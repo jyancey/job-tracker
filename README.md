@@ -1,0 +1,229 @@
+# Job Tracker
+
+A local-first, privacy-focused job application tracking dashboard built with React, TypeScript, and SQLite.
+
+Track your search like a pipeline, not a spreadsheet. Manage opportunities, follow-ups, and monitor momentum from one workspace—all without leaving your browser.
+
+## Features
+
+- **Local-First Storage** — All data stays on your device using SQLite (via sql.js) with localStorage persistence
+- **Privacy** — No server, no tracking, no cloud dependencies
+- **Full CRUD** — Add, edit, view, and delete job applications
+- **Smart Filtering** — Status, date range, salary range, and contact person filters
+- **Sortable Columns** — Click headers to sort by company, role, status, dates
+- **Bulk Operations** — Select multiple jobs, delete across filters with visibility controls
+- **Multiple Views** — Table (default), Kanban board, Calendar, Dashboard
+- **Import/Export** — JSON, CSV export; JSON import with merge strategies (append/upsert/replace)
+- **Pagination** — Configurable page sizes (5/10/20) for large datasets
+- **Overdue Tracking** — Quick metric shortcut to find jobs requiring follow-up
+- **Storage Logging** — Debug visibility with console logs and downloadable .log files
+- **macOS-Inspired UI** — Frosted glass effects, refined typography, delightful interactions
+
+## Getting Started
+
+### Prerequisites
+- Node.js 18+ and npm
+
+### Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server (http://localhost:5173)
+npm run dev
+
+# Run tests
+npm run test:run
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Run production server (requires npm run build first)
+npm run serve
+```
+
+You can also run as a macOS daemon. See [DAEMON_SETUP.md](DAEMON_SETUP.md) for instructions.
+
+## Development
+
+### Project Structure
+```
+src/
+  ├── App.tsx                 # Main app component with state management
+  ├── App.css                 # Styling (hero, filters, table, modals, pagination)
+  ├── App.test.tsx           # Component integration tests
+  ├── domain.ts              # Job and JobStatus types
+  ├── domain.test.ts         # Domain logic tests
+  ├── storage.ts             # SQLite database, persistence, logging
+  ├── storage.test.ts        # Storage functionality tests
+  ├── exportImport.ts        # JSON/CSV export, import merge strategies
+  ├── exportImport.test.ts   # Merge strategy unit tests
+  ├── notifications.ts       # Toast notification system
+  ├── Toast.tsx              # Toast UI component
+  └── vite-env.d.ts         # TypeScript environment declarations
+
+public/
+  └── job-tracker.png       # App logo
+```
+
+### Testing
+
+Tests are run with Vitest and React Testing Library:
+
+```bash
+# Run tests in watch mode
+npm run test
+
+# Run tests once
+npm run test:run
+
+# Current test coverage
+npm run test:run -- --coverage  # (requires coverage provider)
+```
+
+**Test Suites:**
+- `domain.test.ts` — Job type validation and helpers (1 test)
+- `storage.test.ts` — Database operations and persistence (3 tests)
+- `exportImport.test.ts` — Import merge modes: append, upsert, replace (3 tests)
+- `App.test.tsx` — End-to-end workflows: add, filter, edit, delete, pagination, bulk operations (4 tests)
+
+**Total:** 11 passing tests
+
+### Building
+
+```bash
+# Production build (optimized, minified, tree-shaken)
+npm run build
+
+# Output in dist/ directory:
+#   - index.html              (entry point)
+#   - assets/index-*.js       (React + app code)
+#   - assets/index-*.css      (all styles)
+#   - assets/sql-wasm-*.wasm  (SQLite WASM module)
+```
+
+## CI/CD Pipeline (Gitea Actions)
+
+Workflow files are located in `.gitea/workflows/`:
+
+### 1. **Build & Test** (`build-test.yml`)
+Triggers on: `push` to main/develop, `pull_request` against main/develop
+
+**Steps:**
+- Lint code (ESLint)
+- Run full test suite (11 tests)
+- Build application
+- Upload build artifacts (7-day retention)
+
+**Status:** ✅ 11/11 tests passing
+
+### 2. **Release** (`release.yml`)
+Triggers on: `git tag` (e.g., `git tag v1.0.0 && git push origin v1.0.0`)
+
+**Steps:**
+- Run full test suite
+- Build application
+- Package source tarball (`.tar.gz`)
+- Package distribution zip (ready-to-deploy)
+- Generate release notes
+- Create Gitea/GitHub release with assets
+
+**Artifacts:**
+- `job-tracker-vX.Y.Z-source.tar.gz` — Source code archive
+- `job-tracker-vX.Y.Z-dist.zip` — Production build (deploy to static host)
+
+### 3. **Deploy** (`deploy.yml`)
+Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dispatch`
+
+**Steps:**
+- Build application
+- Create deployment artifact with metadata
+- Upload to artifacts (30-day retention)
+
+**Status:** Ready for manual deployment to Netlify, Vercel, GitHub Pages, or custom server
+
+## Usage Tips
+
+### Adding a Job
+1. Fill out the "Add Job" form (Company, Role, Status, etc.)
+2. Click **Save** to add to pipeline
+3. Metric cards update instantly
+
+### Smart Filtering
+- **Status Filter** — Quick drop-down for Interested, Applied, Interviewing, Offered, Rejected, Withdrawn
+- **Advanced Filters** — Click "More Filters" to refine by:
+  - Application date range
+  - Salary range
+  - Contact person name
+- **Overdue Follow-ups** — Click "View list" metric button to see jobs past their due date
+
+### Bulk Operations
+1. Select jobs via checkboxes (or select-all)
+2. Manage selections across pagination
+3. Click "Delete Selected" — only visible+selected rows are removed
+4. Hidden selections preserved and reported
+
+### Import/Export
+- **Export** — JSON or CSV from toolbar; CSV opens in Excel/Sheets
+- **Import** — JSON file with merge strategy:
+  - **Append** — Add imported jobs to existing
+  - **Upsert** — Update existing by ID, add new ones
+  - **Replace** — Clear all, keep only imported
+
+### Storage & Debugging
+- All data stored locally in browser's localStorage
+- Click **Export DB Logs** in form panel to download debug logs
+- Logs include: database operations, timing, error details
+- Enable debug mode: `localStorage.setItem('job-tracker.debug', 'true')` in console
+
+## Browser Compatibility
+
+- Chrome/Edge 90+
+- Firefox 88+
+- Safari 15+
+- Requires WebAssembly support (sql.js WASM module)
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **UI Framework** | React 19 |
+| **Language** | TypeScript 5 |
+| **Build Tool** | Vite 7 |
+| **Database** | sql.js (SQLite in-memory + localStorage) |
+| **Testing** | Vitest + React Testing Library + userEvent |
+| **Linting** | ESLint 9 |
+| **CI/CD** | Gitea Actions |
+
+## Performance
+
+- **Bundle Size:** ~85 KB (gzip), including sql.js WASM
+- **Startup:** <1s (network) + storage hydration
+- **Page Transitions:** Instant (React in-browser)
+- **Pagination:** Optimized for 1000+ jobs
+
+## Privacy & Data Ownership
+
+✅ **No servers involved** — Entirely client-side
+✅ **No analytics tracking** — Zero telemetry
+✅ **No cloud sync** — Data stays on your device
+✅ **Full export capability** — JSON, CSV at any time
+✅ **Local backup** — Browser localStorage, easy to backup
+
+## License
+
+MIT
+
+## Support & Contribution
+
+Report issues, suggest features, or contribute pull requests on the project repository.
+
+---
+
+**Last Updated:** March 2026  
+**Current Version:** 0.0.0 (ready for first release)
+```

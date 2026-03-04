@@ -1,0 +1,53 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["Build & Test"]
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Create deployment artifact
+        run: |
+          mkdir -p deploy
+          cp -r dist/* deploy/
+          echo "Build timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')" > deploy/BUILD_INFO.txt
+          echo "Git commit: ${{ github.sha }}" >> deploy/BUILD_INFO.txt
+          echo "Git branch: ${{ github.ref_name }}" >> deploy/BUILD_INFO.txt
+
+      - name: Deploy artifact information
+        run: |
+          echo "Deployment ready:"
+          echo "- Static files ready in deploy/ directory"
+          echo "- Can be deployed to any static host (Netlify, Vercel, GitHub Pages, etc.)"
+          echo "- Recommended: Copy dist/ folder to your hosting provider"
+          ls -la deploy/
+
+      - name: Upload deployment artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-build-${{ github.run_number }}
+          path: deploy/
+          retention-days: 30

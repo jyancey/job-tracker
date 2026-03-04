@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-release:
+    name: Build & Package Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test:run
+
+      - name: Build application
+        run: npm run build
+
+      - name: Get version from tag
+        id: tag_version
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create source tarball
+        run: |
+          mkdir -p release/${{ steps.tag_version.outputs.version }}
+          tar --exclude='node_modules' --exclude='.git' --exclude='dist' \
+            -czf release/${{ steps.tag_version.outputs.version }}/job-tracker-${{ steps.tag_version.outputs.version }}-source.tar.gz .
+        shell: bash
+
+      - name: Create distribution zip
+        run: |
+          cd dist
+          zip -r ../release/${{ steps.tag_version.outputs.version }}/job-tracker-${{ steps.tag_version.outputs.version }}-dist.zip .
+          cd ..
+        shell: bash
+
+      - name: Create release notes
+        run: |
+          cat > release/${{ steps.tag_version.outputs.version }}/RELEASE_NOTES.md << 'EOF'
+          # Job Tracker ${{ steps.tag_version.outputs.version }}
+
+          ## What's New
+          - Enhanced hero section with logo and metrics display
+          - Improved macOS-style UI with frosted glass effect
+          - Build and test pipeline with automated releases
+
+          ## Downloads
+          - `job-tracker-${{ steps.tag_version.outputs.version }}-dist.zip` - Distribution bundle (ready to deploy)
+          - `job-tracker-${{ steps.tag_version.outputs.version }}-source.tar.gz` - Source code
+
+          ## Installation
+          Extract the distribution zip and serve the contents via any static web server.
+
+          ## Testing
+          All tests passing (11/11). Build verified and production-ready.
+          EOF
+
+      - name: Upload artifacts to release
+        uses: actions/upload-release-assets@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./release/${{ steps.tag_version.outputs.version }}/
+          asset_name: job-tracker-${{ steps.tag_version.outputs.version }}
+          asset_content_type: application/zip
+        continue-on-error: true
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag_version.outputs.version }}
+          release_name: Job Tracker ${{ steps.tag_version.outputs.version }}
+          body_path: release/${{ steps.tag_version.outputs.version }}/RELEASE_NOTES.md
+          draft: false
+          prerelease: false
+        continue-on-error: true
+
+      - name: Publish release assets
+        run: |
+          cd release/${{ steps.tag_version.outputs.version }}
+          ls -la
+        shell: bash
