@@ -20,10 +20,11 @@ import {
   useJobFiltering,
   useJobSorting,
   useJobPagination,
-  type StatusFilter,
   type SortColumn,
   type SortDirection,
 } from './hooks/useJobFiltering'
+import { useFilterState } from './hooks/useFilterState'
+import { useJobSelection } from './hooks/useJobSelection'
 import { useJobGrouping } from './hooks/useJobGrouping'
 import { useJobForm } from './hooks/useJobForm'
 import { useNotifications } from './hooks/useNotifications'
@@ -47,25 +48,21 @@ const VIEW_LABELS: Record<View, string> = {
 function App() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [view, setView] = useState<View>('dashboard')
-  const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('All')
   const [viewingJob, setViewingJob] = useState<Job | null>(null)
   const [isStorageHydrated, setIsStorageHydrated] = useState(false)
 
   const [saveStatus, setSaveStatus] = useState<'idle' | 'pending'>('idle')
   const [undoStack, setUndoStack] = useState<Job[][]>([])
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [dateRangeStart, setDateRangeStart] = useState('')
-  const [dateRangeEnd, setDateRangeEnd] = useState('')
-  const [salaryRangeMin, setSalaryRangeMin] = useState('')
-  const [salaryRangeMax, setSalaryRangeMax] = useState('')
-  const [contactPersonFilter, setContactPersonFilter] = useState('')
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [sortColumn, setSortColumn] = useState<SortColumn>('applicationDate')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [importMode, setImportMode] = useState<ImportMode>('append')
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
+  
+  // Use custom hooks for state management
+  const filters = useFilterState()
+  const selection = useJobSelection()
+  
   const importFileRef = useRef<HTMLInputElement>(null)
   const selectAllCheckboxRef = useRef<HTMLInputElement>(null)
   const saveRequestIdRef = useRef(0)
@@ -133,16 +130,8 @@ function App() {
     }
   }, [jobs, isStorageHydrated])
 
-  // Use filtering hooks
-  const { filteredJobs, overdueCount } = useJobFiltering(jobs, {
-    query,
-    statusFilter,
-    dateRangeStart,
-    dateRangeEnd,
-    salaryRangeMin,
-    salaryRangeMax,
-    contactPersonFilter,
-  })
+  // Use filtering hooks with filter state
+  const { filteredJobs, overdueCount } = useJobFiltering(jobs, filters.state)
 
   // Use sorting hook
   const sortedTableJobs = useJobSorting(filteredJobs, {
@@ -165,8 +154,8 @@ function App() {
 
   const visibleTableIds = useMemo(() => paginatedTableJobs.map((job) => job.id), [paginatedTableJobs])
   const selectedVisibleIds = useMemo(
-    () => visibleTableIds.filter((id) => selectedIds.has(id)),
-    [visibleTableIds, selectedIds],
+    () => visibleTableIds.filter((id) => selection.selectedIds.has(id)),
+    [visibleTableIds, selection.selectedIds],
   )
   const selectedVisibleCount = useMemo(
     () => selectedVisibleIds.length,
@@ -183,7 +172,7 @@ function App() {
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [query, statusFilter, dateRangeStart, dateRangeEnd, salaryRangeMin, salaryRangeMax, contactPersonFilter])
+  }, [filters.state.query, filters.state.statusFilter, filters.state.dateRangeStart, filters.state.dateRangeEnd, filters.state.salaryRangeMin, filters.state.salaryRangeMax, filters.state.contactPersonFilter])
 
   function handleSubmitJob(event: React.FormEvent<HTMLFormElement>): void {
     const normalizedDraft = submitForm(event)
@@ -218,52 +207,23 @@ function App() {
   }
 
   function toggleJobSelection(id: string): void {
-    setSelectedIds((current) => {
-      const next = new Set(current)
-      if (next.has(id)) {
-        next.delete(id)
-      } else {
-        next.add(id)
-      }
-      return next
-    })
+    selection.toggle(id)
   }
 
   function toggleSelectAllVisible(): void {
     if (visibleTableIds.length === 0) {
       return
     }
-
-    setSelectedIds((current) => {
-      const next = new Set(current)
-
-      if (allVisibleSelected) {
-        for (const id of visibleTableIds) {
-          next.delete(id)
-        }
-      } else {
-        for (const id of visibleTableIds) {
-          next.add(id)
-        }
-      }
-
-      return next
-    })
+    selection.toggleAll(visibleTableIds, allVisibleSelected)
   }
 
   function bulkDeleteSelected(): void {
     if (selectedVisibleIds.length === 0) return
 
-    const hiddenSelectedCount = selectedIds.size - selectedVisibleIds.length
+    const hiddenSelectedCount = selection.selectedIds.size - selectedVisibleIds.length
     setUndoStack((current) => [...current, jobs])
     setJobs((current) => jobService.deleteJobs(current, selectedVisibleIds))
-    setSelectedIds((current) => {
-      const next = new Set(current)
-      for (const id of selectedVisibleIds) {
-        next.delete(id)
-      }
-      return next
-    })
+    selection.removeMultiple(selectedVisibleIds)
     addNotification(
       `Deleted ${selectedVisibleIds.length} visible job(s). ${hiddenSelectedCount > 0 ? `${hiddenSelectedCount} hidden selection(s) kept.` : ''}`,
       'success',
@@ -317,7 +277,7 @@ function App() {
         const merge = mergeImportedJobs(jobs, imported, importMode)
         setUndoStack((current) => [...current, jobs])
         setJobs(merge.jobs.sort(jobService.sortByApplicationDateDesc))
-        setSelectedIds(new Set())
+        selection.clear()
         setCurrentPage(1)
         addNotification(
           `Import ${importMode}: ${merge.inserted} inserted${merge.updated ? `, ${merge.updated} updated` : ''}.`,
@@ -335,7 +295,7 @@ function App() {
 
   function showOverdueOnly(): void {
     setView('table')
-    setStatusFilter('Overdue Follow-ups')
+    filters.updateStatusFilter('Overdue Follow-ups')
   }
 
   function openViewOnly(job: Job): void {
@@ -347,12 +307,7 @@ function App() {
   }
 
   function clearAdvancedFilters(): void {
-    setQuery('')
-    setDateRangeStart('')
-    setDateRangeEnd('')
-    setSalaryRangeMin('')
-    setSalaryRangeMax('')
-    setContactPersonFilter('')
+    filters.clearAdvancedFilters()
   }
 
   function handleSort(column: SortColumn): void {
@@ -468,22 +423,22 @@ function App() {
               ))}
             </div>
             <FilterToolbar
-              statusFilter={statusFilter}
-              onStatusFilterChange={setStatusFilter}
-              showAdvancedFilters={showAdvancedFilters}
-              onToggleAdvancedFilters={() => setShowAdvancedFilters((current) => !current)}
-              query={query}
-              onQueryChange={setQuery}
-              dateRangeStart={dateRangeStart}
-              onDateRangeStartChange={setDateRangeStart}
-              dateRangeEnd={dateRangeEnd}
-              onDateRangeEndChange={setDateRangeEnd}
-              salaryRangeMin={salaryRangeMin}
-              onSalaryRangeMinChange={setSalaryRangeMin}
-              salaryRangeMax={salaryRangeMax}
-              onSalaryRangeMaxChange={setSalaryRangeMax}
-              contactPersonFilter={contactPersonFilter}
-              onContactPersonFilterChange={setContactPersonFilter}
+              statusFilter={filters.state.statusFilter}
+              onStatusFilterChange={filters.updateStatusFilter}
+              showAdvancedFilters={filters.state.showAdvancedFilters}
+              onToggleAdvancedFilters={filters.toggleAdvancedFilters}
+              query={filters.state.query}
+              onQueryChange={filters.updateQuery}
+              dateRangeStart={filters.state.dateRangeStart}
+              onDateRangeStartChange={(date) => filters.updateDateRange(date, filters.state.dateRangeEnd)}
+              dateRangeEnd={filters.state.dateRangeEnd}
+              onDateRangeEndChange={(date) => filters.updateDateRange(filters.state.dateRangeStart, date)}
+              salaryRangeMin={filters.state.salaryRangeMin}
+              onSalaryRangeMinChange={(min) => filters.updateSalaryRange(min, filters.state.salaryRangeMax)}
+              salaryRangeMax={filters.state.salaryRangeMax}
+              onSalaryRangeMaxChange={(max) => filters.updateSalaryRange(filters.state.salaryRangeMin, max)}
+              contactPersonFilter={filters.state.contactPersonFilter}
+              onContactPersonFilterChange={filters.updateContactPersonFilter}
               onClearAdvancedFilters={clearAdvancedFilters}
             />
           </div>
@@ -492,7 +447,7 @@ function App() {
             <TableView
               paginatedJobs={paginatedTableJobs}
               sortedJobs={sortedTableJobs}
-              selectedIds={selectedIds}
+              selectedIds={selection.selectedIds}
               selectedVisibleCount={selectedVisibleCount}
               allVisibleSelected={allVisibleSelected}
               someVisibleSelected={someVisibleSelected}
