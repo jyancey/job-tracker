@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react'
 import type { Job } from '../domain'
-import { formatDate } from '../utils/dateUtils'
 
 interface CalendarViewProps {
   dueByDate: [string, Job[]][]
@@ -18,7 +17,7 @@ export function CalendarView({ dueByDate, onView }: CalendarViewProps) {
   }, [dueByDate])
 
   // Get min and max dates to determine year/month range
-  const [minDate, maxDate] = useMemo(() => {
+  const [, maxDate] = useMemo(() => {
     if (dueByDate.length === 0) {
       const today = new Date()
       const dateStr = today.toISOString().split('T')[0]

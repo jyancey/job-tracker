@@ -24,7 +24,7 @@ interface TableViewProps {
   onView: (job: Job) => void
   onPageChange: (page: number) => void
   onPageSizeChange: (size: number) => void
-  selectAllCheckboxRef: React.RefObject<HTMLInputElement>
+  selectAllCheckboxRef: React.RefObject<HTMLInputElement | null>
 }
 
 export function TableView({

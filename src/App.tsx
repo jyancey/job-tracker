@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import {
-  JOB_STATUSES,
   type Job,
   type JobStatus,
 } from './domain'
@@ -17,7 +16,6 @@ import {
   type ImportMode,
 } from './exportImport'
 import { APP_VERSION } from './version'
-import { formatDate, isOverdueFollowUp, getTodayString } from './utils/dateUtils'
 import {
   useJobFiltering,
   useJobSorting,
@@ -76,8 +74,8 @@ function App() {
   const { notifications, addNotification, removeNotification } = useNotifications()
 
   // Use job form hook
-  const { draft, editingId, draftExists, updateDraft, resetForm, startEdit, submitForm } =
-    useJobForm(setJobs, addNotification)
+  const { draft, editingId, updateDraft, resetForm, startEdit, submitForm } =
+    useJobForm()
 
   useEffect(() => {
     let isDisposed = false
@@ -119,10 +117,7 @@ function App() {
         await saveJobs(jobs)
       } catch {
         if (!isCancelled) {
-          setNotifications((current) => [
-            ...current,
-            createNotification('Autosave failed. Your latest changes are not yet persisted.', 'error'),
-          ])
+          addNotification('Autosave failed. Your latest changes are not yet persisted.', 'error')
         }
       } finally {
         if (!isCancelled && requestId === saveRequestIdRef.current) {
