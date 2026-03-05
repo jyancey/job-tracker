@@ -2,6 +2,7 @@ import type { Job, JobStatus } from '../domain'
 import { formatDate, isOverdueFollowUp, getTodayString } from '../utils/dateUtils'
 import type { SortColumn, SortDirection } from '../hooks/useJobFiltering'
 import { StatusSelect } from '../components/StatusSelect'
+import { Pagination } from '../components/Pagination'
 import { stopPropagation } from '../utils/a11yUtils'
 
 interface TableViewProps {
@@ -190,45 +191,15 @@ export function TableView({
           ))}
         </tbody>
       </table>
-      {sortedJobs.length > 0 && (
-        <div className="pagination">
-          <span>
-            Page {currentPage} of {totalPages} ({sortedJobs.length} results)
-          </span>
-          <div className="pagination-actions">
-            <button
-              type="button"
-              className="small ghost"
-              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              className="small ghost"
-              onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </button>
-            <label className="page-size-control">
-              Rows
-              <select
-                value={pageSize}
-                onChange={(event) => {
-                  onPageSizeChange(Number(event.target.value))
-                  onPageChange(1)
-                }}
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-              </select>
-            </label>
-          </div>
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalResults={sortedJobs.length}
+        pageSize={pageSize}
+        onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
+        hideWhenEmpty={false}
+      />
       {!paginatedJobs.length && sortedJobs.length === 0 && (
         <p className="empty">No jobs match current filters.</p>
       )}
