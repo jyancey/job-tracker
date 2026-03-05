@@ -136,6 +136,20 @@ Edit the plist file and modify:
 </dict>
 ```
 
+### Set a Custom SQLite Database Path
+
+Job Tracker stores jobs in a SQLite file (`data/job-tracker.sqlite` by default). To set a custom path, add `JOB_TRACKER_DB_PATH`:
+
+```xml
+<key>EnvironmentVariables</key>
+<dict>
+   <key>PORT</key>
+   <string>3100</string>
+   <key>JOB_TRACKER_DB_PATH</key>
+   <string>/Users/your-user/job-tracker-data/job-tracker.sqlite</string>
+</dict>
+```
+
 Then reload:
 
 ```bash

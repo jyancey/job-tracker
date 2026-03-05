@@ -6,8 +6,8 @@ Track your search like a pipeline, not a spreadsheet. Manage opportunities, foll
 
 ## Features
 
-- **Local-First Storage** — All data stays on your device using SQLite (via sql.js) with localStorage persistence
-- **Privacy** — No server, no tracking, no cloud dependencies
+- **Local-First Storage** — All data stays on your device in a real SQLite file (`data/job-tracker.sqlite` by default)
+- **Privacy** — No cloud dependencies, data remains local on disk
 - **Full CRUD** — Add, edit, view, and delete job applications
 - **Smart Filtering** — Status, date range, salary range, and contact person filters
 - **Sortable Columns** — Click headers to sort by company, role, status, dates
@@ -39,10 +39,7 @@ npm run test:run
 # Build for production
 npm run build
 
-# Preview production build
-npm run preview
-
-# Run production server (requires npm run build first)
+# Preview/serve the production build (requires npm run build first)
 npm run serve
 ```
 
@@ -58,7 +55,7 @@ src/
   ├── App.test.tsx           # Component integration tests
   ├── domain.ts              # Job and JobStatus types
   ├── domain.test.ts         # Domain logic tests
-  ├── storage.ts             # SQLite database, persistence, logging
+  ├── storage.ts             # HTTP storage client + storage logging
   ├── storage.test.ts        # Storage functionality tests
   ├── exportImport.ts        # JSON/CSV export, import merge strategies
   ├── exportImport.test.ts   # Merge strategy unit tests
@@ -68,6 +65,9 @@ src/
 
 public/
   └── job-tracker.png       # App logo
+
+jobsApi.js                  # Shared /api/jobs request handler
+sqliteStore.js              # File-backed SQLite repository
 ```
 
 ### Testing
@@ -103,7 +103,6 @@ npm run build
 #   - index.html              (entry point)
 #   - assets/index-*.js       (React + app code)
 #   - assets/index-*.css      (all styles)
-#   - assets/sql-wasm-*.wasm  (SQLite WASM module)
 ```
 
 ## CI/CD Pipeline (Gitea Actions)
@@ -175,9 +174,10 @@ Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dis
   - **Replace** — Clear all, keep only imported
 
 ### Storage & Debugging
-- All data stored locally in browser's localStorage
+- Job data is stored in `data/job-tracker.sqlite` (or `JOB_TRACKER_DB_PATH` if set)
+- The SQLite file can be opened with DB Browser for SQLite, `sqlite3`, and other compatible readers
 - Click **Export DB Logs** in form panel to download debug logs
-- Logs include: database operations, timing, error details
+- Logs include: API operations, timing, error details
 - Enable debug mode: `localStorage.setItem('job-tracker.debug', 'true')` in console
 
 ## Browser Compatibility
@@ -185,7 +185,6 @@ Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dis
 - Chrome/Edge 90+
 - Firefox 88+
 - Safari 15+
-- Requires WebAssembly support (sql.js WASM module)
 
 ## Tech Stack
 
@@ -194,25 +193,24 @@ Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dis
 | **UI Framework** | React 19 |
 | **Language** | TypeScript 5 |
 | **Build Tool** | Vite 7 |
-| **Database** | sql.js (SQLite in-memory + localStorage) |
+| **Database** | SQLite (file-backed via better-sqlite3) |
 | **Testing** | Vitest + React Testing Library + userEvent |
 | **Linting** | ESLint 9 |
 | **CI/CD** | Gitea Actions |
 
 ## Performance
 
-- **Bundle Size:** ~85 KB (gzip), including sql.js WASM
+- **Bundle Size:** App bundle only (SQLite engine runs server-side)
 - **Startup:** <1s (network) + storage hydration
 - **Page Transitions:** Instant (React in-browser)
 - **Pagination:** Optimized for 1000+ jobs
 
 ## Privacy & Data Ownership
 
-✅ **No servers involved** — Entirely client-side
 ✅ **No analytics tracking** — Zero telemetry
 ✅ **No cloud sync** — Data stays on your device
 ✅ **Full export capability** — JSON, CSV at any time
-✅ **Local backup** — Browser localStorage, easy to backup
+✅ **SQLite portability** — Open the `.sqlite` file with standard SQLite tools
 
 ## License
 

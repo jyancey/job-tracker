@@ -19,6 +19,7 @@ import {
   mergeImportedJobs,
   type ImportMode,
 } from './exportImport'
+import { APP_VERSION } from './version'
 
 type View = 'table' | 'kanban' | 'calendar' | 'dashboard'
 type StatusFilter = 'All' | JobStatus | 'Overdue Follow-ups'
@@ -104,6 +105,7 @@ function App() {
   const [pageSize, setPageSize] = useState(10)
   const importFileRef = useRef<HTMLInputElement>(null)
   const selectAllCheckboxRef = useRef<HTMLInputElement>(null)
+  const saveRequestIdRef = useRef(0)
 
   useEffect(() => {
     let isDisposed = false
@@ -130,10 +132,34 @@ function App() {
       return
     }
 
+    const requestId = saveRequestIdRef.current + 1
+    saveRequestIdRef.current = requestId
+    let isCancelled = false
+
     setSaveStatus('pending')
-    void saveJobs(jobs).then(() => {
-      setSaveStatus('idle')
-    })
+
+    async function persistJobs(): Promise<void> {
+      try {
+        await saveJobs(jobs)
+      } catch {
+        if (!isCancelled) {
+          setNotifications((current) => [
+            ...current,
+            createNotification('Autosave failed. Your latest changes are not yet persisted.', 'error'),
+          ])
+        }
+      } finally {
+        if (!isCancelled && requestId === saveRequestIdRef.current) {
+          setSaveStatus('idle')
+        }
+      }
+    }
+
+    void persistJobs()
+
+    return () => {
+      isCancelled = true
+    }
   }, [jobs, isStorageHydrated])
 
   const filteredJobs = useMemo(() => {
@@ -1130,6 +1156,10 @@ function App() {
           </section>
         </div>
       )}
+
+      <footer className="app-footer">
+        <span>Job Tracker v{APP_VERSION}</span>
+      </footer>
     </div>
   )
 }

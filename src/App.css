@@ -2,6 +2,21 @@
   max-width: 1480px;
   margin: 0 auto;
   padding: 2rem 1.25rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-footer {
+  margin-top: auto;
+  padding: 0.625rem 1.25rem;
+  margin-left: -1.25rem;
+  margin-right: -1.25rem;
+  background-color: #2d5a7b;
+  font-size: 0.7rem;
+  color: #ff8c00;
+  text-align: center;
+  font-weight: 500;
 }
 
 .top-grid {
