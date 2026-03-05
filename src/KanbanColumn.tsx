@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { type Job, type JobStatus } from './domain'
 import { KanbanCard } from './KanbanCard'
+import { useDragDropZone } from './hooks/useDragDropZone'
 
 interface KanbanColumnProps {
   status: JobStatus
@@ -19,36 +19,10 @@ export function KanbanColumn({
   onDelete,
   onView,
 }: KanbanColumnProps) {
-  const [isDragOver, setIsDragOver] = useState(false)
-
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    event.dataTransfer.dropEffect = 'move'
-    setIsDragOver(true)
-  }
-
-  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
-    // Only set to false if we're leaving the column itself, not a child
-    if (event.currentTarget === event.target) {
-      setIsDragOver(false)
-    }
-  }
-
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    setIsDragOver(false)
-
-    try {
-      const data = event.dataTransfer.getData('application/json')
-      const job = JSON.parse(data) as Job
-
-      if (job.status !== status) {
-        onStatusChange(job.id, status)
-      }
-    } catch (error) {
-      console.error('Failed to parse dropped data:', error)
-    }
-  }
+  const { isDragOver, handleDragOver, handleDragLeave, handleDrop } = useDragDropZone(
+    status,
+    onStatusChange
+  )
 
   return (
     <article

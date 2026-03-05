@@ -1,6 +1,7 @@
 import { type Job, type JobStatus } from './domain'
 import { StatusSelect } from './components/StatusSelect'
 import { createButtonKbdProps, stopPropagation } from './utils/a11yUtils'
+import { setJobDragData } from './utils/dragDataUtils'
 
 interface KanbanCardProps {
   job: Job
@@ -12,8 +13,7 @@ interface KanbanCardProps {
 
 export function KanbanCard({ job, onStatusChange, onEdit, onDelete, onView }: KanbanCardProps) {
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
-    event.dataTransfer.effectAllowed = 'move'
-    event.dataTransfer.setData('application/json', JSON.stringify(job))
+    setJobDragData(event, job)
   }
 
   const handleDragEnd = (event: React.DragEvent<HTMLDivElement>) => {
