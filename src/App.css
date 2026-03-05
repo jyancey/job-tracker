@@ -482,6 +482,123 @@ tbody tr:hover {
   padding: calc(0.55rem - 1px);
 }
 
+.calendar-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding: 0;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 0.5rem;
+}
+
+.calendar-title {
+  margin: 0;
+  font-size: 1.5em;
+  min-width: 200px;
+  text-align: center;
+}
+
+.calendar-nav {
+  background: none;
+  border: 1px solid #d1d5da;
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  font-size: 1.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.calendar-nav:hover {
+  background: #f6f8fa;
+  border-color: #0969da;
+  color: #0969da;
+}
+
+.calendar-nav:active {
+  background: #eaeef2;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  padding: 0 0.5rem;
+}
+
+.calendar-day-header {
+  text-align: center;
+  font-weight: 600;
+  padding: 0.5rem;
+  color: #57606a;
+  font-size: 0.9em;
+}
+
+.calendar-cell {
+  border: 1px solid #d1d5da;
+  border-radius: 8px;
+  padding: 0.5rem;
+  min-height: 80px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.calendar-cell.empty {
+  background: #f6f8fa;
+  border-color: #eaeef2;
+}
+
+.calendar-cell.has-jobs {
+  border-color: #0969da;
+  border-width: 2px;
+  background: #f0f6fc;
+}
+
+.calendar-day-number {
+  font-weight: 600;
+  color: #24292e;
+  font-size: 0.9em;
+}
+
+.calendar-day-jobs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+  overflow: hidden;
+}
+
+.calendar-job-entry {
+  background: #ddf4ff;
+  border-left: 3px solid #0969da;
+  padding: 0.25rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.75em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #0550ae;
+  font-weight: 500;
+}
+
+.calendar-job-more {
+  color: #57606a;
+  font-size: 0.7em;
+  padding: 0.2rem 0.4rem;
+  font-style: italic;
+}
+
 .calendar-list {
   display: grid;
   gap: 0.6rem;
