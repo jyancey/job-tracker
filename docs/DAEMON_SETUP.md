@@ -31,7 +31,7 @@ Copy and customize the template:
 
 ```bash
 # Copy the template
-cp com.local.job-tracker.plist.template ~/Library/LaunchAgents/com.local.job-tracker.plist
+cp scripts/launchd/com.local.job-tracker.plist.template ~/Library/LaunchAgents/com.local.job-tracker.plist
 
 # Edit to replace paths (use your favorite editor)
 nano ~/Library/LaunchAgents/com.local.job-tracker.plist

@@ -43,7 +43,7 @@ npm run build
 npm run serve
 ```
 
-You can also run as a macOS daemon. See [DAEMON_SETUP.md](DAEMON_SETUP.md) for instructions.
+You can also run as a macOS daemon. See [docs/DAEMON_SETUP.md](docs/DAEMON_SETUP.md) for instructions.
 
 ## Development
 
@@ -66,8 +66,10 @@ src/
 public/
   └── job-tracker.png       # App logo
 
-jobsApi.js                  # Shared /api/jobs request handler
-sqliteStore.js              # File-backed SQLite repository
+backend/
+  ├── jobsApi.js            # Shared /api/jobs request handler
+  ├── sqliteStore.js        # File-backed SQLite repository
+  └── jobValidation.js      # Backend job payload validation
 ```
 
 ### Testing
