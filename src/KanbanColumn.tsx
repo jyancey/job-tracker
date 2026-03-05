@@ -8,6 +8,7 @@ interface KanbanColumnProps {
   onStatusChange: (jobId: string, newStatus: JobStatus) => void
   onEdit: (job: Job) => void
   onDelete: (jobId: string) => void
+  onView?: (job: Job) => void
 }
 
 export function KanbanColumn({
@@ -16,6 +17,7 @@ export function KanbanColumn({
   onStatusChange,
   onEdit,
   onDelete,
+  onView,
 }: KanbanColumnProps) {
   const [isDragOver, setIsDragOver] = useState(false)
 
@@ -66,6 +68,7 @@ export function KanbanColumn({
           onStatusChange={onStatusChange}
           onEdit={onEdit}
           onDelete={onDelete}
+          onView={onView}
         />
       ))}
       {!jobs.length && <p className="empty">No items</p>}

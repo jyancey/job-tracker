@@ -465,15 +465,18 @@ tbody tr:hover {
 
 .kanban-card {
   cursor: grab;
-  transition: box-shadow 0.2s, opacity 0.2s;
+  transition: box-shadow 0.2s, opacity 0.2s, background-color 0.2s;
+  user-select: none;
 }
 
 .kanban-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 12px rgba(9, 105, 218, 0.15);
+  background: #f6f8fa;
 }
 
 .kanban-card:active {
   cursor: grabbing;
+  background: #e8f0f8;
 }
 
 .kanban-column.drag-over {

@@ -5,9 +5,10 @@ interface KanbanCardProps {
   onStatusChange: (jobId: string, newStatus: JobStatus) => void
   onEdit: (job: Job) => void
   onDelete: (jobId: string) => void
+  onView?: (job: Job) => void
 }
 
-export function KanbanCard({ job, onStatusChange, onEdit, onDelete }: KanbanCardProps) {
+export function KanbanCard({ job, onStatusChange, onEdit, onDelete, onView }: KanbanCardProps) {
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
     event.dataTransfer.effectAllowed = 'move'
     event.dataTransfer.setData('application/json', JSON.stringify(job))
@@ -23,6 +24,16 @@ export function KanbanCard({ job, onStatusChange, onEdit, onDelete }: KanbanCard
       draggable
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onClick={() => onView?.(job)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onView?.(job)
+        }
+      }}
+      title="Click to view details"
     >
       <strong>{job.company}</strong>
       <p>{job.roleTitle}</p>

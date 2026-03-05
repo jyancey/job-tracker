@@ -6,9 +6,10 @@ interface KanbanBoardProps {
   onStatusChange: (jobId: string, newStatus: JobStatus) => void
   onEdit: (job: Job) => void
   onDelete: (jobId: string) => void
+  onView?: (job: Job) => void
 }
 
-export function KanbanBoard({ jobs, onStatusChange, onEdit, onDelete }: KanbanBoardProps) {
+export function KanbanBoard({ jobs, onStatusChange, onEdit, onDelete, onView }: KanbanBoardProps) {
   return (
     <div className="kanban-grid">
       {JOB_STATUSES.map((status) => (
@@ -19,6 +20,7 @@ export function KanbanBoard({ jobs, onStatusChange, onEdit, onDelete }: KanbanBo
           onStatusChange={onStatusChange}
           onEdit={onEdit}
           onDelete={onDelete}
+          onView={onView}
         />
       ))}
     </div>

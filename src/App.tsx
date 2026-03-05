@@ -526,6 +526,7 @@ function App() {
               onStatusChange={handleQuickMove}
               onEdit={handleEditJob}
               onDelete={handleRemoveJob}
+              onView={openViewOnly}
             />
           )}
 
