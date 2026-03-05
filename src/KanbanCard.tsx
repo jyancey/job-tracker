@@ -1,4 +1,6 @@
 import { type Job, type JobStatus } from './domain'
+import { StatusSelect } from './components/StatusSelect'
+import { createButtonKbdProps, stopPropagation } from './utils/a11yUtils'
 
 interface KanbanCardProps {
   job: Job
@@ -24,33 +26,16 @@ export function KanbanCard({ job, onStatusChange, onEdit, onDelete, onView }: Ka
       draggable
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onClick={() => onView?.(job)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onView?.(job)
-        }
-      }}
-      title="Click to view details"
+      {...createButtonKbdProps(() => onView?.(job))}
     >
       <strong>{job.company}</strong>
       <p>{job.roleTitle}</p>
-      <select
+      <StatusSelect
         value={job.status}
-        onChange={(event) => onStatusChange(job.id, event.target.value as JobStatus)}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <option disabled>Move to...</option>
-        <option value="Wishlist">Wishlist</option>
-        <option value="Applied">Applied</option>
-        <option value="Phone Screen">Phone Screen</option>
-        <option value="Interview">Interview</option>
-        <option value="Offer">Offer</option>
-        <option value="Rejected">Rejected</option>
-        <option value="Withdrawn">Withdrawn</option>
-      </select>
+        onChange={(value) => onStatusChange(job.id, value as JobStatus)}
+        placeholder="Move to..."
+        onClick={stopPropagation}
+      />
       <div className="kanban-actions">
         <button type="button" className="small" onClick={() => onEdit(job)}>
           Edit

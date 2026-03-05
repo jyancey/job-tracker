@@ -1,6 +1,8 @@
-import { JOB_STATUSES, type Job, type JobStatus } from '../domain'
+import type { Job, JobStatus } from '../domain'
 import { formatDate, isOverdueFollowUp, getTodayString } from '../utils/dateUtils'
 import type { SortColumn, SortDirection } from '../hooks/useJobFiltering'
+import { StatusSelect } from '../components/StatusSelect'
+import { stopPropagation } from '../utils/a11yUtils'
 
 interface TableViewProps {
   paginatedJobs: Job[]
@@ -137,18 +139,13 @@ export function TableView({
               <td>{job.company}</td>
               <td>{job.roleTitle}</td>
               <td>
-                <select
+                <StatusSelect
                   className="quick-status"
                   value={job.status}
-                  onClick={(event) => event.stopPropagation()}
-                  onChange={(event) => onQuickMove(job.id, event.target.value as JobStatus)}
-                >
-                  {JOB_STATUSES.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(value) => onQuickMove(job.id, value as JobStatus)}
+                  placeholder={false}
+                  onClick={stopPropagation}
+                />
               </td>
               <td>{formatDate(job.applicationDate)}</td>
               <td>

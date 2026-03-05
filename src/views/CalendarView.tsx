@@ -1,5 +1,13 @@
 import { useState, useMemo } from 'react'
 import type { Job } from '../domain'
+import {
+  parseDate,
+  getDateString,
+  isDateOverdue,
+  generateCalendarGrid,
+  getMonthName,
+} from '../utils/dateCalendarUtils'
+import { createButtonKbdProps } from '../utils/a11yUtils'
 
 interface CalendarViewProps {
   dueByDate: [string, Job[]][]
@@ -26,30 +34,12 @@ export function CalendarView({ dueByDate, onView }: CalendarViewProps) {
     return [dueByDate[0][0], dueByDate[dueByDate.length - 1][0]]
   }, [dueByDate])
 
-  // Parse date strings (YYYY-MM-DD format)
-  const parseDate = (dateStr: string) => {
-    const [year, month, day] = dateStr.split('-').map(Number)
-    return new Date(year, month - 1, day)
-  }
-
   const maxDateObj = parseDate(maxDate)
   const [currentMonth, setCurrentMonth] = useState(new Date(maxDateObj.getFullYear(), maxDateObj.getMonth()))
 
-  // Get days in month
-  const getDaysInMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
-  }
-
-  // Get first day of month (0 = Sunday)
-  const getFirstDayOfMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay()
-  }
-
-  const daysInMonth = getDaysInMonth(currentMonth)
-  const firstDay = getFirstDayOfMonth(currentMonth)
   const year = currentMonth.getFullYear()
   const month = currentMonth.getMonth()
-  const monthName = currentMonth.toLocaleString('default', { month: 'long' })
+  const monthName = getMonthName(currentMonth)
 
   // Navigate months
   const goToPrevious = () => {
@@ -61,35 +51,18 @@ export function CalendarView({ dueByDate, onView }: CalendarViewProps) {
   }
 
   // Generate calendar grid
-  const calendarDays: (number | null)[] = []
-  for (let i = 0; i < firstDay; i++) {
-    calendarDays.push(null)
-  }
-  for (let i = 1; i <= daysInMonth; i++) {
-    calendarDays.push(i)
-  }
-
-  // Format a YYYY-MM-DD string for a specific day
-  const getDateString = (day: number) => {
-    const dateObj = new Date(year, month, day)
-    const y = dateObj.getFullYear()
-    const m = String(dateObj.getMonth() + 1).padStart(2, '0')
-    const d = String(dateObj.getDate()).padStart(2, '0')
-    return `${y}-${m}-${d}`
-  }
+  const calendarDays = generateCalendarGrid(currentMonth)
 
   // Get jobs for a specific day
   const getJobsForDay = (day: number) => {
-    const dateStr = getDateString(day)
+    const dateStr = getDateString(year, month, day)
     return jobsByDate.get(dateStr) || []
   }
 
   // Check if a date is overdue
-  const isDateOverdue = (day: number) => {
-    const dateStr = getDateString(day)
-    const today = new Date()
-    const todayStr = today.toISOString().split('T')[0]
-    return dateStr < todayStr
+  const isDayOverdue = (day: number) => {
+    const dateStr = getDateString(year, month, day)
+    return isDateOverdue(dateStr)
   }
 
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -118,7 +91,7 @@ export function CalendarView({ dueByDate, onView }: CalendarViewProps) {
         {calendarDays.map((day, index) => {
           const jobsForDay = day ? getJobsForDay(day) : []
           const hasJobs = jobsForDay.length > 0
-          const overdue = day ? isDateOverdue(day) : false
+          const overdue = day ? isDayOverdue(day) : false
           const isOverdueWithJobs = hasJobs && overdue
 
           return (
@@ -137,16 +110,10 @@ export function CalendarView({ dueByDate, onView }: CalendarViewProps) {
                       <div
                         key={job.id}
                         className="calendar-job-entry"
-                        onClick={() => onView?.(job)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault()
-                            onView?.(job)
-                          }
-                        }}
-                        title={`Click to view: ${job.company} - ${job.roleTitle}`}
+                        {...createButtonKbdProps(
+                          () => onView?.(job),
+                          `Click to view: ${job.company} - ${job.roleTitle}`
+                        )}
                       >
                         {job.company}
                       </div>

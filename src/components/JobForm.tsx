@@ -1,4 +1,5 @@
-import { JOB_STATUSES, type JobDraft, type JobStatus } from '../domain'
+import type { JobDraft, JobStatus } from '../domain'
+import { StatusSelect } from './StatusSelect'
 
 interface JobFormProps {
   draft: JobDraft
@@ -40,16 +41,11 @@ export function JobForm({ draft, editingId, onUpdateDraft, onSubmit, onCancel }:
       </label>
       <label>
         Status
-        <select
+        <StatusSelect
           value={draft.status}
-          onChange={(event) => onUpdateDraft('status', event.target.value as JobStatus)}
-        >
-          {JOB_STATUSES.map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
+          onChange={(value) => onUpdateDraft('status', value as JobStatus)}
+          placeholder={false}
+        />
       </label>
       <label>
         Job URL

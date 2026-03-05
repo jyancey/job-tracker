@@ -1,5 +1,5 @@
-import { JOB_STATUSES } from '../domain'
 import type { StatusFilter } from '../hooks/useJobFiltering'
+import { StatusSelect } from './StatusSelect'
 
 /**
  * Filter change actions using discriminated union pattern
@@ -41,18 +41,13 @@ export function FilterToolbar({
   return (
     <>
       <div className="quick-filters">
-        <select
+        <StatusSelect
           value={state.statusFilter}
-          onChange={(event) => onDispatch({ type: 'status', value: event.target.value as StatusFilter })}
-        >
-          <option value="All">All statuses</option>
-          <option value="Overdue Follow-ups">Overdue Follow-ups</option>
-          {JOB_STATUSES.map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
+          onChange={(value) => onDispatch({ type: 'status', value: value as StatusFilter })}
+          placeholder={false}
+          showAllStatus
+          showOverdueFilter
+        />
         <button
           type="button"
           className="small ghost"
