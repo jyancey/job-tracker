@@ -505,7 +505,7 @@ tbody tr:hover {
 }
 
 .calendar-nav {
-  background: none;
+  background: #ffffff;
   border: 1px solid #d1d5da;
   border-radius: 6px;
   width: 40px;
@@ -516,6 +516,8 @@ tbody tr:hover {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  color: #24292e;
+  font-weight: bold;
 }
 
 .calendar-nav:hover {
