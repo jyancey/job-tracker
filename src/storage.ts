@@ -2,6 +2,7 @@ import type { Job } from './domain'
 
 const API_JOBS_ENDPOINT = '/api/jobs'
 const STORAGE_LOG_BUFFER_KEY = 'job-tracker.storage.logs'
+const FALLBACK_JOBS_KEY = 'job-tracker.jobs.fallback'
 
 const STORAGE_DEBUG_KEY = 'job-tracker.debug'
 const MAX_LOG_LINES = 500
@@ -92,7 +93,39 @@ export function downloadStorageLogs(filename = 'job-tracker-storage.log'): void 
   URL.revokeObjectURL(url)
 }
 
-export async function loadJobs(): Promise<Job[]> {
+export type LoadJobsResult = {
+  jobs: Job[]
+  didLoad: boolean
+}
+
+function readFallbackJobs(): Job[] {
+  try {
+    const raw = localStorage.getItem(FALLBACK_JOBS_KEY)
+    if (!raw) {
+      return []
+    }
+
+    const parsed = JSON.parse(raw) as unknown
+    return Array.isArray(parsed) ? (parsed as Job[]) : []
+  } catch {
+    return []
+  }
+}
+
+function writeFallbackJobs(jobs: Job[]): void {
+  localStorage.setItem(FALLBACK_JOBS_KEY, JSON.stringify(jobs))
+}
+
+function isApiUrlPatternError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false
+  }
+
+  const message = error.message.toLowerCase()
+  return message.includes('did not match the expected pattern') || message.includes('failed to parse url')
+}
+
+export async function loadJobs(): Promise<LoadJobsResult> {
   const startedAt = performance.now()
   try {
     const response = await fetch(API_JOBS_ENDPOINT)
@@ -107,10 +140,28 @@ export async function loadJobs(): Promise<Job[]> {
       count: jobs.length,
       durationMs: Math.round(performance.now() - startedAt),
     })
-    return jobs
+    return {
+      jobs,
+      didLoad: true,
+    }
   } catch (error) {
+    if (isApiUrlPatternError(error)) {
+      const jobs = readFallbackJobs()
+      logStorageInfo('loaded jobs from local fallback', {
+        count: jobs.length,
+        durationMs: Math.round(performance.now() - startedAt),
+      })
+      return {
+        jobs,
+        didLoad: true,
+      }
+    }
+
     logStorageError('failed to load jobs', error)
-    return []
+    return {
+      jobs: [],
+      didLoad: false,
+    }
   }
 }
 
@@ -136,6 +187,15 @@ export async function saveJobs(jobs: Job[]): Promise<void> {
       durationMs: Math.round(performance.now() - startedAt),
     })
   } catch (error) {
+    if (isApiUrlPatternError(error)) {
+      writeFallbackJobs(jobs)
+      logStorageInfo('saved jobs to local fallback', {
+        count: jobs.length,
+        durationMs: Math.round(performance.now() - startedAt),
+      })
+      return
+    }
+
     logStorageError('failed to save jobs', error)
     throw error
   }

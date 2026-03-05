@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Job } from './domain'
 import { loadJobs, saveJobs } from './storage'
 
+const FALLBACK_JOBS_KEY = 'job-tracker.jobs.fallback'
+
 function sampleJob(): Job {
   return {
     id: '1',
@@ -24,6 +26,7 @@ function sampleJob(): Job {
 describe('storage', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    localStorage.clear()
   })
 
   it('returns empty array when no data exists', async () => {
@@ -37,7 +40,7 @@ describe('storage', () => {
       ),
     )
 
-    await expect(loadJobs()).resolves.toEqual([])
+    await expect(loadJobs()).resolves.toEqual({ jobs: [], didLoad: true })
   })
 
   it('saves and loads jobs', async () => {
@@ -63,11 +66,31 @@ describe('storage', () => {
       }),
     )
 
-    await expect(loadJobs()).resolves.toEqual(jobs)
+    await expect(loadJobs()).resolves.toEqual({ jobs, didLoad: true })
   })
 
   it('returns empty array when request fails', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('boom', { status: 500 })))
-    await expect(loadJobs()).resolves.toEqual([])
+    await expect(loadJobs()).resolves.toEqual({ jobs: [], didLoad: false })
+  })
+
+  it('loads jobs from local fallback when fetch URL parsing fails', async () => {
+    const jobs = [sampleJob()]
+    localStorage.setItem(FALLBACK_JOBS_KEY, JSON.stringify(jobs))
+    vi.stubGlobal('fetch', vi.fn(async () => {
+      throw new TypeError('The string did not match the expected pattern.')
+    }))
+
+    await expect(loadJobs()).resolves.toEqual({ jobs, didLoad: true })
+  })
+
+  it('saves jobs to local fallback when fetch URL parsing fails', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => {
+      throw new TypeError('The string did not match the expected pattern.')
+    }))
+
+    const jobs = [sampleJob()]
+    await expect(saveJobs(jobs)).resolves.toBeUndefined()
+    expect(localStorage.getItem(FALLBACK_JOBS_KEY)).toBe(JSON.stringify(jobs))
   })
 })

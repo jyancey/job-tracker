@@ -15,7 +15,7 @@ import {
   downloadFile,
   exportToCsv,
   exportToJson,
-  importFromJson,
+  importJobsFromFile,
   mergeImportedJobs,
   type ImportMode,
 } from './exportImport'
@@ -111,13 +111,20 @@ function App() {
     let isDisposed = false
 
     async function hydrateFromStorage(): Promise<void> {
-      const loaded = await loadJobs()
+      const result = await loadJobs()
       if (isDisposed) {
         return
       }
 
-      setJobs(loaded.sort(sortByApplicationDateDesc))
-      setIsStorageHydrated(true)
+      setJobs(result.jobs.sort(sortByApplicationDateDesc))
+      setIsStorageHydrated(result.didLoad)
+
+      if (!result.didLoad) {
+        setNotifications((current) => [
+          ...current,
+          createNotification('Storage is unavailable. Existing jobs were not loaded.', 'error'),
+        ])
+      }
     }
 
     void hydrateFromStorage()
@@ -491,16 +498,17 @@ function App() {
   }
 
   function handleImportFile(event: React.ChangeEvent<HTMLInputElement>): void {
-    const file = event.target.files?.[0]
+    const input = event.target
+    const file = input.files?.[0]
     if (!file) return
 
     const reader = new FileReader()
     reader.onload = (e) => {
       try {
         const content = e.target?.result as string
-        const imported = importFromJson(content)
+        const imported = importJobsFromFile(content, file.name)
         if (imported.length === 0) {
-          addNotification('No valid jobs found in file', 'error')
+          addNotification('No valid jobs found in file. Expected CSV or JSON job rows.', 'error')
           return
         }
 
@@ -515,6 +523,9 @@ function App() {
         )
       } catch {
         addNotification('Import failed', 'error')
+      } finally {
+        // Allow picking the same file again without changing its name.
+        input.value = ''
       }
     }
     reader.readAsText(file)
@@ -565,7 +576,6 @@ function App() {
       <input
         ref={importFileRef}
         type="file"
-        accept=".json"
         onChange={handleImportFile}
         style={{ display: 'none' }}
       />
@@ -1158,7 +1168,7 @@ function App() {
       )}
 
       <footer className="app-footer">
-        <span>Job Tracker v{APP_VERSION}</span>
+        <span>Job Tracker {APP_VERSION}</span>
       </footer>
     </div>
   )

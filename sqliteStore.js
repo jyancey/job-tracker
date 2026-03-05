@@ -1,8 +1,10 @@
 import fs from 'fs'
 import path from 'path'
 import Database from 'better-sqlite3'
+import { fileURLToPath } from 'url'
 
-const DEFAULT_DB_PATH = path.join(process.cwd(), 'data', 'job-tracker.sqlite')
+const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url))
+const DEFAULT_DB_PATH = path.join(MODULE_DIR, 'data', 'job-tracker.sqlite')
 
 const JOB_COLUMNS = [
   'id',

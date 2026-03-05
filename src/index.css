@@ -4,8 +4,8 @@
   font-family: 'Source Sans 3', ui-sans-serif, sans-serif;
   line-height: 1.4;
   font-weight: 400;
-  color: #102a43;
-  background: #f7fafc;
+  color: #24292e;
+  background: #ffffff;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -20,7 +20,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
+  background: #ffffff;
 }
 
 h1,

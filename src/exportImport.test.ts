@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Job } from './domain'
-import { mergeImportedJobs } from './exportImport'
+import { importFromCsv, importJobsFromFile, mergeImportedJobs } from './exportImport'
 
 function job(id: string, company = `Company ${id}`): Job {
   return {
@@ -55,5 +55,49 @@ describe('mergeImportedJobs', () => {
     expect(result.jobs.map((x) => x.id)).toEqual(['3'])
     expect(result.inserted).toBe(1)
     expect(result.updated).toBe(0)
+  })
+})
+
+describe('CSV import', () => {
+  it('imports rows from exported-style CSV', () => {
+    const csv = [
+      'Company,Role Title,Status,Application Date,Salary Range,Contact Person,Next Action,Next Action Due,Notes',
+      '"Acme, Inc","Frontend Engineer","Applied","2026-03-02","$120k - $150k","Sam","Follow up","2026-03-09","Strong portfolio"',
+    ].join('\n')
+
+    const imported = importFromCsv(csv)
+
+    expect(imported).toHaveLength(1)
+    expect(imported[0].company).toBe('Acme, Inc')
+    expect(imported[0].roleTitle).toBe('Frontend Engineer')
+    expect(imported[0].status).toBe('Applied')
+    expect(imported[0].applicationDate).toBe('2026-03-02')
+    expect(imported[0].contactPerson).toBe('Sam')
+  })
+
+  it('skips invalid CSV rows missing required fields', () => {
+    const csv = [
+      'Company,Role Title,Application Date,Status',
+      '"","Engineer","2026-03-01","Applied"',
+      '"Valid Co","","2026-03-01","Applied"',
+      '"Good Co","Designer","2026-03-05","Interview"',
+    ].join('\n')
+
+    const imported = importFromCsv(csv)
+
+    expect(imported).toHaveLength(1)
+    expect(imported[0].company).toBe('Good Co')
+  })
+
+  it('routes import by filename extension', () => {
+    const csv = [
+      'Company,Role Title,Application Date,Status',
+      '"CSV Co","Engineer","2026-03-03","Applied"',
+    ].join('\n')
+
+    const json = JSON.stringify([job('json-1', 'JSON Co')])
+
+    expect(importJobsFromFile(csv, 'jobs.csv')[0].company).toBe('CSV Co')
+    expect(importJobsFromFile(json, 'jobs.json')[0].company).toBe('JSON Co')
   })
 })

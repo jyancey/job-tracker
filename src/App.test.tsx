@@ -2,17 +2,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
+import { loadJobs, saveJobs } from './storage'
 
 vi.mock('./storage', () => ({
   downloadStorageLogs: vi.fn(),
-  loadJobs: vi.fn(async () => {
-    const raw = localStorage.getItem('__app_test_jobs__')
-    return raw ? JSON.parse(raw) : []
-  }),
-  saveJobs: vi.fn(async (jobs: unknown[]) => {
-    localStorage.setItem('__app_test_jobs__', JSON.stringify(jobs))
-  }),
+  loadJobs: vi.fn(),
+  saveJobs: vi.fn(),
 }))
+
+const mockedLoadJobs = vi.mocked(loadJobs)
+const mockedSaveJobs = vi.mocked(saveJobs)
 
 async function addJob(input: {
   company: string
@@ -80,6 +79,17 @@ function storedJob(input: {
 describe('App', () => {
   beforeEach(() => {
     localStorage.clear()
+    vi.clearAllMocks()
+    mockedLoadJobs.mockImplementation(async () => {
+      const raw = localStorage.getItem('__app_test_jobs__')
+      return {
+        jobs: raw ? JSON.parse(raw) : [],
+        didLoad: true,
+      }
+    })
+    mockedSaveJobs.mockImplementation(async (jobs: unknown[]) => {
+      localStorage.setItem('__app_test_jobs__', JSON.stringify(jobs))
+    })
   })
 
   afterEach(() => {
@@ -219,5 +229,14 @@ describe('App', () => {
 
     await user.selectOptions(screen.getByDisplayValue('Rejected'), 'All')
     expect(screen.getByText('Hidden Applied')).toBeInTheDocument()
+  })
+
+  it('does not autosave when initial storage load fails', async () => {
+    mockedLoadJobs.mockResolvedValueOnce({ jobs: [], didLoad: false })
+
+    render(<App />)
+
+    await screen.findByText('Storage is unavailable. Existing jobs were not loaded.')
+    expect(mockedSaveJobs).not.toHaveBeenCalled()
   })
 })
