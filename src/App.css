@@ -592,6 +592,20 @@ tbody tr:hover {
   white-space: nowrap;
   color: #0550ae;
   font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.calendar-job-entry:hover {
+  background: #1f6feb;
+  color: #ffffff;
+  border-left-color: #0d3b66;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.calendar-job-entry:active {
+  background: #0d3b66;
 }
 
 .calendar-job-more {

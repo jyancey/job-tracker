@@ -529,7 +529,7 @@ function App() {
             />
           )}
 
-          {view === 'calendar' && <CalendarView dueByDate={dueByDate} />}
+          {view === 'calendar' && <CalendarView dueByDate={dueByDate} onView={openViewOnly} />}
 
           {view === 'dashboard' && <DashboardView byStatus={byStatus} />}
         </section>

@@ -4,9 +4,10 @@ import { formatDate } from '../utils/dateUtils'
 
 interface CalendarViewProps {
   dueByDate: [string, Job[]][]
+  onView?: (job: Job) => void
 }
 
-export function CalendarView({ dueByDate }: CalendarViewProps) {
+export function CalendarView({ dueByDate, onView }: CalendarViewProps) {
   // Create a map for faster lookup
   const jobsByDate = useMemo(() => {
     const map = new Map<string, Job[]>()
@@ -134,7 +135,20 @@ export function CalendarView({ dueByDate }: CalendarViewProps) {
                   </div>
                   <div className="calendar-day-jobs">
                     {jobsForDay.slice(0, 2).map((job) => (
-                      <div key={job.id} className="calendar-job-entry" title={`${job.company} - ${job.roleTitle}`}>
+                      <div
+                        key={job.id}
+                        className="calendar-job-entry"
+                        onClick={() => onView?.(job)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            onView?.(job)
+                          }
+                        }}
+                        title={`Click to view: ${job.company} - ${job.roleTitle}`}
+                      >
                         {job.company}
                       </div>
                     ))}
