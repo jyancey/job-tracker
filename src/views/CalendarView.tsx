@@ -84,6 +84,14 @@ export function CalendarView({ dueByDate }: CalendarViewProps) {
     return jobsByDate.get(dateStr) || []
   }
 
+  // Check if a date is overdue
+  const isDateOverdue = (day: number) => {
+    const dateStr = getDateString(day)
+    const today = new Date()
+    const todayStr = today.toISOString().split('T')[0]
+    return dateStr < todayStr
+  }
+
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
   return (
@@ -110,12 +118,19 @@ export function CalendarView({ dueByDate }: CalendarViewProps) {
         {calendarDays.map((day, index) => {
           const jobsForDay = day ? getJobsForDay(day) : []
           const hasJobs = jobsForDay.length > 0
+          const overdue = day ? isDateOverdue(day) : false
 
           return (
-            <div key={index} className={`calendar-cell ${!day ? 'empty' : ''} ${hasJobs ? 'has-jobs' : ''}`}>
+            <div
+              key={index}
+              className={`calendar-cell ${!day ? 'empty' : ''} ${hasJobs ? 'has-jobs' : ''} ${overdue ? 'overdue' : ''}`}
+            >
               {day && (
                 <>
-                  <div className="calendar-day-number">{day}</div>
+                  <div className="calendar-day-number">
+                    {day}
+                    {overdue && <span className="overdue-badge">⚠</span>}
+                  </div>
                   <div className="calendar-day-jobs">
                     {jobsForDay.slice(0, 2).map((job) => (
                       <div key={job.id} className="calendar-job-entry" title={`${job.company} - ${job.roleTitle}`}>
