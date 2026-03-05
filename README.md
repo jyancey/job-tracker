@@ -12,7 +12,7 @@ Track your search like a pipeline, not a spreadsheet. Manage opportunities, foll
 - **Smart Filtering** — Status, date range, salary range, and contact person filters
 - **Sortable Columns** — Click headers to sort by company, role, status, dates
 - **Bulk Operations** — Select multiple jobs, delete across filters with visibility controls
-- **Multiple Views** — Table (default), Kanban board, Calendar, Dashboard
+- **Multiple Views** — Dashboard (default), Table, Kanban board, and Calendar
 - **Import/Export** — JSON, CSV export; JSON import with merge strategies (append/upsert/replace)
 - **Pagination** — Configurable page sizes (5/10/20) for large datasets
 - **Overdue Tracking** — Quick metric shortcut to find jobs requiring follow-up
@@ -49,27 +49,33 @@ You can also run as a macOS daemon. See [docs/DAEMON_SETUP.md](docs/DAEMON_SETUP
 
 ### Project Structure
 ```
-src/
-  ├── App.tsx                 # Main app component with state management
-  ├── App.css                 # Styling (hero, filters, table, modals, pagination)
-  ├── App.test.tsx           # Component integration tests
-  ├── domain.ts              # Job and JobStatus types
-  ├── domain.test.ts         # Domain logic tests
-  ├── storage.ts             # HTTP storage client + storage logging
-  ├── storage.test.ts        # Storage functionality tests
-  ├── exportImport.ts        # JSON/CSV export, import merge strategies
-  ├── exportImport.test.ts   # Merge strategy unit tests
-  ├── notifications.ts       # Toast notification system
-  ├── Toast.tsx              # Toast UI component
-  └── vite-env.d.ts         # TypeScript environment declarations
-
-public/
-  └── job-tracker.png       # App logo
-
 backend/
   ├── jobsApi.js            # Shared /api/jobs request handler
   ├── sqliteStore.js        # File-backed SQLite repository
-  └── jobValidation.js      # Backend job payload validation
+  ├── jobValidation.js      # Backend job payload validation
+  └── *.d.ts                # Type declarations for backend JS modules
+
+docs/
+  ├── DAEMON_SETUP.md
+  └── REFACTORING_ANALYSIS.md
+
+scripts/
+  ├── generate-version.js
+  └── launchd/
+      └── com.local.job-tracker.plist.template
+
+src/
+  ├── App.tsx                # Main app orchestrator
+  ├── components/            # Reusable UI components (table, kanban, form, toast)
+  ├── hooks/                 # Custom state and behavior hooks
+  ├── services/              # Service layer (jobService)
+  ├── utils/                 # Date, accessibility, drag/drop, formatting helpers
+  ├── views/                 # View-level components (DashboardView)
+  ├── types/                 # Shared TypeScript types
+  └── test/setup.ts          # Vitest setup
+
+public/
+  └── job-tracker.png       # App logo
 ```
 
 ### Testing
@@ -87,13 +93,10 @@ npm run test:run
 npm run test:run -- --coverage  # (requires coverage provider)
 ```
 
-**Test Suites:**
-- `domain.test.ts` — Job type validation and helpers (1 test)
-- `storage.test.ts` — Database operations and persistence (3 tests)
-- `exportImport.test.ts` — Import merge modes: append, upsert, replace (3 tests)
-- `App.test.tsx` — End-to-end workflows: add, filter, edit, delete, pagination, bulk operations (4 tests)
-
-**Total:** 11 passing tests
+**Current Status (v2.3.0):**
+- 15 test files
+- 163 passing tests
+- Covers app workflows, hooks, backend API/store modules, and utility functions
 
 ### Building
 
@@ -116,11 +119,11 @@ Triggers on: `push` to main/develop, `pull_request` against main/develop
 
 **Steps:**
 - Lint code (ESLint)
-- Run full test suite (11 tests)
+- Run full test suite
 - Build application
 - Upload build artifacts (7-day retention)
 
-**Status:** ✅ 11/11 tests passing
+**Status:** ✅ Passing on current main branch
 
 ### 2. **Release** (`release.yml`)
 Triggers on: `git tag` (e.g., `git tag v1.0.0 && git push origin v1.0.0`)
@@ -151,11 +154,11 @@ Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dis
 
 ### Adding a Job
 1. Fill out the "Add Job" form (Company, Role, Status, etc.)
-2. Click **Save** to add to pipeline
+2. Click **Add Job** to add to pipeline
 3. Metric cards update instantly
 
 ### Smart Filtering
-- **Status Filter** — Quick drop-down for Interested, Applied, Interviewing, Offered, Rejected, Withdrawn
+- **Status Filter** — Quick drop-down for All statuses, Overdue Follow-ups, Wishlist, Applied, Phone Screen, Interview, Offer, Rejected, Withdrawn
 - **Advanced Filters** — Click "More Filters" to refine by:
   - Application date range
   - Salary range
@@ -165,7 +168,7 @@ Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dis
 ### Bulk Operations
 1. Select jobs via checkboxes (or select-all)
 2. Manage selections across pagination
-3. Click "Delete Selected" — only visible+selected rows are removed
+3. Click "Delete Selected on Page" — only visible selected rows are removed
 4. Hidden selections preserved and reported
 
 ### Import/Export
@@ -225,5 +228,4 @@ Report issues, suggest features, or contribute pull requests on the project repo
 ---
 
 **Last Updated:** March 2026  
-**Current Version:** 0.0.0 (ready for first release)
-```
+**Current Release Tag:** v2.3.0
