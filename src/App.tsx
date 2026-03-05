@@ -88,14 +88,11 @@ function App() {
         return
       }
 
-      setJobs(result.jobs.sort(sortByApplicationDateDesc))
+      setJobs(result.jobs.sort(jobService.sortByApplicationDateDesc))
       setIsStorageHydrated(result.didLoad)
 
       if (!result.didLoad) {
-        setNotifications((current) => [
-          ...current,
-          createNotification('Storage is unavailable. Existing jobs were not loaded.', 'error'),
-        ])
+        addNotification('Storage is unavailable. Existing jobs were not loaded.', 'error')
       }
     }
 
@@ -324,7 +321,7 @@ function App() {
 
         const merge = mergeImportedJobs(jobs, imported, importMode)
         setUndoStack((current) => [...current, jobs])
-        setJobs(merge.jobs.sort(sortByApplicationDateDesc))
+        setJobs(merge.jobs.sort(jobService.sortByApplicationDateDesc))
         setSelectedIds(new Set())
         setCurrentPage(1)
         addNotification(

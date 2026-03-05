@@ -3,7 +3,7 @@ import { createJobFromDraft, type Job, type JobDraft, type JobStatus } from '../
 /**
  * Sort jobs by application date (newest first)
  */
-function sortByApplicationDateDesc(a: Job, b: Job): number {
+export function sortByApplicationDateDesc(a: Job, b: Job): number {
   return b.applicationDate.localeCompare(a.applicationDate)
 }
 
