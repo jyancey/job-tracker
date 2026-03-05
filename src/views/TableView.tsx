@@ -1,9 +1,9 @@
 import type { Job, JobStatus } from '../domain'
 import { formatDate, isOverdueFollowUp, getTodayString } from '../utils/dateUtils'
 import type { SortColumn, SortDirection } from '../hooks/useJobFiltering'
-import { StatusSelect } from '../components/StatusSelect'
 import { Pagination } from '../components/Pagination'
-import { stopPropagation } from '../utils/a11yUtils'
+import { SortableHeader } from '../components/SortableHeader'
+import { StatusCell } from '../components/StatusCell'
 
 interface TableViewProps {
   paginatedJobs: Job[]
@@ -53,13 +53,6 @@ export function TableView({
   onPageSizeChange,
   selectAllCheckboxRef,
 }: TableViewProps) {
-  function sortMarker(column: SortColumn): string {
-    if (column !== sortColumn) {
-      return ''
-    }
-    return sortDirection === 'asc' ? '↑' : '↓'
-  }
-
   const today = getTodayString()
 
   return (
@@ -94,31 +87,41 @@ export function TableView({
                 aria-label="Select all visible jobs"
               />
             </th>
-            <th className="sortable-header">
-              <button type="button" onClick={() => onSort('company')}>
-                Company {sortMarker('company')}
-              </button>
-            </th>
-            <th className="sortable-header">
-              <button type="button" onClick={() => onSort('roleTitle')}>
-                Role {sortMarker('roleTitle')}
-              </button>
-            </th>
-            <th className="sortable-header">
-              <button type="button" onClick={() => onSort('status')}>
-                Status {sortMarker('status')}
-              </button>
-            </th>
-            <th className="sortable-header">
-              <button type="button" onClick={() => onSort('applicationDate')}>
-                Applied {sortMarker('applicationDate')}
-              </button>
-            </th>
-            <th className="sortable-header">
-              <button type="button" onClick={() => onSort('nextActionDueDate')}>
-                Next Action {sortMarker('nextActionDueDate')}
-              </button>
-            </th>
+            <SortableHeader
+              label="Company"
+              column="company"
+              currentColumn={sortColumn}
+              currentDirection={sortDirection}
+              onSort={onSort}
+            />
+            <SortableHeader
+              label="Role"
+              column="roleTitle"
+              currentColumn={sortColumn}
+              currentDirection={sortDirection}
+              onSort={onSort}
+            />
+            <SortableHeader
+              label="Status"
+              column="status"
+              currentColumn={sortColumn}
+              currentDirection={sortDirection}
+              onSort={onSort}
+            />
+            <SortableHeader
+              label="Applied"
+              column="applicationDate"
+              currentColumn={sortColumn}
+              currentDirection={sortDirection}
+              onSort={onSort}
+            />
+            <SortableHeader
+              label="Next Action"
+              column="nextActionDueDate"
+              currentColumn={sortColumn}
+              currentDirection={sortDirection}
+              onSort={onSort}
+            />
             <th>Actions</th>
           </tr>
         </thead>
@@ -139,15 +142,12 @@ export function TableView({
               </td>
               <td>{job.company}</td>
               <td>{job.roleTitle}</td>
-              <td>
-                <StatusSelect
-                  className="quick-status"
-                  value={job.status}
-                  onChange={(value) => onQuickMove(job.id, value as JobStatus)}
-                  placeholder={false}
-                  onClick={stopPropagation}
-                />
-              </td>
+              <StatusCell
+                value={job.status}
+                onChange={onQuickMove}
+                jobId={job.id}
+                className="quick-status"
+              />
               <td>{formatDate(job.applicationDate)}</td>
               <td>
                 {job.nextAction || '-'}
