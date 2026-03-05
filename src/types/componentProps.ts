@@ -1,28 +1,16 @@
 import type { Job, JobStatus } from '../domain'
-import type { StatusFilter, SortColumn, SortDirection } from './filters'
+import type { SortColumn, SortDirection } from './filters'
+import type { FilterAction, FilterState } from '../components/FilterToolbar'
 
 /**
  * Component prop interfaces - centralized for consistency and reusability
  */
 
 export interface FilterToolbarProps {
-  statusFilter: StatusFilter
-  showAdvancedFilters: boolean
-  query: string
-  dateRangeStart: string
-  dateRangeEnd: string
-  salaryRangeMin: string
-  salaryRangeMax: string
-  contactPersonFilter: string
-  onStatusFilterChange: (filter: StatusFilter) => void
-  onToggleAdvancedFilters: () => void
-  onQueryChange: (query: string) => void
-  onDateRangeStartChange: (date: string) => void
-  onDateRangeEndChange: (date: string) => void
-  onSalaryRangeMinChange: (min: string) => void
-  onSalaryRangeMaxChange: (max: string) => void
-  onContactPersonFilterChange: (contact: string) => void
-  onClearAdvancedFilters: () => void
+  state: FilterState
+  onDispatch: (action: FilterAction) => void
+  onToggleAdvanced: () => void
+  onClearAdvanced: () => void
 }
 
 export interface TableViewProps {

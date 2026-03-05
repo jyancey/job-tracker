@@ -1,12 +1,14 @@
 import { useCallback, useState } from 'react'
-import type { FilterOptions, StatusFilter } from '../types/filters'
+import type { StatusFilter } from '../types/filters'
+import type { FilterAction, FilterState } from '../components/FilterToolbar'
 
 /**
  * Custom hook to manage all filter-related state
  * Consolidates 8 individual useState calls into a single composable hook
  *
  * Returns:
- * - filterState: Current filter values
+ * - state: Current filter values
+ * - dispatch: Handle FilterAction events (for use with FilterToolbar)
  * - updateFilter: Batch update filter values
  * - updateQuery: Update search query
  * - updateStatusFilter: Update status filter
@@ -16,10 +18,6 @@ import type { FilterOptions, StatusFilter } from '../types/filters'
  * - toggleAdvancedFilters: Toggle visibility of advanced filters
  * - clearAdvancedFilters: Reset all advanced filter values
  */
-
-export interface FilterState extends FilterOptions {
-  showAdvancedFilters: boolean
-}
 
 export function useFilterState(initialState?: Partial<FilterState>) {
   const [state, setState] = useState<FilterState>({
@@ -33,6 +31,29 @@ export function useFilterState(initialState?: Partial<FilterState>) {
     showAdvancedFilters: false,
     ...initialState,
   })
+
+  const dispatch = useCallback((action: FilterAction) => {
+    setState((prev) => {
+      switch (action.type) {
+        case 'query':
+          return { ...prev, query: action.value }
+        case 'status':
+          return { ...prev, statusFilter: action.value }
+        case 'dateStart':
+          return { ...prev, dateRangeStart: action.value }
+        case 'dateEnd':
+          return { ...prev, dateRangeEnd: action.value }
+        case 'salaryMin':
+          return { ...prev, salaryRangeMin: action.value }
+        case 'salaryMax':
+          return { ...prev, salaryRangeMax: action.value }
+        case 'contact':
+          return { ...prev, contactPersonFilter: action.value }
+        default:
+          return prev
+      }
+    })
+  }, [])
 
   const updateFilter = useCallback((updates: Partial<FilterState>) => {
     setState((prev) => ({ ...prev, ...updates }))
@@ -83,6 +104,7 @@ export function useFilterState(initialState?: Partial<FilterState>) {
 
   return {
     state,
+    dispatch,
     updateFilter,
     updateQuery,
     updateStatusFilter,

@@ -1,7 +1,20 @@
 import { JOB_STATUSES } from '../domain'
 import type { StatusFilter } from '../hooks/useJobFiltering'
 
-interface FilterToolbarProps {
+/**
+ * Filter change actions using discriminated union pattern
+ * Enables type-safe filter updates with single callback
+ */
+export type FilterAction =
+  | { type: 'query'; value: string }
+  | { type: 'status'; value: StatusFilter }
+  | { type: 'dateStart'; value: string }
+  | { type: 'dateEnd'; value: string }
+  | { type: 'salaryMin'; value: string }
+  | { type: 'salaryMax'; value: string }
+  | { type: 'contact'; value: string }
+
+export interface FilterState {
   statusFilter: StatusFilter
   showAdvancedFilters: boolean
   query: string
@@ -10,42 +23,27 @@ interface FilterToolbarProps {
   salaryRangeMin: string
   salaryRangeMax: string
   contactPersonFilter: string
-  onStatusFilterChange: (filter: StatusFilter) => void
-  onToggleAdvancedFilters: () => void
-  onQueryChange: (query: string) => void
-  onDateRangeStartChange: (date: string) => void
-  onDateRangeEndChange: (date: string) => void
-  onSalaryRangeMinChange: (min: string) => void
-  onSalaryRangeMaxChange: (max: string) => void
-  onContactPersonFilterChange: (contact: string) => void
-  onClearAdvancedFilters: () => void
+}
+
+interface FilterToolbarProps {
+  state: FilterState
+  onDispatch: (action: FilterAction) => void
+  onToggleAdvanced: () => void
+  onClearAdvanced: () => void
 }
 
 export function FilterToolbar({
-  statusFilter,
-  showAdvancedFilters,
-  query,
-  dateRangeStart,
-  dateRangeEnd,
-  salaryRangeMin,
-  salaryRangeMax,
-  contactPersonFilter,
-  onStatusFilterChange,
-  onToggleAdvancedFilters,
-  onQueryChange,
-  onDateRangeStartChange,
-  onDateRangeEndChange,
-  onSalaryRangeMinChange,
-  onSalaryRangeMaxChange,
-  onContactPersonFilterChange,
-  onClearAdvancedFilters,
+  state,
+  onDispatch,
+  onToggleAdvanced,
+  onClearAdvanced,
 }: FilterToolbarProps) {
   return (
     <>
       <div className="quick-filters">
         <select
-          value={statusFilter}
-          onChange={(event) => onStatusFilterChange(event.target.value as StatusFilter)}
+          value={state.statusFilter}
+          onChange={(event) => onDispatch({ type: 'status', value: event.target.value as StatusFilter })}
         >
           <option value="All">All statuses</option>
           <option value="Overdue Follow-ups">Overdue Follow-ups</option>
@@ -58,60 +56,60 @@ export function FilterToolbar({
         <button
           type="button"
           className="small ghost"
-          onClick={onToggleAdvancedFilters}
+          onClick={onToggleAdvanced}
         >
-          {showAdvancedFilters ? 'Hide Filters' : 'More Filters'}
+          {state.showAdvancedFilters ? 'Hide Filters' : 'More Filters'}
         </button>
-        {statusFilter === 'Overdue Follow-ups' && (
+        {state.statusFilter === 'Overdue Follow-ups' && (
           <button
             type="button"
             className="small ghost"
-            onClick={() => onStatusFilterChange('All')}
+            onClick={() => onDispatch({ type: 'status', value: 'All' })}
           >
             Clear Overdue Filter
           </button>
         )}
       </div>
 
-      {showAdvancedFilters && (
+      {state.showAdvancedFilters && (
         <div className="advanced-filters">
           <input
             placeholder="Search company, role, or notes"
-            value={query}
-            onChange={(event) => onQueryChange(event.target.value)}
+            value={state.query}
+            onChange={(event) => onDispatch({ type: 'query', value: event.target.value })}
           />
           <input
             type="date"
             placeholder="From"
-            value={dateRangeStart}
-            onChange={(event) => onDateRangeStartChange(event.target.value)}
+            value={state.dateRangeStart}
+            onChange={(event) => onDispatch({ type: 'dateStart', value: event.target.value })}
             title="Application date from"
           />
           <input
             type="date"
             placeholder="To"
-            value={dateRangeEnd}
-            onChange={(event) => onDateRangeEndChange(event.target.value)}
+            value={state.dateRangeEnd}
+            onChange={(event) => onDispatch({ type: 'dateEnd', value: event.target.value })}
             title="Application date to"
           />
           <input
             type="number"
             placeholder="Min salary"
-            value={salaryRangeMin}
-            onChange={(event) => onSalaryRangeMinChange(event.target.value)}
+            value={state.salaryRangeMin}
+            onChange={(event) => onDispatch({ type: 'salaryMin', value: event.target.value })}
           />
           <input
             type="number"
             placeholder="Max salary"
-            value={salaryRangeMax}
-            onChange={(event) => onSalaryRangeMaxChange(event.target.value)}
+            value={state.salaryRangeMax}
+            onChange={(event) => onDispatch({ type: 'salaryMax', value: event.target.value })}
           />
           <input
             placeholder="Contact person"
-            value={contactPersonFilter}
-            onChange={(event) => onContactPersonFilterChange(event.target.value)}
+            value={state.contactPersonFilter}
+            onChange={(event) => onDispatch({ type: 'contact', value: event.target.value })}
           />
-          <button type="button" className="small ghost" onClick={onClearAdvancedFilters}>
+          <button type="button" className="small ghost" onClick={onClearAdvanced}>
             Clear Advanced
           </button>
         </div>

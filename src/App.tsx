@@ -25,6 +25,8 @@ import {
 } from './hooks/useJobFiltering'
 import { useFilterState } from './hooks/useFilterState'
 import { useJobSelection } from './hooks/useJobSelection'
+import { useViewState } from './hooks/useViewState'
+import { useUndoStack } from './hooks/useUndoStack'
 import { useJobGrouping } from './hooks/useJobGrouping'
 import { useJobForm } from './hooks/useJobForm'
 import { useNotifications } from './hooks/useNotifications'
@@ -47,24 +49,22 @@ const VIEW_LABELS: Record<View, string> = {
 
 function App() {
   const [jobs, setJobs] = useState<Job[]>([])
-  const [view, setView] = useState<View>('dashboard')
-  const [viewingJob, setViewingJob] = useState<Job | null>(null)
   const [isStorageHydrated, setIsStorageHydrated] = useState(false)
-
   const [saveStatus, setSaveStatus] = useState<'idle' | 'pending'>('idle')
-  const [undoStack, setUndoStack] = useState<Job[][]>([])
   const [sortColumn, setSortColumn] = useState<SortColumn>('applicationDate')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
-  const [importMode, setImportMode] = useState<ImportMode>('append')
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   
   // Use custom hooks for state management
   const filters = useFilterState()
   const selection = useJobSelection()
+  const view = useViewState()
+  const undo = useUndoStack()
   
   const importFileRef = useRef<HTMLInputElement>(null)
   const selectAllCheckboxRef = useRef<HTMLInputElement>(null)
+  const [importMode, setImportMode] = useState<ImportMode>('append')
   const saveRequestIdRef = useRef(0)
 
   // Use notifications hook
@@ -197,8 +197,8 @@ function App() {
     if (editingId === id) {
       resetForm()
     }
-    if (viewingJob?.id === id) {
-      setViewingJob(null)
+    if (view.viewingJob?.id === id) {
+      view.closeViewOnly()
     }
   }
 
@@ -221,7 +221,7 @@ function App() {
     if (selectedVisibleIds.length === 0) return
 
     const hiddenSelectedCount = selection.selectedIds.size - selectedVisibleIds.length
-    setUndoStack((current) => [...current, jobs])
+    undo.pushState(jobs)
     setJobs((current) => jobService.deleteJobs(current, selectedVisibleIds))
     selection.removeMultiple(selectedVisibleIds)
     addNotification(
@@ -230,18 +230,12 @@ function App() {
     )
   }
 
-  function undo(): void {
-    if (undoStack.length === 0) return
-
-    setUndoStack((current) => {
-      const next = [...current]
-      const previous = next.pop()
-      if (previous) {
-        setJobs(previous)
-      }
-      return next
-    })
-    addNotification('Undo successful', 'info')
+  function undo_handler(): void {
+    const previous = undo.undo()
+    if (previous) {
+      setJobs(previous)
+      addNotification('Undo successful', 'info')
+    }
   }
 
   function handleExport(format: 'json' | 'csv'): void {
@@ -275,7 +269,7 @@ function App() {
         }
 
         const merge = mergeImportedJobs(jobs, imported, importMode)
-        setUndoStack((current) => [...current, jobs])
+        undo.pushState(jobs)
         setJobs(merge.jobs.sort(jobService.sortByApplicationDateDesc))
         selection.clear()
         setCurrentPage(1)
@@ -294,20 +288,16 @@ function App() {
   }
 
   function showOverdueOnly(): void {
-    setView('table')
+    view.updateView('table')
     filters.updateStatusFilter('Overdue Follow-ups')
   }
 
   function openViewOnly(job: Job): void {
-    setViewingJob(job)
+    view.openViewOnly(job)
   }
 
   function closeViewOnly(): void {
-    setViewingJob(null)
-  }
-
-  function clearAdvancedFilters(): void {
-    filters.clearAdvancedFilters()
+    view.closeViewOnly()
   }
 
   function handleSort(column: SortColumn): void {
@@ -390,8 +380,8 @@ function App() {
               <button type="button" className="small ghost" onClick={() => downloadStorageLogs()}>
                 Export DB Logs
               </button>
-              {undoStack.length > 0 && (
-                <button type="button" className="small" onClick={undo}>
+              {undo.canUndo && (
+                <button type="button" className="small" onClick={undo_handler}>
                   Undo
                 </button>
               )}
@@ -414,8 +404,8 @@ function App() {
               {(Object.keys(VIEW_LABELS) as View[]).map((key) => (
                 <button
                   key={key}
-                  className={view === key ? 'active' : ''}
-                  onClick={() => setView(key)}
+                  className={view.view === key ? 'active' : ''}
+                  onClick={() => view.updateView(key)}
                   type="button"
                 >
                   {VIEW_LABELS[key]}
@@ -423,27 +413,14 @@ function App() {
               ))}
             </div>
             <FilterToolbar
-              statusFilter={filters.state.statusFilter}
-              onStatusFilterChange={filters.updateStatusFilter}
-              showAdvancedFilters={filters.state.showAdvancedFilters}
-              onToggleAdvancedFilters={filters.toggleAdvancedFilters}
-              query={filters.state.query}
-              onQueryChange={filters.updateQuery}
-              dateRangeStart={filters.state.dateRangeStart}
-              onDateRangeStartChange={(date) => filters.updateDateRange(date, filters.state.dateRangeEnd)}
-              dateRangeEnd={filters.state.dateRangeEnd}
-              onDateRangeEndChange={(date) => filters.updateDateRange(filters.state.dateRangeStart, date)}
-              salaryRangeMin={filters.state.salaryRangeMin}
-              onSalaryRangeMinChange={(min) => filters.updateSalaryRange(min, filters.state.salaryRangeMax)}
-              salaryRangeMax={filters.state.salaryRangeMax}
-              onSalaryRangeMaxChange={(max) => filters.updateSalaryRange(filters.state.salaryRangeMin, max)}
-              contactPersonFilter={filters.state.contactPersonFilter}
-              onContactPersonFilterChange={filters.updateContactPersonFilter}
-              onClearAdvancedFilters={clearAdvancedFilters}
+              state={filters.state}
+              onDispatch={filters.dispatch}
+              onToggleAdvanced={filters.toggleAdvancedFilters}
+              onClearAdvanced={filters.clearAdvancedFilters}
             />
           </div>
 
-          {view === 'table' && (
+          {view.view === 'table' && (
             <TableView
               paginatedJobs={paginatedTableJobs}
               sortedJobs={sortedTableJobs}
@@ -470,7 +447,7 @@ function App() {
             />
           )}
 
-          {view === 'kanban' && (
+          {view.view === 'kanban' && (
             <KanbanBoard
               jobs={byStatus}
               onStatusChange={handleQuickMove}
@@ -480,13 +457,13 @@ function App() {
             />
           )}
 
-          {view === 'calendar' && <CalendarView dueByDate={dueByDate} onView={openViewOnly} />}
+          {view.view === 'calendar' && <CalendarView dueByDate={dueByDate} onView={openViewOnly} />}
 
-          {view === 'dashboard' && <DashboardView byStatus={byStatus} />}
+          {view.view === 'dashboard' && <DashboardView byStatus={byStatus} />}
         </section>
       </main>
 
-      {viewingJob && <JobModal job={viewingJob} onClose={closeViewOnly} />}
+      {view.viewingJob && <JobModal job={view.viewingJob} onClose={closeViewOnly} />}
 
       <footer className="app-footer">
         <span>Job Tracker {APP_VERSION}</span>
