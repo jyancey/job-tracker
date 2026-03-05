@@ -46,10 +46,12 @@ export default defineConfig({
         'src/**/*.d.ts',
         'src/version.ts',
       ],
-      lines: 70,
-      functions: 70,
-      branches: 65,
-      statements: 70,
+      thresholds: {
+        lines: 70,
+        functions: 70,
+        branches: 65,
+        statements: 70,
+      },
     },
   },
 })
