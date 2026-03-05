@@ -119,17 +119,18 @@ export function CalendarView({ dueByDate }: CalendarViewProps) {
           const jobsForDay = day ? getJobsForDay(day) : []
           const hasJobs = jobsForDay.length > 0
           const overdue = day ? isDateOverdue(day) : false
+          const isOverdueWithJobs = hasJobs && overdue
 
           return (
             <div
               key={index}
-              className={`calendar-cell ${!day ? 'empty' : ''} ${hasJobs ? 'has-jobs' : ''} ${overdue ? 'overdue' : ''}`}
+              className={`calendar-cell ${!day ? 'empty' : ''} ${hasJobs ? 'has-jobs' : ''} ${isOverdueWithJobs ? 'overdue' : ''}`}
             >
               {day && (
                 <>
                   <div className="calendar-day-number">
                     {day}
-                    {overdue && <span className="overdue-badge">⚠</span>}
+                    {isOverdueWithJobs && <span className="overdue-badge">⚠</span>}
                   </div>
                   <div className="calendar-day-jobs">
                     {jobsForDay.slice(0, 2).map((job) => (
