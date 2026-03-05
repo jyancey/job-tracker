@@ -1,11 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import {
-  EMPTY_JOB_DRAFT,
   JOB_STATUSES,
-  createJobFromDraft,
   type Job,
-  type JobDraft,
   type JobStatus,
 } from './domain'
 import { KanbanBoard } from './KanbanBoard'
@@ -22,8 +19,6 @@ import {
 } from './exportImport'
 import { APP_VERSION } from './version'
 import { formatDate, isOverdueFollowUp, getTodayString } from './utils/dateUtils'
-import { normalizeUrl } from './utils/stringUtils'
-import { parseSalaryRange } from './utils/salaryUtils'
 import {
   useJobFiltering,
   useJobSorting,
@@ -33,9 +28,11 @@ import {
   type SortDirection,
 } from './hooks/useJobFiltering'
 import { useJobGrouping } from './hooks/useJobGrouping'
+import { useJobForm } from './hooks/useJobForm'
 import { TableView } from './views/TableView'
 import { CalendarView } from './views/CalendarView'
 import { DashboardView } from './views/DashboardView'
+import * as jobService from './services/jobService'
 
 type View = 'table' | 'kanban' | 'calendar' | 'dashboard'
 
@@ -46,18 +43,12 @@ const VIEW_LABELS: Record<View, string> = {
   dashboard: 'Dashboard',
 }
 
-function sortByApplicationDateDesc(a: Job, b: Job): number {
-  return b.applicationDate.localeCompare(a.applicationDate)
-}
-
 function App() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [view, setView] = useState<View>('table')
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All')
-  const [editingId, setEditingId] = useState<string | null>(null)
   const [viewingJob, setViewingJob] = useState<Job | null>(null)
-  const [draft, setDraft] = useState<JobDraft>(EMPTY_JOB_DRAFT)
   const [isStorageHydrated, setIsStorageHydrated] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [saveStatus, setSaveStatus] = useState<'idle' | 'pending'>('idle')
@@ -77,6 +68,9 @@ function App() {
   const importFileRef = useRef<HTMLInputElement>(null)
   const selectAllCheckboxRef = useRef<HTMLInputElement>(null)
   const saveRequestIdRef = useRef(0)
+
+  // Use job form hook
+  const { draft, editingId, isEditing, updateDraft, resetForm, startEdit, submitForm, isValid } = useJobForm()
 
   useEffect(() => {
     let isDisposed = false
@@ -192,77 +186,26 @@ function App() {
     setCurrentPage(1)
   }, [query, statusFilter, dateRangeStart, dateRangeEnd, salaryRangeMin, salaryRangeMax, contactPersonFilter])
 
-  function updateDraft<K extends keyof JobDraft>(key: K, value: JobDraft[K]): void {
-    setDraft((current) => ({
-      ...current,
-      [key]: value,
-    }))
-  }
-
-  function resetForm(): void {
-    setDraft(EMPTY_JOB_DRAFT)
-    setEditingId(null)
-  }
-
-  function submitJob(event: React.FormEvent<HTMLFormElement>): void {
-    event.preventDefault()
-    if (!draft.company.trim() || !draft.roleTitle.trim() || !draft.applicationDate) {
+  function handleSubmitJob(event: React.FormEvent<HTMLFormElement>): void {
+    const normalizedDraft = submitForm(event)
+    if (!normalizedDraft) {
       return
-    }
-
-    const normalizedDraft: JobDraft = {
-      ...draft,
-      company: draft.company.trim(),
-      roleTitle: draft.roleTitle.trim(),
-      jobUrl: normalizeUrl(draft.jobUrl),
-      atsUrl: normalizeUrl(draft.atsUrl),
-      notes: draft.notes.trim(),
-      nextAction: draft.nextAction.trim(),
-      contactPerson: draft.contactPerson.trim(),
-      salaryRange: draft.salaryRange.trim(),
     }
 
     if (editingId) {
-      setJobs((current) =>
-        current
-          .map((job) =>
-            job.id === editingId
-              ? {
-                  ...job,
-                  ...normalizedDraft,
-                  updatedAt: new Date().toISOString(),
-                }
-              : job,
-          )
-          .sort(sortByApplicationDateDesc),
-      )
-      resetForm()
-      return
+      setJobs((current) => jobService.updateJob(current, editingId, normalizedDraft))
+    } else {
+      setJobs((current) => jobService.createJob(current, normalizedDraft))
     }
-
-    setJobs((current) => [...current, createJobFromDraft(normalizedDraft)].sort(sortByApplicationDateDesc))
     resetForm()
   }
 
-  function editJob(job: Job): void {
-    setDraft({
-      company: job.company,
-      roleTitle: job.roleTitle,
-      applicationDate: job.applicationDate,
-      status: job.status,
-      jobUrl: job.jobUrl,
-      atsUrl: job.atsUrl,
-      salaryRange: job.salaryRange,
-      notes: job.notes,
-      contactPerson: job.contactPerson,
-      nextAction: job.nextAction,
-      nextActionDueDate: job.nextActionDueDate,
-    })
-    setEditingId(job.id)
+  function handleEditJob(job: Job): void {
+    startEdit(job)
   }
 
-  function removeJob(id: string): void {
-    setJobs((current) => current.filter((job) => job.id !== id))
+  function handleRemoveJob(id: string): void {
+    setJobs((current) => jobService.deleteJob(current, id))
     if (editingId === id) {
       resetForm()
     }
@@ -271,18 +214,8 @@ function App() {
     }
   }
 
-  function quickMove(id: string, nextStatus: JobStatus): void {
-    setJobs((current) =>
-      current.map((job) =>
-        job.id === id
-          ? {
-              ...job,
-              status: nextStatus,
-              updatedAt: new Date().toISOString(),
-            }
-          : job,
-      ),
-    )
+  function handleQuickMove(id: string, nextStatus: JobStatus): void {
+    setJobs((current) => jobService.updateJobStatus(current, id, nextStatus))
   }
 
   function addNotification(
@@ -335,11 +268,9 @@ function App() {
   function bulkDeleteSelected(): void {
     if (selectedVisibleIds.length === 0) return
 
-    const visibleSet = new Set(selectedVisibleIds)
-    const newJobs = jobs.filter((job) => !visibleSet.has(job.id))
     const hiddenSelectedCount = selectedIds.size - selectedVisibleIds.length
     setUndoStack((current) => [...current, jobs])
-    setJobs(newJobs)
+    setJobs((current) => jobService.deleteJobs(current, selectedVisibleIds))
     setSelectedIds((current) => {
       const next = new Set(current)
       for (const id of selectedVisibleIds) {
@@ -525,7 +456,7 @@ function App() {
               )}
             </div>
           </div>
-          <form onSubmit={submitJob} className="job-form">
+          <form onSubmit={handleSubmitJob} className="job-form">
             <label>
               Company *
               <input
@@ -743,9 +674,9 @@ function App() {
               onToggleSelection={toggleJobSelection}
               onToggleSelectAll={toggleSelectAllVisible}
               onBulkDelete={bulkDeleteSelected}
-              onQuickMove={quickMove}
-              onEdit={editJob}
-              onRemove={removeJob}
+              onQuickMove={handleQuickMove}
+              onEdit={handleEditJob}
+              onRemove={handleRemoveJob}
               onView={openViewOnly}
               onPageChange={setCurrentPage}
               onPageSizeChange={setPageSize}
@@ -756,9 +687,9 @@ function App() {
           {view === 'kanban' && (
             <KanbanBoard
               jobs={byStatus}
-              onStatusChange={quickMove}
-              onEdit={editJob}
-              onDelete={removeJob}
+              onStatusChange={handleQuickMove}
+              onEdit={handleEditJob}
+              onDelete={handleRemoveJob}
             />
           )}
 
