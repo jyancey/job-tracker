@@ -9,8 +9,8 @@ import http from 'http'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { createJobStore } from './sqliteStore.js'
-import { handleJobsApi } from './jobsApi.js'
+import { createJobStore } from './backend/sqliteStore.js'
+import { handleJobsApi } from './backend/jobsApi.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PORT = process.env.PORT || 3100
