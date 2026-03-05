@@ -8,6 +8,7 @@ import {
   type JobDraft,
   type JobStatus,
 } from './domain'
+import { KanbanBoard } from './KanbanBoard'
 import { downloadStorageLogs, loadJobs, saveJobs } from './storage'
 import { ToastContainer } from './Toast'
 import { createNotification, type Notification } from './notifications'
@@ -1027,52 +1028,12 @@ function App() {
           )}
 
           {view === 'kanban' && (
-            <div className="kanban-grid">
-              {JOB_STATUSES.map((status) => {
-                const jobsForStatus = byStatus.get(status) ?? []
-                return (
-                  <article key={status} className="kanban-column">
-                    <header>
-                      <h3>{status}</h3>
-                      <span>{jobsForStatus.length}</span>
-                    </header>
-                    {jobsForStatus.map((job) => (
-                      <div key={job.id} className="kanban-card">
-                        <strong>{job.company}</strong>
-                        <p>{job.roleTitle}</p>
-                        <select
-                          value={job.status}
-                          onChange={(event) => quickMove(job.id, event.target.value as JobStatus)}
-                        >
-                          {JOB_STATUSES.map((nextStatus) => (
-                            <option key={nextStatus} value={nextStatus}>
-                              {nextStatus}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="kanban-actions">
-                          <button
-                            type="button"
-                            className="small"
-                            onClick={() => editJob(job)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            className="small ghost"
-                            onClick={() => removeJob(job.id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                    {!jobsForStatus.length && <p className="empty">No items</p>}
-                  </article>
-                )
-              })}
-            </div>
+            <KanbanBoard
+              jobs={byStatus}
+              onStatusChange={quickMove}
+              onEdit={editJob}
+              onDelete={removeJob}
+            />
           )}
 
           {view === 'calendar' && (
