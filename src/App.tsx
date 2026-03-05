@@ -7,8 +7,8 @@ import {
 import { KanbanBoard } from './KanbanBoard'
 import { downloadStorageLogs, loadJobs, saveJobs } from './storage'
 import { ToastContainer } from './Toast'
+import { downloadFile } from './utils/downloadUtils'
 import {
-  downloadFile,
   exportToCsv,
   exportToJson,
   importJobsFromFile,

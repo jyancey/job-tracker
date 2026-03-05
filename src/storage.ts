@@ -1,4 +1,5 @@
 import type { Job } from './domain'
+import { downloadTextFile } from './utils/downloadUtils'
 
 const API_JOBS_ENDPOINT = '/api/jobs'
 const STORAGE_LOG_BUFFER_KEY = 'job-tracker.storage.logs'
@@ -82,18 +83,10 @@ export function downloadStorageLogs(filename = 'job-tracker-storage.log'): void 
     return
   }
 
-  const blob = new Blob([content], { type: 'text/plain' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  downloadTextFile(content, filename)
 }
 
-export type LoadJobsResult = {
+export interface LoadJobsResult {
   jobs: Job[]
   didLoad: boolean
 }

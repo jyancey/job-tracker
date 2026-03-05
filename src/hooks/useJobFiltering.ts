@@ -1,32 +1,12 @@
 import { useMemo } from 'react'
-import type { Job, JobStatus } from '../domain'
+import type { Job } from '../domain'
 import { isOverdueFollowUp, compareDates, getTodayString } from '../utils/dateUtils'
 import { compareStrings } from '../utils/stringUtils'
 import { parseSalaryRange } from '../utils/salaryUtils'
+import type { FilterOptions, SortOptions, PaginationOptions } from '../types/filters'
 
-export type StatusFilter = 'All' | JobStatus | 'Overdue Follow-ups'
-export type SortColumn = 'company' | 'roleTitle' | 'status' | 'applicationDate' | 'nextActionDueDate'
-export type SortDirection = 'asc' | 'desc'
-
-export interface FilterOptions {
-  query: string
-  statusFilter: StatusFilter
-  dateRangeStart: string
-  dateRangeEnd: string
-  salaryRangeMin: string
-  salaryRangeMax: string
-  contactPersonFilter: string
-}
-
-export interface SortOptions {
-  sortColumn: SortColumn
-  sortDirection: SortDirection
-}
-
-export interface PaginationOptions {
-  currentPage: number
-  pageSize: number
-}
+// Re-export types from centralized location for backward compatibility
+export type { StatusFilter, SortColumn, SortDirection, FilterOptions, SortOptions, PaginationOptions } from '../types/filters'
 
 export function useJobFiltering(jobs: Job[], filterOptions: FilterOptions) {
   const filteredJobs = useMemo(() => {
