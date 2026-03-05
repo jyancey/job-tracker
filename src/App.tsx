@@ -21,11 +21,23 @@ import {
   type ImportMode,
 } from './exportImport'
 import { APP_VERSION } from './version'
+import { formatDate, isOverdueFollowUp, getTodayString } from './utils/dateUtils'
+import { normalizeUrl } from './utils/stringUtils'
+import { parseSalaryRange } from './utils/salaryUtils'
+import {
+  useJobFiltering,
+  useJobSorting,
+  useJobPagination,
+  type StatusFilter,
+  type SortColumn,
+  type SortDirection,
+} from './hooks/useJobFiltering'
+import { useJobGrouping } from './hooks/useJobGrouping'
+import { TableView } from './views/TableView'
+import { CalendarView } from './views/CalendarView'
+import { DashboardView } from './views/DashboardView'
 
 type View = 'table' | 'kanban' | 'calendar' | 'dashboard'
-type StatusFilter = 'All' | JobStatus | 'Overdue Follow-ups'
-type SortColumn = 'company' | 'roleTitle' | 'status' | 'applicationDate' | 'nextActionDueDate'
-type SortDirection = 'asc' | 'desc'
 
 const VIEW_LABELS: Record<View, string> = {
   table: 'All Jobs',
@@ -36,48 +48,6 @@ const VIEW_LABELS: Record<View, string> = {
 
 function sortByApplicationDateDesc(a: Job, b: Job): number {
   return b.applicationDate.localeCompare(a.applicationDate)
-}
-
-function formatDate(value: string): string {
-  if (!value) {
-    return '-'
-  }
-
-  return new Date(value).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
-
-function normalizeUrl(url: string): string {
-  if (!url.trim()) {
-    return ''
-  }
-
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url.trim()
-  }
-
-  return `https://${url.trim()}`
-}
-
-function isOverdueFollowUp(job: Job, today: string): boolean {
-  return Boolean(job.nextActionDueDate && job.nextActionDueDate < today)
-}
-
-function compareStrings(a: string, b: string, direction: SortDirection): number {
-  const left = a.toLowerCase()
-  const right = b.toLowerCase()
-  return direction === 'asc' ? left.localeCompare(right) : right.localeCompare(left)
-}
-
-function compareDates(a: string, b: string, direction: SortDirection): number {
-  const emptyFallbackAsc = '9999-12-31'
-  const emptyFallbackDesc = '0000-01-01'
-  const left = a || (direction === 'asc' ? emptyFallbackAsc : emptyFallbackDesc)
-  const right = b || (direction === 'asc' ? emptyFallbackAsc : emptyFallbackDesc)
-  return direction === 'asc' ? left.localeCompare(right) : right.localeCompare(left)
 }
 
 function App() {
@@ -170,76 +140,35 @@ function App() {
     }
   }, [jobs, isStorageHydrated])
 
-  const filteredJobs = useMemo(() => {
-    const lowerQuery = query.toLowerCase().trim()
-    const today = new Date().toISOString().slice(0, 10)
+  // Use filtering hooks
+  const { filteredJobs, overdueCount } = useJobFiltering(jobs, {
+    query,
+    statusFilter,
+    dateRangeStart,
+    dateRangeEnd,
+    salaryRangeMin,
+    salaryRangeMax,
+    contactPersonFilter,
+  })
 
-    return jobs.filter((job) => {
-      const matchesStatus =
-        statusFilter === 'All'
-          ? true
-          : statusFilter === 'Overdue Follow-ups'
-            ? isOverdueFollowUp(job, today)
-            : job.status === statusFilter
-      const matchesQuery =
-        !lowerQuery ||
-        job.company.toLowerCase().includes(lowerQuery) ||
-        job.roleTitle.toLowerCase().includes(lowerQuery) ||
-        job.notes.toLowerCase().includes(lowerQuery)
-      const matchesDateRange =
-        (!dateRangeStart || job.applicationDate >= dateRangeStart) &&
-        (!dateRangeEnd || job.applicationDate <= dateRangeEnd)
-      const matchesSalaryRange = !salaryRangeMin && !salaryRangeMax ? true : parseSalaryRange(job.salaryRange, salaryRangeMin, salaryRangeMax)
-      const matchesContactPerson =
-        !contactPersonFilter || job.contactPerson.toLowerCase().includes(contactPersonFilter.toLowerCase())
+  // Use sorting hook
+  const sortedTableJobs = useJobSorting(filteredJobs, {
+    sortColumn,
+    sortDirection,
+  })
 
-      return matchesStatus && matchesQuery && matchesDateRange && matchesSalaryRange && matchesContactPerson
-    })
-  }, [jobs, query, statusFilter, dateRangeStart, dateRangeEnd, salaryRangeMin, salaryRangeMax, contactPersonFilter])
+  // Use pagination hook
+  const { paginatedJobs: paginatedTableJobs, totalPages } = useJobPagination(sortedTableJobs, {
+    currentPage,
+    pageSize,
+  })
 
-  const overdueCount = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10)
-    return jobs.filter((job) => job.nextActionDueDate && job.nextActionDueDate < today).length
-  }, [jobs])
-
-  const sortedTableJobs = useMemo(() => {
-    const sorted = [...filteredJobs]
-
-    sorted.sort((a, b) => {
-      if (sortColumn === 'applicationDate') {
-        return compareDates(a.applicationDate, b.applicationDate, sortDirection)
-      }
-      if (sortColumn === 'nextActionDueDate') {
-        return compareDates(a.nextActionDueDate, b.nextActionDueDate, sortDirection)
-      }
-      if (sortColumn === 'company') {
-        return compareStrings(a.company, b.company, sortDirection)
-      }
-      if (sortColumn === 'roleTitle') {
-        return compareStrings(a.roleTitle, b.roleTitle, sortDirection)
-      }
-      return compareStrings(a.status, b.status, sortDirection)
-    })
-
-    return sorted
-  }, [filteredJobs, sortColumn, sortDirection])
-
-  const totalPages = useMemo(() => {
-    if (!sortedTableJobs.length) {
-      return 1
-    }
-
-    return Math.ceil(sortedTableJobs.length / pageSize)
-  }, [sortedTableJobs.length, pageSize])
+  // Use grouping hooks
+  const { byStatus, dueByDate } = useJobGrouping(jobs)
 
   useEffect(() => {
     setCurrentPage((current) => Math.min(current, totalPages))
   }, [totalPages])
-
-  const paginatedTableJobs = useMemo(() => {
-    const start = (currentPage - 1) * pageSize
-    return sortedTableJobs.slice(start, start + pageSize)
-  }, [sortedTableJobs, currentPage, pageSize])
 
   const visibleTableIds = useMemo(() => paginatedTableJobs.map((job) => job.id), [paginatedTableJobs])
   const selectedVisibleIds = useMemo(
@@ -262,37 +191,6 @@ function App() {
   useEffect(() => {
     setCurrentPage(1)
   }, [query, statusFilter, dateRangeStart, dateRangeEnd, salaryRangeMin, salaryRangeMax, contactPersonFilter])
-
-  const byStatus = useMemo(() => {
-    const grouped = new Map<JobStatus, Job[]>()
-    for (const status of JOB_STATUSES) {
-      grouped.set(status, [])
-    }
-
-    for (const job of jobs) {
-      grouped.get(job.status)?.push(job)
-    }
-
-    return grouped
-  }, [jobs])
-
-  const dueByDate = useMemo(() => {
-    const grouped = new Map<string, Job[]>()
-
-    for (const job of jobs) {
-      if (!job.nextActionDueDate) {
-        continue
-      }
-
-      if (!grouped.has(job.nextActionDueDate)) {
-        grouped.set(job.nextActionDueDate, [])
-      }
-
-      grouped.get(job.nextActionDueDate)?.push(job)
-    }
-
-    return [...grouped.entries()].sort(([a], [b]) => a.localeCompare(b))
-  }, [jobs])
 
   function updateDraft<K extends keyof JobDraft>(key: K, value: JobDraft[K]): void {
     setDraft((current) => ({
@@ -398,20 +296,6 @@ function App() {
 
   function removeNotification(id: string): void {
     setNotifications((current) => current.filter((n) => n.id !== id))
-  }
-
-  function parseSalaryRange(salaryRange: string, minStr: string, maxStr: string): boolean {
-    if (!minStr && !maxStr) return true
-    if (!salaryRange) return false
-
-    const numbers = salaryRange.match(/\d+/g) || []
-    if (!numbers.length) return false
-
-    const first = parseInt(numbers[0]!, 10)
-    const min = minStr ? parseInt(minStr, 10) : 0
-    const max = maxStr ? parseInt(maxStr, 10) : Infinity
-
-    return first >= min && first <= max
   }
 
   function toggleJobSelection(id: string): void {
@@ -562,14 +446,6 @@ function App() {
 
     setSortColumn(column)
     setSortDirection(column === 'applicationDate' || column === 'nextActionDueDate' ? 'desc' : 'asc')
-  }
-
-  function sortMarker(column: SortColumn): string {
-    if (sortColumn !== column) {
-      return ''
-    }
-
-    return sortDirection === 'asc' ? '↑' : '↓'
   }
 
   return (
@@ -851,180 +727,30 @@ function App() {
           )}
 
           {view === 'table' && (
-            <div className="table-wrap">
-              {selectedIds.size > 0 && (
-                <div className="bulk-actions">
-                  <span>
-                    {selectedVisibleCount} selected on page
-                    {selectedIds.size > selectedVisibleCount
-                      ? ` (${selectedIds.size - selectedVisibleCount} selected on other pages/filters)`
-                      : ''}
-                  </span>
-                  <button
-                    type="button"
-                    className="danger"
-                    onClick={bulkDeleteSelected}
-                    disabled={selectedVisibleCount === 0}
-                  >
-                    Delete Selected on Page
-                  </button>
-                </div>
-              )}
-              <table>
-                <thead>
-                  <tr>
-                    <th style={{ width: '40px' }}>
-                      <input
-                        ref={selectAllCheckboxRef}
-                        type="checkbox"
-                        checked={allVisibleSelected}
-                        onChange={toggleSelectAllVisible}
-                        aria-label="Select all visible jobs"
-                      />
-                    </th>
-                    <th className="sortable-header">
-                      <button type="button" onClick={() => handleSort('company')}>
-                        Company {sortMarker('company')}
-                      </button>
-                    </th>
-                    <th className="sortable-header">
-                      <button type="button" onClick={() => handleSort('roleTitle')}>
-                        Role {sortMarker('roleTitle')}
-                      </button>
-                    </th>
-                    <th className="sortable-header">
-                      <button type="button" onClick={() => handleSort('status')}>
-                        Status {sortMarker('status')}
-                      </button>
-                    </th>
-                    <th className="sortable-header">
-                      <button type="button" onClick={() => handleSort('applicationDate')}>
-                        Applied {sortMarker('applicationDate')}
-                      </button>
-                    </th>
-                    <th className="sortable-header">
-                      <button type="button" onClick={() => handleSort('nextActionDueDate')}>
-                        Next Action {sortMarker('nextActionDueDate')}
-                      </button>
-                    </th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedTableJobs.map((job) => (
-                    <tr
-                      key={job.id}
-                      className={isOverdueFollowUp(job, new Date().toISOString().slice(0, 10)) ? 'row-overdue' : ''}
-                      onClick={() => openViewOnly(job)}
-                    >
-                      <td>
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.has(job.id)}
-                          onClick={(event) => event.stopPropagation()}
-                          onChange={() => toggleJobSelection(job.id)}
-                        />
-                      </td>
-                      <td>{job.company}</td>
-                      <td>{job.roleTitle}</td>
-                      <td>
-                        <select
-                          className="quick-status"
-                          value={job.status}
-                          onClick={(event) => event.stopPropagation()}
-                          onChange={(event) => quickMove(job.id, event.target.value as JobStatus)}
-                        >
-                          {JOB_STATUSES.map((status) => (
-                            <option key={status} value={status}>
-                              {status}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td>{formatDate(job.applicationDate)}</td>
-                      <td>
-                        {job.nextAction || '-'}
-                        {job.nextActionDueDate ? ` (${formatDate(job.nextActionDueDate)})` : ''}
-                        {isOverdueFollowUp(job, new Date().toISOString().slice(0, 10)) && (
-                          <span className="overdue-flag">Overdue</span>
-                        )}
-                      </td>
-                      <td className="action-row">
-                        <button
-                          type="button"
-                          className="ghost"
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            openViewOnly(job)
-                          }}
-                        >
-                          View
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            editJob(job)
-                          }}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          className="ghost"
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            removeJob(job.id)
-                          }}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {sortedTableJobs.length > 0 && (
-                <div className="pagination">
-                  <span>
-                    Page {currentPage} of {totalPages} ({sortedTableJobs.length} results)
-                  </span>
-                  <div className="pagination-actions">
-                    <button
-                      type="button"
-                      className="small ghost"
-                      onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-                      disabled={currentPage === 1}
-                    >
-                      Previous
-                    </button>
-                    <button
-                      type="button"
-                      className="small ghost"
-                      onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
-                    </button>
-                    <label className="page-size-control">
-                      Rows
-                      <select
-                        value={pageSize}
-                        onChange={(event) => {
-                          setPageSize(Number(event.target.value))
-                          setCurrentPage(1)
-                        }}
-                      >
-                        <option value={5}>5</option>
-                        <option value={10}>10</option>
-                        <option value={20}>20</option>
-                      </select>
-                    </label>
-                  </div>
-                </div>
-              )}
-              {!filteredJobs.length && <p className="empty">No jobs match current filters.</p>}
-            </div>
+            <TableView
+              paginatedJobs={paginatedTableJobs}
+              sortedJobs={sortedTableJobs}
+              selectedIds={selectedIds}
+              selectedVisibleCount={selectedVisibleCount}
+              allVisibleSelected={allVisibleSelected}
+              someVisibleSelected={someVisibleSelected}
+              sortColumn={sortColumn}
+              sortDirection={sortDirection}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              onSort={handleSort}
+              onToggleSelection={toggleJobSelection}
+              onToggleSelectAll={toggleSelectAllVisible}
+              onBulkDelete={bulkDeleteSelected}
+              onQuickMove={quickMove}
+              onEdit={editJob}
+              onRemove={removeJob}
+              onView={openViewOnly}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              selectAllCheckboxRef={selectAllCheckboxRef}
+            />
           )}
 
           {view === 'kanban' && (
@@ -1036,34 +762,9 @@ function App() {
             />
           )}
 
-          {view === 'calendar' && (
-            <div className="calendar-list">
-              {dueByDate.map(([date, entries]) => (
-                <article key={date} className="calendar-row">
-                  <h3>{formatDate(date)}</h3>
-                  {entries.map((job) => (
-                    <div key={job.id} className="calendar-item">
-                      <strong>{job.company}</strong>
-                      <span>{job.roleTitle}</span>
-                      <small>{job.nextAction || 'Follow up'}</small>
-                    </div>
-                  ))}
-                </article>
-              ))}
-              {!dueByDate.length && <p className="empty">No scheduled follow-ups yet.</p>}
-            </div>
-          )}
+          {view === 'calendar' && <CalendarView dueByDate={dueByDate} />}
 
-          {view === 'dashboard' && (
-            <div className="dashboard-grid">
-              {JOB_STATUSES.map((status) => (
-                <article key={status}>
-                  <h3>{status}</h3>
-                  <strong>{byStatus.get(status)?.length ?? 0}</strong>
-                </article>
-              ))}
-            </div>
-          )}
+          {view === 'dashboard' && <DashboardView byStatus={byStatus} />}
         </section>
       </main>
 
