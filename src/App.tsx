@@ -40,15 +40,15 @@ import * as jobService from './services/jobService'
 type View = 'table' | 'kanban' | 'calendar' | 'dashboard'
 
 const VIEW_LABELS: Record<View, string> = {
-  table: 'All Jobs',
+  dashboard: 'Dashboard',
   kanban: 'Kanban',
   calendar: 'Calendar',
-  dashboard: 'Dashboard',
+  table: 'All Jobs',
 }
 
 function App() {
   const [jobs, setJobs] = useState<Job[]>([])
-  const [view, setView] = useState<View>('table')
+  const [view, setView] = useState<View>('dashboard')
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All')
   const [viewingJob, setViewingJob] = useState<Job | null>(null)
