@@ -8,7 +8,6 @@ import {
 import { KanbanBoard } from './KanbanBoard'
 import { downloadStorageLogs, loadJobs, saveJobs } from './storage'
 import { ToastContainer } from './Toast'
-import { createNotification, type Notification } from './notifications'
 import {
   downloadFile,
   exportToCsv,
@@ -29,9 +28,13 @@ import {
 } from './hooks/useJobFiltering'
 import { useJobGrouping } from './hooks/useJobGrouping'
 import { useJobForm } from './hooks/useJobForm'
+import { useNotifications } from './hooks/useNotifications'
 import { TableView } from './views/TableView'
 import { CalendarView } from './views/CalendarView'
 import { DashboardView } from './views/DashboardView'
+import { JobForm } from './components/JobForm'
+import { JobModal } from './components/JobModal'
+import { FilterToolbar } from './components/FilterToolbar'
 import * as jobService from './services/jobService'
 
 type View = 'table' | 'kanban' | 'calendar' | 'dashboard'
@@ -50,7 +53,7 @@ function App() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All')
   const [viewingJob, setViewingJob] = useState<Job | null>(null)
   const [isStorageHydrated, setIsStorageHydrated] = useState(false)
-  const [notifications, setNotifications] = useState<Notification[]>([])
+
   const [saveStatus, setSaveStatus] = useState<'idle' | 'pending'>('idle')
   const [undoStack, setUndoStack] = useState<Job[][]>([])
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -69,8 +72,12 @@ function App() {
   const selectAllCheckboxRef = useRef<HTMLInputElement>(null)
   const saveRequestIdRef = useRef(0)
 
+  // Use notifications hook
+  const { notifications, addNotification, removeNotification } = useNotifications()
+
   // Use job form hook
-  const { draft, editingId, isEditing, updateDraft, resetForm, startEdit, submitForm, isValid } = useJobForm()
+  const { draft, editingId, draftExists, updateDraft, resetForm, startEdit, submitForm } =
+    useJobForm(setJobs, addNotification)
 
   useEffect(() => {
     let isDisposed = false
@@ -216,19 +223,6 @@ function App() {
 
   function handleQuickMove(id: string, nextStatus: JobStatus): void {
     setJobs((current) => jobService.updateJobStatus(current, id, nextStatus))
-  }
-
-  function addNotification(
-    message: string,
-    type: 'success' | 'error' | 'info' = 'info',
-    duration?: number,
-  ): void {
-    const notification = createNotification(message, type, duration)
-    setNotifications((current) => [...current, notification])
-  }
-
-  function removeNotification(id: string): void {
-    setNotifications((current) => current.filter((n) => n.id !== id))
   }
 
   function toggleJobSelection(id: string): void {
@@ -456,113 +450,13 @@ function App() {
               )}
             </div>
           </div>
-          <form onSubmit={handleSubmitJob} className="job-form">
-            <label>
-              Company *
-              <input
-                value={draft.company}
-                onChange={(event) => updateDraft('company', event.target.value)}
-                required
-                placeholder="Acme Labs"
-              />
-            </label>
-            <label>
-              Role Title *
-              <input
-                value={draft.roleTitle}
-                onChange={(event) => updateDraft('roleTitle', event.target.value)}
-                required
-                placeholder="Product Designer"
-              />
-            </label>
-            <label>
-              Application Date *
-              <input
-                type="date"
-                value={draft.applicationDate}
-                onChange={(event) => updateDraft('applicationDate', event.target.value)}
-                required
-              />
-            </label>
-            <label>
-              Status
-              <select
-                value={draft.status}
-                onChange={(event) => updateDraft('status', event.target.value as JobStatus)}
-              >
-                {JOB_STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Job URL
-              <input
-                value={draft.jobUrl}
-                onChange={(event) => updateDraft('jobUrl', event.target.value)}
-                placeholder="https://company.com/jobs/123"
-              />
-            </label>
-            <label>
-              ATS URL
-              <input
-                value={draft.atsUrl}
-                onChange={(event) => updateDraft('atsUrl', event.target.value)}
-                placeholder="https://greenhouse.io/..."
-              />
-            </label>
-            <label>
-              Salary Range
-              <input
-                value={draft.salaryRange}
-                onChange={(event) => updateDraft('salaryRange', event.target.value)}
-                placeholder="$130k - $150k"
-              />
-            </label>
-            <label>
-              Contact Person
-              <input
-                value={draft.contactPerson}
-                onChange={(event) => updateDraft('contactPerson', event.target.value)}
-                placeholder="Taylor Singh"
-              />
-            </label>
-            <label>
-              Next Action
-              <input
-                value={draft.nextAction}
-                onChange={(event) => updateDraft('nextAction', event.target.value)}
-                placeholder="Send follow-up email"
-              />
-            </label>
-            <label>
-              Next Action Due
-              <input
-                type="date"
-                value={draft.nextActionDueDate}
-                onChange={(event) => updateDraft('nextActionDueDate', event.target.value)}
-              />
-            </label>
-            <label className="full-width">
-              Notes
-              <textarea
-                value={draft.notes}
-                onChange={(event) => updateDraft('notes', event.target.value)}
-                placeholder="Networking context, interview prep notes, or recruiter details."
-                rows={4}
-              />
-            </label>
-            <div className="form-actions full-width">
-              <button type="submit">{editingId ? 'Save Changes' : 'Add Job'}</button>
-              {editingId && (
-                <button type="button" className="ghost" onClick={resetForm}>
-                  Cancel Edit
-                </button>
-              )}
-            </div>
-          </form>
+          <JobForm
+            draft={draft}
+            editingId={editingId}
+            onUpdateDraft={updateDraft}
+            onSubmit={handleSubmitJob}
+            onCancel={resetForm}
+          />
         </section>
       </section>
 
@@ -581,81 +475,26 @@ function App() {
                 </button>
               ))}
             </div>
-            <div className="quick-filters">
-              <select
-                value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
-              >
-                <option value="All">All statuses</option>
-                <option value="Overdue Follow-ups">Overdue Follow-ups</option>
-                {JOB_STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="button"
-                className="small ghost"
-                onClick={() => setShowAdvancedFilters((current) => !current)}
-              >
-                {showAdvancedFilters ? 'Hide Filters' : 'More Filters'}
-              </button>
-              {statusFilter === 'Overdue Follow-ups' && (
-                <button
-                  type="button"
-                  className="small ghost"
-                  onClick={() => setStatusFilter('All')}
-                >
-                  Clear Overdue Filter
-                </button>
-              )}
-            </div>
+            <FilterToolbar
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+              showAdvancedFilters={showAdvancedFilters}
+              onToggleAdvancedFilters={() => setShowAdvancedFilters((current) => !current)}
+              query={query}
+              onQueryChange={setQuery}
+              dateRangeStart={dateRangeStart}
+              onDateRangeStartChange={setDateRangeStart}
+              dateRangeEnd={dateRangeEnd}
+              onDateRangeEndChange={setDateRangeEnd}
+              salaryRangeMin={salaryRangeMin}
+              onSalaryRangeMinChange={setSalaryRangeMin}
+              salaryRangeMax={salaryRangeMax}
+              onSalaryRangeMaxChange={setSalaryRangeMax}
+              contactPersonFilter={contactPersonFilter}
+              onContactPersonFilterChange={setContactPersonFilter}
+              onClearAdvancedFilters={clearAdvancedFilters}
+            />
           </div>
-
-          {showAdvancedFilters && (
-            <div className="advanced-filters">
-              <input
-                placeholder="Search company, role, or notes"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-              <input
-                type="date"
-                placeholder="From"
-                value={dateRangeStart}
-                onChange={(event) => setDateRangeStart(event.target.value)}
-                title="Application date from"
-              />
-              <input
-                type="date"
-                placeholder="To"
-                value={dateRangeEnd}
-                onChange={(event) => setDateRangeEnd(event.target.value)}
-                title="Application date to"
-              />
-              <input
-                type="number"
-                placeholder="Min salary"
-                value={salaryRangeMin}
-                onChange={(event) => setSalaryRangeMin(event.target.value)}
-              />
-              <input
-                type="number"
-                placeholder="Max salary"
-                value={salaryRangeMax}
-                onChange={(event) => setSalaryRangeMax(event.target.value)}
-              />
-              <input
-                placeholder="Contact person"
-                value={contactPersonFilter}
-                onChange={(event) => setContactPersonFilter(event.target.value)}
-              />
-              <button type="button" className="small ghost" onClick={clearAdvancedFilters}>
-                Clear Advanced
-              </button>
-            </div>
-          )}
 
           {view === 'table' && (
             <TableView
@@ -699,66 +538,7 @@ function App() {
         </section>
       </main>
 
-      {viewingJob && (
-        <div className="job-modal-backdrop" onClick={closeViewOnly}>
-          <section className="job-modal" onClick={(event) => event.stopPropagation()}>
-            <header className="job-modal-header">
-              <div>
-                <h3>{viewingJob.roleTitle}</h3>
-                <p>{viewingJob.company}</p>
-              </div>
-              <button type="button" className="ghost" onClick={closeViewOnly}>
-                Close
-              </button>
-            </header>
-
-            <div className="job-modal-grid">
-              <article>
-                <span>Status</span>
-                <strong>{viewingJob.status}</strong>
-              </article>
-              <article>
-                <span>Applied</span>
-                <strong>{formatDate(viewingJob.applicationDate)}</strong>
-              </article>
-              <article>
-                <span>Salary</span>
-                <strong>{viewingJob.salaryRange || '-'}</strong>
-              </article>
-              <article>
-                <span>Contact</span>
-                <strong>{viewingJob.contactPerson || '-'}</strong>
-              </article>
-              <article>
-                <span>Next Action</span>
-                <strong>{viewingJob.nextAction || '-'}</strong>
-              </article>
-              <article>
-                <span>Next Action Due</span>
-                <strong>{formatDate(viewingJob.nextActionDueDate)}</strong>
-              </article>
-            </div>
-
-            <div className="job-modal-links">
-              {viewingJob.jobUrl && (
-                <a href={viewingJob.jobUrl} target="_blank" rel="noreferrer">
-                  Job Posting
-                </a>
-              )}
-              {viewingJob.atsUrl && (
-                <a href={viewingJob.atsUrl} target="_blank" rel="noreferrer">
-                  ATS Link
-                </a>
-              )}
-            </div>
-
-            <div className="job-modal-notes">
-              <h4>Notes</h4>
-              <p>{viewingJob.notes || 'No notes added.'}</p>
-            </div>
-          </section>
-        </div>
-      )}
+      {viewingJob && <JobModal job={viewingJob} onClose={closeViewOnly} />}
 
       <footer className="app-footer">
         <span>Job Tracker {APP_VERSION}</span>
