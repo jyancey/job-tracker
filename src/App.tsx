@@ -4,9 +4,9 @@ import {
   type Job,
   type JobStatus,
 } from './domain'
-import { KanbanBoard } from './KanbanBoard'
+import { KanbanBoard } from './components/KanbanBoard'
 import { downloadStorageLogs, loadJobs, saveJobs } from './storage'
-import { ToastContainer } from './Toast'
+import { ToastContainer } from './components/Toast'
 import { downloadFile } from './utils/downloadUtils'
 import {
   exportToCsv,

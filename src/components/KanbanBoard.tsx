@@ -1,4 +1,4 @@
-import { JOB_STATUSES, type Job, type JobStatus } from './domain'
+import { JOB_STATUSES, type Job, type JobStatus } from '../domain'
 import { KanbanColumn } from './KanbanColumn'
 
 interface KanbanBoardProps {

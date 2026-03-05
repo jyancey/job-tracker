@@ -1,7 +1,7 @@
-import { type Job, type JobStatus } from './domain'
-import { StatusSelect } from './components/StatusSelect'
-import { createButtonKbdProps, stopPropagation } from './utils/a11yUtils'
-import { setJobDragData } from './utils/dragDataUtils'
+import { type Job, type JobStatus } from '../domain'
+import { StatusSelect } from './StatusSelect'
+import { createButtonKbdProps, stopPropagation } from '../utils/a11yUtils'
+import { setJobDragData } from '../utils/dragDataUtils'
 
 interface KanbanCardProps {
   job: Job

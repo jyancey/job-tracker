@@ -1,6 +1,6 @@
-import { type Job, type JobStatus } from './domain'
+import { type Job, type JobStatus } from '../domain'
 import { KanbanCard } from './KanbanCard'
-import { useDragDropZone } from './hooks/useDragDropZone'
+import { useDragDropZone } from '../hooks/useDragDropZone'
 
 interface KanbanColumnProps {
   status: JobStatus
