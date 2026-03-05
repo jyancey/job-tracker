@@ -1,11 +1,19 @@
 import type { Job } from '../domain'
 
+/**
+ * Format a YYYY-MM-DD date string for display
+ * Parses as local date to avoid timezone offset issues
+ */
 export function formatDate(value: string): string {
   if (!value) {
     return '-'
   }
 
-  return new Date(value).toLocaleDateString(undefined, {
+  // Parse YYYY-MM-DD as local date to avoid UTC timezone shift
+  const [year, month, day] = value.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  
+  return date.toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
