@@ -50,6 +50,11 @@ function metricValue(label: string): string {
   return within(card).getByText(/\d+/).textContent ?? ''
 }
 
+async function openAllJobsView(): Promise<void> {
+  const user = userEvent.setup()
+  await user.click(screen.getByRole('button', { name: 'All Jobs' }))
+}
+
 function storedJob(input: {
   id: string
   company: string
@@ -106,6 +111,8 @@ describe('App', () => {
       nextAction: 'Send recruiter follow-up',
     })
 
+    await openAllJobsView()
+
     expect(screen.getByText('Acme Labs')).toBeInTheDocument()
     expect(screen.getByText('Product Designer')).toBeInTheDocument()
     expect(metricValue('Total Jobs')).toBe('1')
@@ -129,6 +136,8 @@ describe('App', () => {
       date: '2026-03-02',
       status: 'Rejected',
     })
+
+    await openAllJobsView()
 
     await user.selectOptions(screen.getByDisplayValue('All statuses'), 'Rejected')
     expect(screen.queryByText('Northstar')).not.toBeInTheDocument()
@@ -172,6 +181,8 @@ describe('App', () => {
     render(<App />)
     const user = userEvent.setup()
 
+    await openAllJobsView()
+
     await screen.findByText('Company 12')
     await user.selectOptions(screen.getByLabelText(/rows/i), '5')
 
@@ -209,6 +220,8 @@ describe('App', () => {
 
     render(<App />)
     const user = userEvent.setup()
+
+    await openAllJobsView()
 
     await screen.findByText('Visible Rejected')
     const rejectedRow = screen.getByText('Visible Rejected').closest('tr')
