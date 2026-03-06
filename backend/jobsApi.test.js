@@ -6,6 +6,20 @@ function createMockStore() {
     dbPath: '/fake/path/job-tracker.sqlite',
     listJobs: vi.fn(() => []),
     replaceAllJobs: vi.fn(),
+    getDatabaseInfo: vi.fn(() => ({
+      provider: 'sqlite',
+      dbPath: '/fake/path/job-tracker.sqlite',
+      exists: true,
+    })),
+    createDatabase: vi.fn(() => ({
+      created: false,
+      dbPath: '/fake/path/job-tracker.sqlite',
+      exists: true,
+    })),
+    testConnection: vi.fn(() => ({
+      ok: true,
+      dbPath: '/fake/path/job-tracker.sqlite',
+    })),
     close: vi.fn(),
   }
 }
@@ -195,5 +209,47 @@ describe('jobsApi', () => {
 
     expect(handled).toBe(true)
     expect(res.writeHead).toHaveBeenCalledWith(400, expect.anything())
+  })
+
+  test('GET /api/database/info returns database metadata', async () => {
+    const req = createMockRequest('GET', '/api/database/info')
+    const res = createMockResponse()
+
+    const handled = await handleJobsApi(req, res, mockStore)
+
+    expect(handled).toBe(true)
+    expect(mockStore.getDatabaseInfo).toHaveBeenCalledTimes(1)
+    expect(res.writeHead).toHaveBeenCalledWith(200, expect.anything())
+
+    const endCall = res.end.mock.calls[0]?.[0]
+    const response = JSON.parse(endCall)
+    expect(response.provider).toBe('sqlite')
+    expect(response.exists).toBe(true)
+  })
+
+  test('POST /api/database/create triggers create operation', async () => {
+    const req = createMockRequest('POST', '/api/database/create')
+    const res = createMockResponse()
+
+    const handled = await handleJobsApi(req, res, mockStore)
+
+    expect(handled).toBe(true)
+    expect(mockStore.createDatabase).toHaveBeenCalledTimes(1)
+    expect(res.writeHead).toHaveBeenCalledWith(200, expect.anything())
+  })
+
+  test('GET /api/database/test runs connection check', async () => {
+    const req = createMockRequest('GET', '/api/database/test')
+    const res = createMockResponse()
+
+    const handled = await handleJobsApi(req, res, mockStore)
+
+    expect(handled).toBe(true)
+    expect(mockStore.testConnection).toHaveBeenCalledTimes(1)
+    expect(res.writeHead).toHaveBeenCalledWith(200, expect.anything())
+
+    const endCall = res.end.mock.calls[0]?.[0]
+    const response = JSON.parse(endCall)
+    expect(response.ok).toBe(true)
   })
 })

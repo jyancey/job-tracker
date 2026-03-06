@@ -1,6 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { AIConfig } from '../types/ai'
 import { loadAIConfig, saveAIConfig } from '../storage/aiStorage'
+import {
+  createDatabase,
+  fetchDatabaseInfo,
+  testAIEndpoint,
+  testDatabaseConnection,
+  type DatabaseInfo,
+} from '../services/settingsService'
 
 interface SettingsViewProps {
   onClose: () => void
@@ -8,8 +15,29 @@ interface SettingsViewProps {
 
 export function SettingsView({ onClose }: SettingsViewProps) {
   const [aiConfig, setAiConfig] = useState<AIConfig>(() => loadAIConfig())
+  const [databaseInfo, setDatabaseInfo] = useState<DatabaseInfo | null>(null)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+  const [databaseMessage, setDatabaseMessage] = useState('')
+  const [aiTestMessage, setAiTestMessage] = useState('')
+  const [loadingInfo, setLoadingInfo] = useState(false)
+  const [testingDatabase, setTestingDatabase] = useState(false)
+  const [testingAI, setTestingAI] = useState(false)
+  const [creatingDatabase, setCreatingDatabase] = useState(false)
+
+  useEffect(() => {
+    setLoadingInfo(true)
+    fetchDatabaseInfo()
+      .then((info) => {
+        setDatabaseInfo(info)
+      })
+      .catch((err) => {
+        setDatabaseMessage(err instanceof Error ? err.message : 'Failed to load database info')
+      })
+      .finally(() => {
+        setLoadingInfo(false)
+      })
+  }, [])
 
   const handleAIFieldChange = <K extends keyof AIConfig>(key: K, value: AIConfig[K]) => {
     setAiConfig((prev) => ({ ...prev, [key]: value }))
@@ -28,10 +56,65 @@ export function SettingsView({ onClose }: SettingsViewProps) {
     }
   }
 
+  const handleCreateDatabase = async () => {
+    setCreatingDatabase(true)
+    setDatabaseMessage('')
+
+    try {
+      const result = await createDatabase()
+      setDatabaseInfo((current) => ({
+        provider: current?.provider || 'sqlite',
+        dbPath: result.dbPath,
+        exists: result.exists,
+      }))
+      setDatabaseMessage(result.created ? 'Database file created successfully.' : 'Database already exists and is ready.')
+    } catch (err) {
+      setDatabaseMessage(err instanceof Error ? err.message : 'Failed to create database')
+    } finally {
+      setCreatingDatabase(false)
+    }
+  }
+
+  const handleTestDatabaseConnection = async () => {
+    setTestingDatabase(true)
+    setDatabaseMessage('')
+
+    try {
+      const result = await testDatabaseConnection()
+      if (result.ok) {
+        setDatabaseMessage('Database connection successful.')
+      } else {
+        setDatabaseMessage('Database connection returned an unexpected response.')
+      }
+    } catch (err) {
+      setDatabaseMessage(err instanceof Error ? err.message : 'Failed to test database connection')
+    } finally {
+      setTestingDatabase(false)
+    }
+  }
+
+  const handleTestAIConnection = async () => {
+    setTestingAI(true)
+    setAiTestMessage('')
+
+    try {
+      const result = await testAIEndpoint(aiConfig)
+      if (result.ok) {
+        setAiTestMessage(`${result.message} (${result.latencyMs} ms)`)
+      } else {
+        setAiTestMessage(`Connection failed: ${result.message}`)
+      }
+    } catch (err) {
+      setAiTestMessage(err instanceof Error ? err.message : 'Failed to test AI endpoint')
+    } finally {
+      setTestingAI(false)
+    }
+  }
+
   return (
     <div className="profile-view-container">
       <header className="profile-view-header">
-        <h1>AI Settings</h1>
+        <h1>Settings</h1>
         <button className="close-button" onClick={onClose} title="Close">
           ✕
         </button>
@@ -39,6 +122,50 @@ export function SettingsView({ onClose }: SettingsViewProps) {
 
       <div className="profile-content">
         <div className="ai-tab">
+          <div className="settings-section">
+            <h2>Database Settings</h2>
+
+            <label className="full-width">
+              Database Provider
+              <input type="text" value="SQLite" readOnly />
+            </label>
+
+            <label className="full-width">
+              API Endpoint
+              <input type="text" value="/api/jobs" readOnly />
+            </label>
+
+            <label className="full-width">
+              Database File Path
+              <input
+                type="text"
+                value={databaseInfo?.dbPath || (loadingInfo ? 'Loading...' : 'Unavailable')}
+                readOnly
+              />
+            </label>
+
+            <div className="settings-actions-row">
+              <button
+                type="button"
+                className="button-secondary"
+                onClick={handleCreateDatabase}
+                disabled={creatingDatabase}
+              >
+                {creatingDatabase ? 'Creating...' : 'Create Database'}
+              </button>
+              <button
+                type="button"
+                className="button-secondary"
+                onClick={handleTestDatabaseConnection}
+                disabled={testingDatabase}
+              >
+                {testingDatabase ? 'Testing...' : 'Test Connection'}
+              </button>
+            </div>
+
+            {databaseMessage && <small className="settings-message">{databaseMessage}</small>}
+          </div>
+
           <div className="settings-section">
             <h2>AI Provider</h2>
 
@@ -147,6 +274,21 @@ export function SettingsView({ onClose }: SettingsViewProps) {
               </label>
             </div>
           )}
+
+          <div className="settings-section">
+            <h2>AI Endpoint Test</h2>
+            <div className="settings-actions-row">
+              <button
+                type="button"
+                className="button-secondary"
+                onClick={handleTestAIConnection}
+                disabled={testingAI}
+              >
+                {testingAI ? 'Testing...' : 'Test AI Endpoint'}
+              </button>
+            </div>
+            {aiTestMessage && <small className="settings-message">{aiTestMessage}</small>}
+          </div>
         </div>
 
         {error && <div className="error-message">{error}</div>}

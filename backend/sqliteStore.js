@@ -74,12 +74,7 @@ function normalizeJob(input) {
   }
 }
 
-export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAULT_DB_PATH) {
-  fs.mkdirSync(path.dirname(dbPath), { recursive: true })
-
-  const db = new Database(dbPath)
-  db.pragma('journal_mode = WAL')
-
+function ensureJobsSchema(db) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS jobs (
       id TEXT PRIMARY KEY,
@@ -99,7 +94,6 @@ export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAU
     )
   `)
 
-  // Migration: Add scoring columns if they don't exist
   const columns = db.pragma('table_info(jobs)')
   const columnNames = columns.map((col) => col.name)
 
@@ -118,8 +112,7 @@ export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAU
   if (!columnNames.includes('scoreConfidence')) {
     db.exec('ALTER TABLE jobs ADD COLUMN scoreConfidence REAL')
   }
-  
-  // Migration: Add AI and job description columns
+
   if (!columnNames.includes('jobDescription')) {
     db.exec('ALTER TABLE jobs ADD COLUMN jobDescription TEXT')
   }
@@ -135,6 +128,14 @@ export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAU
   if (!columnNames.includes('aiReasoning')) {
     db.exec('ALTER TABLE jobs ADD COLUMN aiReasoning TEXT')
   }
+}
+
+export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAULT_DB_PATH) {
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true })
+
+  const db = new Database(dbPath)
+  db.pragma('journal_mode = WAL')
+  ensureJobsSchema(db)
 
   const listStatement = db.prepare(`
     SELECT ${JOB_COLUMNS.join(', ')}
@@ -176,6 +177,30 @@ export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAU
     },
     replaceAllJobs(jobs) {
       replaceAllStatement(Array.isArray(jobs) ? jobs : [])
+    },
+    getDatabaseInfo() {
+      return {
+        provider: 'sqlite',
+        dbPath,
+        exists: fs.existsSync(dbPath),
+      }
+    },
+    createDatabase() {
+      const existedBefore = fs.existsSync(dbPath)
+      fs.mkdirSync(path.dirname(dbPath), { recursive: true })
+      ensureJobsSchema(db)
+      return {
+        created: !existedBefore,
+        dbPath,
+        exists: fs.existsSync(dbPath),
+      }
+    },
+    testConnection() {
+      const result = db.prepare('SELECT 1 AS ok').get()
+      return {
+        ok: result?.ok === 1,
+        dbPath,
+      }
     },
     close() {
       db.close()

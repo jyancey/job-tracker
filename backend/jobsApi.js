@@ -40,6 +40,54 @@ export async function handleJobsApi(req, res, store) {
   const host = req.headers.host || 'localhost'
   const pathname = new URL(req.url || '/', `http://${host}`).pathname
 
+  if (pathname === '/api/database/info' && req.method === 'GET') {
+    if (typeof store.getDatabaseInfo !== 'function') {
+      writeJson(res, 501, { error: 'Database info operation not supported' })
+      return true
+    }
+
+    try {
+      writeJson(res, 200, store.getDatabaseInfo())
+    } catch (error) {
+      writeJson(res, 500, {
+        error: error instanceof Error ? error.message : 'Failed to fetch database info',
+      })
+    }
+    return true
+  }
+
+  if (pathname === '/api/database/create' && req.method === 'POST') {
+    if (typeof store.createDatabase !== 'function') {
+      writeJson(res, 501, { error: 'Database create operation not supported' })
+      return true
+    }
+
+    try {
+      writeJson(res, 200, store.createDatabase())
+    } catch (error) {
+      writeJson(res, 500, {
+        error: error instanceof Error ? error.message : 'Failed to create database',
+      })
+    }
+    return true
+  }
+
+  if (pathname === '/api/database/test' && req.method === 'GET') {
+    if (typeof store.testConnection !== 'function') {
+      writeJson(res, 501, { error: 'Database test operation not supported' })
+      return true
+    }
+
+    try {
+      writeJson(res, 200, store.testConnection())
+    } catch (error) {
+      writeJson(res, 500, {
+        error: error instanceof Error ? error.message : 'Failed to test database connection',
+      })
+    }
+    return true
+  }
+
   if (pathname !== '/api/jobs') {
     return false
   }

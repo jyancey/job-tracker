@@ -1531,6 +1531,19 @@ label.full-width {
   margin-bottom: 0;
 }
 
+.settings-actions-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.settings-message {
+  display: block;
+  margin-top: 0.6rem;
+  color: #475569;
+}
+
 .settings-section input,
 .settings-section textarea,
 .settings-section select {
