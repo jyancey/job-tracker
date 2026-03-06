@@ -1,5 +1,7 @@
+import { useRef, useState } from 'react'
 import type { JobDraft, JobStatus } from '../domain'
 import { StatusSelect } from './StatusSelect'
+import { scrapeJobDescription } from '../services/jobScrapingService'
 
 interface JobFormProps {
   draft: JobDraft
@@ -10,6 +12,55 @@ interface JobFormProps {
 }
 
 export function JobForm({ draft, editingId, onUpdateDraft, onSubmit, onCancel }: JobFormProps) {
+  const [scrapingLoading, setScrapingLoading] = useState(false)
+  const [scrapingError, setScrapingError] = useState('')
+  const descriptionFileRef = useRef<HTMLInputElement>(null)
+
+  const handleScrapeDescription = async () => {
+    if (!draft.jobUrl.trim()) {
+      setScrapingError('Please enter a job URL first')
+      return
+    }
+
+    setScrapingLoading(true)
+    setScrapingError('')
+
+    try {
+      const result = await scrapeJobDescription(draft.jobUrl)
+      if (result.success && result.description) {
+        onUpdateDraft('jobDescription', result.description)
+        onUpdateDraft('jobDescriptionSource', 'scraped')
+      } else {
+        setScrapingError(result.error || 'Failed to scrape job description')
+      }
+    } catch (err) {
+      setScrapingError(err instanceof Error ? err.message : 'Failed to scrape job description')
+    } finally {
+      setScrapingLoading(false)
+    }
+  }
+
+  const handleDescriptionFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setScrapingError('')
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string
+        onUpdateDraft('jobDescription', text)
+        onUpdateDraft('jobDescriptionSource', 'upload')
+      } catch (err) {
+        setScrapingError('Failed to read file')
+      }
+    }
+    reader.readAsText(file)
+
+    if (descriptionFileRef.current) {
+      descriptionFileRef.current.value = ''
+    }
+  }
   return (
     <form onSubmit={onSubmit} className="job-form">
       <label>
@@ -55,6 +106,53 @@ export function JobForm({ draft, editingId, onUpdateDraft, onSubmit, onCancel }:
           placeholder="https://company.com/jobs/123"
         />
       </label>
+
+      <fieldset className="full-width">
+        <legend>Job Description</legend>
+        <div className="job-description-actions">
+          <button
+            type="button"
+            className="button-secondary"
+            onClick={handleScrapeDescription}
+            disabled={scrapingLoading || !draft.jobUrl.trim()}
+          >
+            {scrapingLoading ? 'Scraping...' : 'Scrape from URL'}
+          </button>
+          <label className="button button-secondary">
+            Upload File
+            <input
+              ref={descriptionFileRef}
+              type="file"
+              accept=".txt,.html,.pdf"
+              onChange={handleDescriptionFileUpload}
+              style={{ display: 'none' }}
+            />
+          </label>
+        </div>
+
+        {scrapingError && <div className="error-message-inline">{scrapingError}</div>}
+
+        <label className="full-width" style={{ marginTop: '0.5rem' }}>
+          Description
+          <textarea
+            value={draft.jobDescription || ''}
+            onChange={(event) => {
+              onUpdateDraft('jobDescription', event.target.value)
+              if (event.target.value.trim()) {
+                onUpdateDraft('jobDescriptionSource', 'paste')
+              }
+            }}
+            placeholder="Job description text (copy-paste here or use Scrape from URL)"
+            rows={6}
+          />
+        </label>
+        {draft.jobDescription && (
+          <small className="job-description-source">
+            Source: {draft.jobDescriptionSource || 'pasted'} ({draft.jobDescription.length} characters)
+          </small>
+        )}
+      </fieldset>
+
       <label>
         ATS URL
         <input

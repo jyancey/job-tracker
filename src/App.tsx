@@ -41,7 +41,11 @@ import { JobForm } from './components/JobForm'
 import { JobModal } from './components/JobModal'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { FilterToolbar } from './components/FilterToolbar'
+import { AISettingsPanel } from './components/AISettingsPanel'
+import { UserProfileEditor } from './components/UserProfileEditor'
 import * as jobService from './services/jobService'
+import { scoreJobWithAI } from './services/aiScoringService'
+import { loadAIConfig, loadUserProfile } from './storage/aiStorage'
 
 type View = 'table' | 'kanban' | 'calendar' | 'dashboard'
 
@@ -69,6 +73,8 @@ function AppContent() {
   const selectAllCheckboxRef = useRef<HTMLInputElement>(null)
   const [importMode, setImportMode] = useState<ImportMode>('append')
   const [showCompare, setShowCompare] = useState(false)
+  const [showAISettings, setShowAISettings] = useState(false)
+  const [showUserProfile, setShowUserProfile] = useState(false)
 
   // Use notifications hook
   const { notifications, addNotification, removeNotification } = useNotifications()
@@ -118,12 +124,82 @@ function AppContent() {
       return
     }
 
+    let newJobId: string | null = editingId || null
+    
+    // Create or update the job
     if (editingId) {
       setJobs((current) => jobService.updateJob(current, editingId, normalizedDraft))
     } else {
-      setJobs((current) => jobService.createJob(current, normalizedDraft))
+      setJobs((current) => {
+        const updated = jobService.createJob(current, normalizedDraft)
+        // Get the newly created job ID (first item after sorting)
+        const newJob = updated[0]
+        newJobId = newJob.id
+        return updated
+      })
     }
+    
     resetForm()
+
+    // Trigger auto-scoring if AI is enabled, profile configured, and job description exists
+    const jobDescription = normalizedDraft.jobDescription
+    const shouldAutoScore = jobDescription && jobDescription.trim() && newJobId
+    
+    if (shouldAutoScore) {
+      const aiConfig = loadAIConfig()
+      const userProfile = loadUserProfile()
+
+      if (aiConfig.provider !== 'disabled' && apiKeyConfigured(aiConfig)) {
+        setTimeout(() => {
+          try {
+            scoreJobWithAI(
+              {
+                jobDescription: jobDescription,
+                jobTitle: normalizedDraft.roleTitle,
+                company: normalizedDraft.company,
+                salaryRange: normalizedDraft.salaryRange,
+                userProfile,
+              },
+              aiConfig,
+            )
+              .then((result) => {
+                // Update the job with AI scores
+                if (newJobId) {
+                  setJobs((current) =>
+                    jobService.updateJob(current, newJobId as string, {
+                      ...normalizedDraft,
+                      scoreFit: result.scoreFit,
+                      scoreCompensation: result.scoreCompensation,
+                      scoreLocation: result.scoreLocation,
+                      scoreGrowth: result.scoreGrowth,
+                      scoreConfidence: result.scoreConfidence,
+                      aiScoredAt: result.analyzedAt,
+                      aiModel: result.model,
+                      aiReasoning: result.reasoning,
+                    }),
+                  )
+                  addNotification('AI scoring completed successfully', 'success')
+                }
+              })
+              .catch((err) => {
+                addNotification(`AI scoring failed: ${err.message}`, 'error')
+              })
+          } catch (err) {
+            // Silently handle errors during async scoring
+          }
+        }, 0)
+      }
+    }
+  }
+
+  function apiKeyConfigured(config: ReturnType<typeof loadAIConfig>): boolean {
+    if (config.provider === 'openai') {
+      return !!config.apiKey?.trim()
+    }
+    if (config.provider === 'lmstudio') {
+      return !!config.baseUrl?.trim()
+    }
+    return false
   }
 
   function handleEditJob(job: Job): void {
@@ -351,6 +427,12 @@ function AppContent() {
               {saveStatus === 'pending' && <span className="save-status">Saving...</span>}
             </div>
             <div className="form-actions-top">
+              <button type="button" className="small" onClick={() => setShowUserProfile(true)}>
+                📋 Profile
+              </button>
+              <button type="button" className="small" onClick={() => setShowAISettings(true)}>
+                🤖 AI Settings
+              </button>
               <button type="button" className="small" onClick={() => handleExport('json')}>
                 Export JSON
               </button>
@@ -439,6 +521,9 @@ function AppContent() {
       </main>
 
       {view.viewingJob && <JobModal job={view.viewingJob} onClose={closeViewOnly} />}
+
+      <AISettingsPanel isOpen={showAISettings} onClose={() => setShowAISettings(false)} />
+      <UserProfileEditor isOpen={showUserProfile} onClose={() => setShowUserProfile(false)} />
 
       <footer className="app-footer">
         <span>Job Tracker {APP_VERSION}</span>

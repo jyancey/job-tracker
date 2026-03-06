@@ -1111,3 +1111,294 @@ button.danger:hover {
   gap: 0.5rem;
   flex-wrap: wrap;
 }
+
+/* Modal and Panel Styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 42, 67, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.modal {
+  width: min(600px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #d9e2ec;
+  box-shadow: 0 20px 45px rgba(16, 42, 67, 0.25);
+  padding: 1.5rem;
+}
+
+.modal-large {
+  width: min(800px, 100%);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #586069;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: #f0f2f5;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #d9e2ec;
+}
+
+.ai-settings-content,
+.profile-editor-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.settings-section h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #102a43;
+}
+
+.provider-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.radio-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.radio-label:hover {
+  background-color: #f6f8fa;
+  border-color: #d1d5da;
+}
+
+.radio-label input[type="radio"] {
+  margin-top: 0.25rem;
+  cursor: pointer;
+}
+
+.radio-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.radio-text strong {
+  color: #102a43;
+  font-size: 0.9rem;
+}
+
+.radio-text small {
+  color: #586069;
+  font-size: 0.8rem;
+}
+
+.input-with-toggle {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.input-with-toggle input {
+  flex: 1;
+}
+
+.toggle-button {
+  background: #f0f2f5;
+  border: 1px solid #d9e2ec;
+  border-radius: 6px;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.toggle-button:hover {
+  background-color: #e1e4e8;
+}
+
+/* Job Description Styles */
+.job-description-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.job-description-actions .button {
+  flex: 1;
+  min-width: 150px;
+}
+
+.job-description-actions label.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.error-message-inline {
+  background: #fff5f5;
+  border: 1px solid #fed7d7;
+  color: #9b2c2c;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.job-description-source {
+  display: block;
+  color: #586069;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+/* Skills Grid */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.skill-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border: 1px solid #d9e2ec;
+  border-radius: 8px;
+  background: #f6f8fa;
+  transition: background-color 0.2s, border-color 0.2s;
+  font-size: 0.85rem;
+}
+
+.skill-checkbox:hover {
+  background: #edf2f7;
+  border-color: #0071e3;
+}
+
+.skill-checkbox input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.skill-checkbox input[type="checkbox"]:checked {
+  accent-color: #0071e3;
+}
+
+/* Resume Upload Area */
+.resume-upload-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 2px dashed #d9e2ec;
+  border-radius: 12px;
+  background: #f9fafb;
+  text-align: center;
+}
+
+.resume-upload-area small {
+  color: #586069;
+  font-size: 0.8rem;
+}
+
+.resume-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: #e6f2ff;
+  border-radius: 8px;
+}
+
+.resume-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #0071e3;
+}
+
+.button-text {
+  background: none;
+  border: none;
+  color: #0071e3;
+  cursor: pointer;
+  font-size: 0.8rem;
+  text-decoration: underline;
+}
+
+.button-text:hover {
+  opacity: 0.7;
+}
+
+/* Form Styles */
+.half-width {
+  grid-column: span 1;
+}
+
+.success-message {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #15803d;
+  border-radius: 6px;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+label.full-width {
+  grid-column: 1 / -1;
+}

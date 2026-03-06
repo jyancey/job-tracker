@@ -49,6 +49,41 @@ export function JobModal({ job, onClose }: JobModalProps) {
             <span>Next Action Due</span>
             <strong>{formatDate(job.nextActionDueDate)}</strong>
           </article>
+
+          {job.scoreFit !== undefined && (
+            <>
+              <article>
+                <span>Fit</span>
+                <strong>{job.scoreFit.toFixed(1)}/5</strong>
+              </article>
+              <article>
+                <span>Compensation</span>
+                <strong>{job.scoreCompensation?.toFixed(1) || '-'}/5</strong>
+              </article>
+              <article>
+                <span>Location</span>
+                <strong>{job.scoreLocation?.toFixed(1) || '-'}/5</strong>
+              </article>
+              <article>
+                <span>Growth</span>
+                <strong>{job.scoreGrowth?.toFixed(1) || '-'}/5</strong>
+              </article>
+              <article>
+                <span>Confidence</span>
+                <strong>{job.scoreConfidence?.toFixed(1) || '-'}/5</strong>
+              </article>
+            </>
+          )}
+
+          {job.aiScoredAt && (
+            <article>
+              <span>AI Analysis</span>
+              <strong>{formatDate(job.aiScoredAt)}</strong>
+              <small style={{ color: '#586069', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+                via {job.aiModel || 'AI'}
+              </small>
+            </article>
+          )}
         </div>
 
         <div className="job-modal-links">
@@ -68,6 +103,13 @@ export function JobModal({ job, onClose }: JobModalProps) {
           <h4>Notes</h4>
           <p>{job.notes || 'No notes added.'}</p>
         </div>
+
+        {job.aiReasoning && (
+          <div className="job-modal-notes">
+            <h4>AI Analysis</h4>
+            <p>{job.aiReasoning}</p>
+          </div>
+        )}
       </section>
     </div>
   )
