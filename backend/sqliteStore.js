@@ -21,11 +21,16 @@ const JOB_COLUMNS = [
   'nextActionDueDate',
   'createdAt',
   'updatedAt',
+  'jobDescription',
+  'jobDescriptionSource',
   'scoreFit',
   'scoreCompensation',
   'scoreLocation',
   'scoreGrowth',
   'scoreConfidence',
+  'aiScoredAt',
+  'aiModel',
+  'aiReasoning',
 ]
 
 function normalizeText(value) {
@@ -56,11 +61,16 @@ function normalizeJob(input) {
     nextActionDueDate: normalizeText(input.nextActionDueDate),
     createdAt: normalizeText(input.createdAt),
     updatedAt: normalizeText(input.updatedAt),
+    jobDescription: normalizeText(input.jobDescription),
+    jobDescriptionSource: normalizeText(input.jobDescriptionSource),
     scoreFit: normalizeNumber(input.scoreFit),
     scoreCompensation: normalizeNumber(input.scoreCompensation),
     scoreLocation: normalizeNumber(input.scoreLocation),
     scoreGrowth: normalizeNumber(input.scoreGrowth),
     scoreConfidence: normalizeNumber(input.scoreConfidence),
+    aiScoredAt: normalizeText(input.aiScoredAt),
+    aiModel: normalizeText(input.aiModel),
+    aiReasoning: normalizeText(input.aiReasoning),
   }
 }
 
@@ -108,6 +118,23 @@ export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAU
   if (!columnNames.includes('scoreConfidence')) {
     db.exec('ALTER TABLE jobs ADD COLUMN scoreConfidence REAL')
   }
+  
+  // Migration: Add AI and job description columns
+  if (!columnNames.includes('jobDescription')) {
+    db.exec('ALTER TABLE jobs ADD COLUMN jobDescription TEXT')
+  }
+  if (!columnNames.includes('jobDescriptionSource')) {
+    db.exec('ALTER TABLE jobs ADD COLUMN jobDescriptionSource TEXT')
+  }
+  if (!columnNames.includes('aiScoredAt')) {
+    db.exec('ALTER TABLE jobs ADD COLUMN aiScoredAt TEXT')
+  }
+  if (!columnNames.includes('aiModel')) {
+    db.exec('ALTER TABLE jobs ADD COLUMN aiModel TEXT')
+  }
+  if (!columnNames.includes('aiReasoning')) {
+    db.exec('ALTER TABLE jobs ADD COLUMN aiReasoning TEXT')
+  }
 
   const listStatement = db.prepare(`
     SELECT ${JOB_COLUMNS.join(', ')}
@@ -121,12 +148,16 @@ export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAU
       id, company, roleTitle, applicationDate, status,
       jobUrl, atsUrl, salaryRange, notes, contactPerson,
       nextAction, nextActionDueDate, createdAt, updatedAt,
-      scoreFit, scoreCompensation, scoreLocation, scoreGrowth, scoreConfidence
+      jobDescription, jobDescriptionSource,
+      scoreFit, scoreCompensation, scoreLocation, scoreGrowth, scoreConfidence,
+      aiScoredAt, aiModel, aiReasoning
     ) VALUES (
       @id, @company, @roleTitle, @applicationDate, @status,
       @jobUrl, @atsUrl, @salaryRange, @notes, @contactPerson,
       @nextAction, @nextActionDueDate, @createdAt, @updatedAt,
-      @scoreFit, @scoreCompensation, @scoreLocation, @scoreGrowth, @scoreConfidence
+      @jobDescription, @jobDescriptionSource,
+      @scoreFit, @scoreCompensation, @scoreLocation, @scoreGrowth, @scoreConfidence,
+      @aiScoredAt, @aiModel, @aiReasoning
     )
   `)
 

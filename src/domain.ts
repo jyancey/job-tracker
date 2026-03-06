@@ -25,12 +25,19 @@ export interface Job {
   nextActionDueDate: string
   createdAt: string
   updatedAt: string
+  // Job description for AI analysis
+  jobDescription?: string
+  jobDescriptionSource?: 'url' | 'paste' | 'upload' | 'scraped'
   // Optional scoring fields (0-5 scale)
   scoreFit?: number
   scoreCompensation?: number
   scoreLocation?: number
   scoreGrowth?: number
   scoreConfidence?: number
+  // AI scoring metadata
+  aiScoredAt?: string
+  aiModel?: string
+  aiReasoning?: string
 }
 
 export type JobDraft = Omit<Job, 'id' | 'createdAt' | 'updatedAt'>
@@ -47,11 +54,16 @@ export const EMPTY_JOB_DRAFT: JobDraft = {
   contactPerson: '',
   nextAction: '',
   nextActionDueDate: '',
+  jobDescription: '',
+  jobDescriptionSource: undefined,
   scoreFit: undefined,
   scoreCompensation: undefined,
   scoreLocation: undefined,
   scoreGrowth: undefined,
   scoreConfidence: undefined,
+  aiScoredAt: undefined,
+  aiModel: undefined,
+  aiReasoning: undefined,
 }
 
 export function createJobFromDraft(draft: JobDraft): Job {
