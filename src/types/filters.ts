@@ -5,7 +5,7 @@ import type { JobStatus } from '../domain'
  */
 
 export type StatusFilter = 'All' | JobStatus | 'Overdue Follow-ups'
-export type SortColumn = 'company' | 'roleTitle' | 'status' | 'applicationDate' | 'nextActionDueDate'
+export type SortColumn = 'company' | 'roleTitle' | 'status' | 'applicationDate' | 'nextActionDueDate' | 'score'
 export type SortDirection = 'asc' | 'desc'
 
 export interface FilterOptions {

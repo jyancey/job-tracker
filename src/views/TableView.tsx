@@ -2,6 +2,7 @@ import { formatDate, isOverdueFollowUp, getTodayString } from '../utils/dateUtil
 import { Pagination } from '../components/Pagination'
 import { SortableHeader } from '../components/SortableHeader'
 import { StatusCell } from '../components/StatusCell'
+import { ScoreCell } from '../components/ScoreCell'
 import { useTableViewContext } from './table/TableViewContext'
 
 export function TableView() {
@@ -20,6 +21,7 @@ export function TableView() {
     onToggleSelection,
     onToggleSelectAll,
     onBulkDelete,
+    onCompare,
     onQuickMove,
     onEdit,
     onRemove,
@@ -40,6 +42,12 @@ export function TableView() {
               ? ` (${selectedIds.size - selectedVisibleCount} selected on other pages/filters)`
               : ''}
           </span>
+          <button
+            type="button"
+            onClick={onCompare}
+          >
+            Compare Selected ({selectedIds.size})
+          </button>
           <button
             type="button"
             className="danger"
@@ -84,6 +92,13 @@ export function TableView() {
               onSort={onSort}
             />
             <SortableHeader
+              label="Score"
+              column="score"
+              currentColumn={sortColumn}
+              currentDirection={sortDirection}
+              onSort={onSort}
+            />
+            <SortableHeader
               label="Applied"
               column="applicationDate"
               currentColumn={sortColumn}
@@ -123,6 +138,9 @@ export function TableView() {
                 jobId={job.id}
                 className="quick-status"
               />
+              <td style={{ textAlign: 'center' }}>
+                <ScoreCell job={job} />
+              </td>
               <td>{formatDate(job.applicationDate)}</td>
               <td>
                 {job.nextAction || '-'}

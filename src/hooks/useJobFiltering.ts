@@ -3,6 +3,7 @@ import type { Job } from '../domain'
 import { isOverdueFollowUp, compareDates, getTodayString } from '../utils/dateUtils'
 import { compareStrings } from '../utils/stringUtils'
 import { parseSalaryRange } from '../utils/salaryUtils'
+import { calculateJobScore, DEFAULT_SCORE_WEIGHTS } from '../scoring'
 import type { FilterOptions, SortOptions, PaginationOptions } from '../types/filters'
 
 // Re-export types from centralized location for backward compatibility
@@ -68,6 +69,19 @@ export function useJobSorting(jobs: Job[], sortOptions: SortOptions) {
       }
       if (sortOptions.sortColumn === 'roleTitle') {
         return compareStrings(a.roleTitle, b.roleTitle, sortOptions.sortDirection)
+      }
+      if (sortOptions.sortColumn === 'score') {
+        const scoreA = calculateJobScore(a, DEFAULT_SCORE_WEIGHTS)
+        const scoreB = calculateJobScore(b, DEFAULT_SCORE_WEIGHTS)
+        
+        // Unscored jobs go to the end (or beginning if asc)
+        if (scoreA === null && scoreB === null) return 0
+        if (scoreA === null) return sortOptions.sortDirection === 'desc' ? 1 : -1
+        if (scoreB === null) return sortOptions.sortDirection === 'desc' ? -1 : 1
+        
+        // Compare scores
+        const diff = scoreA - scoreB
+        return sortOptions.sortDirection === 'desc' ? -diff : diff
       }
       return compareStrings(a.status, b.status, sortOptions.sortDirection)
     })

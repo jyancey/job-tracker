@@ -29,6 +29,11 @@ export function exportToCsv(jobs: Job[]): string {
     'Contact Person',
     'Next Action',
     'Next Action Due',
+    'Score Fit',
+    'Score Compensation',
+    'Score Location',
+    'Score Growth',
+    'Score Confidence',
     'Notes',
   ]
 
@@ -41,6 +46,11 @@ export function exportToCsv(jobs: Job[]): string {
     `"${job.contactPerson.replace(/"/g, '""')}"`,
     `"${job.nextAction.replace(/"/g, '""')}"`,
     `"${job.nextActionDueDate}"`,
+    job.scoreFit != null ? String(job.scoreFit) : '',
+    job.scoreCompensation != null ? String(job.scoreCompensation) : '',
+    job.scoreLocation != null ? String(job.scoreLocation) : '',
+    job.scoreGrowth != null ? String(job.scoreGrowth) : '',
+    job.scoreConfidence != null ? String(job.scoreConfidence) : '',
     `"${job.notes.replace(/"/g, '""')}"`,
   ])
 

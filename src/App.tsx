@@ -35,6 +35,7 @@ import { useTableSelectionState } from './hooks/useTableSelectionState'
 import { TableView } from './views/TableView'
 import { CalendarView } from './views/CalendarView'
 import { DashboardView } from './views/DashboardView'
+import { CompareView } from './views/CompareView'
 import { TableViewProvider } from './views/table/TableViewContext'
 import { JobForm } from './components/JobForm'
 import { JobModal } from './components/JobModal'
@@ -67,6 +68,7 @@ function AppContent() {
   const importFileRef = useRef<HTMLInputElement>(null)
   const selectAllCheckboxRef = useRef<HTMLInputElement>(null)
   const [importMode, setImportMode] = useState<ImportMode>('append')
+  const [showCompare, setShowCompare] = useState(false)
 
   // Use notifications hook
   const { notifications, addNotification, removeNotification } = useNotifications()
@@ -166,6 +168,22 @@ function AppContent() {
     )
   }
 
+  function handleCompare(): void {
+    if (selection.selectedIds.size === 0) {
+      addNotification('Select jobs to compare', 'info')
+      return
+    }
+    setShowCompare(true)
+  }
+
+  function closeCompare(): void {
+    setShowCompare(false)
+  }
+
+  const selectedJobs = useMemo(() => {
+    return jobs.filter((job) => selection.selectedIds.has(job.id))
+  }, [jobs, selection.selectedIds])
+
   function undo_handler(): void {
     const previous = undo.undo()
     if (previous) {
@@ -262,6 +280,7 @@ function AppContent() {
       onToggleSelection: toggleJobSelection,
       onToggleSelectAll: toggleSelectAllVisible,
       onBulkDelete: bulkDeleteSelected,
+      onCompare: handleCompare,
       onQuickMove: handleQuickMove,
       onEdit: handleEditJob,
       onRemove: handleRemoveJob,
@@ -395,9 +414,12 @@ function AppContent() {
           </div>
 
           {view.view === 'table' && (
-            <TableViewProvider value={tableViewContextValue}>
-              <TableView />
-            </TableViewProvider>
+            <>
+              <TableViewProvider value={tableViewContextValue}>
+                <TableView />
+              </TableViewProvider>
+              {showCompare && <CompareView jobs={selectedJobs} onClose={closeCompare} />}
+            </>
           )}
 
           {view.view === 'kanban' && (

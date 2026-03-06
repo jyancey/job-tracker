@@ -249,6 +249,162 @@ button.ghost {
   gap: 0.5rem;
 }
 
+fieldset {
+  border: 1px solid #d1d5da;
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 0;
+}
+
+fieldset legend {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #24292e;
+  padding: 0 0.5rem;
+}
+
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.7rem;
+}
+
+.score-grid input[type="number"] {
+  text-align: center;
+}
+
+/* Score display */
+.score {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  min-width: 2.5rem;
+}
+
+.score-high {
+  background: #d1f4e0;
+  color: #0c6b2e;
+}
+
+.score-medium {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.score-low {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.score-empty {
+  color: #959da5;
+  font-size: 0.85rem;
+}
+
+/* Compare View */
+.compare-view {
+  background: #ffffff;
+  border: 1px solid #d1d5da;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.compare-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e1e4e8;
+}
+
+.compare-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.compare-grid {
+  overflow-x: auto;
+}
+
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.compare-table th,
+.compare-table td {
+  padding: 0.75rem;
+  border: 1px solid #e1e4e8;
+  text-align: left;
+  vertical-align: top;
+}
+
+.compare-label {
+  font-weight: 600;
+  background: #f6f8fa;
+  white-space: nowrap;
+  min-width: 140px;
+}
+
+.compare-job {
+  background: #f6f8fa;
+  min-width: 200px;
+}
+
+.compare-job-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.compare-job-header strong {
+  font-size: 1rem;
+}
+
+.compare-job-header span {
+  font-size: 0.85rem;
+  color: #586069;
+  font-weight: normal;
+}
+
+.compare-cell {
+  background: #ffffff;
+}
+
+.compare-score {
+  text-align: center;
+}
+
+.compare-notes {
+  max-width: 300px;
+  font-size: 0.85rem;
+  color: #586069;
+  white-space: pre-wrap;
+}
+
+.compare-section-header td {
+  background: #24292e;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+}
+
+.compare-table a {
+  color: #0366d6;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.compare-table a:hover {
+  text-decoration: underline;
+}
+
 .toolbar {
   display: flex;
   justify-content: space-between;

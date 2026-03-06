@@ -21,10 +21,23 @@ const JOB_COLUMNS = [
   'nextActionDueDate',
   'createdAt',
   'updatedAt',
+  'scoreFit',
+  'scoreCompensation',
+  'scoreLocation',
+  'scoreGrowth',
+  'scoreConfidence',
 ]
 
 function normalizeText(value) {
   return typeof value === 'string' ? value : ''
+}
+
+function normalizeNumber(value) {
+  if (value == null) {
+    return null
+  }
+  const num = Number(value)
+  return Number.isFinite(num) ? num : null
 }
 
 function normalizeJob(input) {
@@ -43,6 +56,11 @@ function normalizeJob(input) {
     nextActionDueDate: normalizeText(input.nextActionDueDate),
     createdAt: normalizeText(input.createdAt),
     updatedAt: normalizeText(input.updatedAt),
+    scoreFit: normalizeNumber(input.scoreFit),
+    scoreCompensation: normalizeNumber(input.scoreCompensation),
+    scoreLocation: normalizeNumber(input.scoreLocation),
+    scoreGrowth: normalizeNumber(input.scoreGrowth),
+    scoreConfidence: normalizeNumber(input.scoreConfidence),
   }
 }
 
@@ -71,6 +89,26 @@ export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAU
     )
   `)
 
+  // Migration: Add scoring columns if they don't exist
+  const columns = db.pragma('table_info(jobs)')
+  const columnNames = columns.map((col) => col.name)
+
+  if (!columnNames.includes('scoreFit')) {
+    db.exec('ALTER TABLE jobs ADD COLUMN scoreFit REAL')
+  }
+  if (!columnNames.includes('scoreCompensation')) {
+    db.exec('ALTER TABLE jobs ADD COLUMN scoreCompensation REAL')
+  }
+  if (!columnNames.includes('scoreLocation')) {
+    db.exec('ALTER TABLE jobs ADD COLUMN scoreLocation REAL')
+  }
+  if (!columnNames.includes('scoreGrowth')) {
+    db.exec('ALTER TABLE jobs ADD COLUMN scoreGrowth REAL')
+  }
+  if (!columnNames.includes('scoreConfidence')) {
+    db.exec('ALTER TABLE jobs ADD COLUMN scoreConfidence REAL')
+  }
+
   const listStatement = db.prepare(`
     SELECT ${JOB_COLUMNS.join(', ')}
     FROM jobs
@@ -82,11 +120,13 @@ export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAU
     INSERT INTO jobs (
       id, company, roleTitle, applicationDate, status,
       jobUrl, atsUrl, salaryRange, notes, contactPerson,
-      nextAction, nextActionDueDate, createdAt, updatedAt
+      nextAction, nextActionDueDate, createdAt, updatedAt,
+      scoreFit, scoreCompensation, scoreLocation, scoreGrowth, scoreConfidence
     ) VALUES (
       @id, @company, @roleTitle, @applicationDate, @status,
       @jobUrl, @atsUrl, @salaryRange, @notes, @contactPerson,
-      @nextAction, @nextActionDueDate, @createdAt, @updatedAt
+      @nextAction, @nextActionDueDate, @createdAt, @updatedAt,
+      @scoreFit, @scoreCompensation, @scoreLocation, @scoreGrowth, @scoreConfidence
     )
   `)
 

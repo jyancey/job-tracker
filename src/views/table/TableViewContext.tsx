@@ -18,6 +18,7 @@ export interface TableViewContextValue {
   onToggleSelection: (id: string) => void
   onToggleSelectAll: () => void
   onBulkDelete: () => void
+  onCompare: () => void
   onQuickMove: (id: string, status: JobStatus) => void
   onEdit: (job: Job) => void
   onRemove: (id: string) => void

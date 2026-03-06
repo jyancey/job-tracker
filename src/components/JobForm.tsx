@@ -104,6 +104,83 @@ export function JobForm({ draft, editingId, onUpdateDraft, onSubmit, onCancel }:
           rows={4}
         />
       </label>
+
+      <fieldset className="full-width">
+        <legend>Quality Scores (0-5, optional)</legend>
+        <div className="score-grid">
+          <label>
+            Fit
+            <input
+              type="number"
+              min="0"
+              max="5"
+              step="0.5"
+              value={draft.scoreFit ?? ''}
+              onChange={(event) =>
+                onUpdateDraft('scoreFit', event.target.value ? Number(event.target.value) : undefined)
+              }
+              placeholder="0-5"
+            />
+          </label>
+          <label>
+            Compensation
+            <input
+              type="number"
+              min="0"
+              max="5"
+              step="0.5"
+              value={draft.scoreCompensation ?? ''}
+              onChange={(event) =>
+                onUpdateDraft('scoreCompensation', event.target.value ? Number(event.target.value) : undefined)
+              }
+              placeholder="0-5"
+            />
+          </label>
+          <label>
+            Location
+            <input
+              type="number"
+              min="0"
+              max="5"
+              step="0.5"
+              value={draft.scoreLocation ?? ''}
+              onChange={(event) =>
+                onUpdateDraft('scoreLocation', event.target.value ? Number(event.target.value) : undefined)
+              }
+              placeholder="0-5"
+            />
+          </label>
+          <label>
+            Growth
+            <input
+              type="number"
+              min="0"
+              max="5"
+              step="0.5"
+              value={draft.scoreGrowth ?? ''}
+              onChange={(event) =>
+                onUpdateDraft('scoreGrowth', event.target.value ? Number(event.target.value) : undefined)
+              }
+              placeholder="0-5"
+            />
+          </label>
+          <label>
+            Confidence
+            <input
+              type="number"
+              min="0"
+              max="5"
+              step="0.5"
+              value={draft.scoreConfidence ?? ''}
+              onChange={(event) =>
+                onUpdateDraft('scoreConfidence', event.target.value ? Number(event.target.value) : undefined)
+              }
+              placeholder="0-5"
+            />
+          </label>
+        </div>
+      </fieldset>
+
       <div className="form-actions full-width">
         <button type="submit">{editingId ? 'Save Changes' : 'Add Job'}</button>
         {editingId && (
