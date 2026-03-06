@@ -1,58 +1,33 @@
-import type { Job, JobStatus } from '../domain'
 import { formatDate, isOverdueFollowUp, getTodayString } from '../utils/dateUtils'
-import type { SortColumn, SortDirection } from '../hooks/useJobFiltering'
 import { Pagination } from '../components/Pagination'
 import { SortableHeader } from '../components/SortableHeader'
 import { StatusCell } from '../components/StatusCell'
+import { useTableViewContext } from './table/TableViewContext'
 
-interface TableViewProps {
-  paginatedJobs: Job[]
-  sortedJobs: Job[]
-  selectedIds: Set<string>
-  selectedVisibleCount: number
-  allVisibleSelected: boolean
-  someVisibleSelected: boolean
-  sortColumn: SortColumn
-  sortDirection: SortDirection
-  currentPage: number
-  totalPages: number
-  pageSize: number
-  onSort: (column: SortColumn) => void
-  onToggleSelection: (id: string) => void
-  onToggleSelectAll: () => void
-  onBulkDelete: () => void
-  onQuickMove: (id: string, status: JobStatus) => void
-  onEdit: (job: Job) => void
-  onRemove: (id: string) => void
-  onView: (job: Job) => void
-  onPageChange: (page: number) => void
-  onPageSizeChange: (size: number) => void
-  selectAllCheckboxRef: React.RefObject<HTMLInputElement | null>
-}
-
-export function TableView({
-  paginatedJobs,
-  sortedJobs,
-  selectedIds,
-  selectedVisibleCount,
-  allVisibleSelected,
-  sortColumn,
-  sortDirection,
-  currentPage,
-  totalPages,
-  pageSize,
-  onSort,
-  onToggleSelection,
-  onToggleSelectAll,
-  onBulkDelete,
-  onQuickMove,
-  onEdit,
-  onRemove,
-  onView,
-  onPageChange,
-  onPageSizeChange,
-  selectAllCheckboxRef,
-}: TableViewProps) {
+export function TableView() {
+  const {
+    paginatedJobs,
+    sortedJobs,
+    selectedIds,
+    selectedVisibleCount,
+    allVisibleSelected,
+    sortColumn,
+    sortDirection,
+    currentPage,
+    totalPages,
+    pageSize,
+    onSort,
+    onToggleSelection,
+    onToggleSelectAll,
+    onBulkDelete,
+    onQuickMove,
+    onEdit,
+    onRemove,
+    onView,
+    onPageChange,
+    onPageSizeChange,
+    selectAllCheckboxRef,
+  } = useTableViewContext()
   const today = getTodayString()
 
   return (

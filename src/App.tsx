@@ -5,7 +5,7 @@ import {
   type JobStatus,
 } from './domain'
 import { KanbanBoard } from './components/KanbanBoard'
-import { downloadStorageLogs, loadJobs, saveJobs } from './storage'
+import { downloadStorageLogs } from './storage'
 import { ToastContainer } from './components/Toast'
 import { downloadFile } from './utils/downloadUtils'
 import {
@@ -30,11 +30,15 @@ import { useUndoStack } from './hooks/useUndoStack'
 import { useJobGrouping } from './hooks/useJobGrouping'
 import { useJobForm } from './hooks/useJobForm'
 import { useNotifications } from './hooks/useNotifications'
+import { useJobPersistence } from './hooks/useJobPersistence'
+import { useTableSelectionState } from './hooks/useTableSelectionState'
 import { TableView } from './views/TableView'
 import { CalendarView } from './views/CalendarView'
 import { DashboardView } from './views/DashboardView'
+import { TableViewProvider } from './views/table/TableViewContext'
 import { JobForm } from './components/JobForm'
 import { JobModal } from './components/JobModal'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { FilterToolbar } from './components/FilterToolbar'
 import * as jobService from './services/jobService'
 
@@ -47,10 +51,8 @@ const VIEW_LABELS: Record<View, string> = {
   table: 'All Jobs',
 }
 
-function App() {
+function AppContent() {
   const [jobs, setJobs] = useState<Job[]>([])
-  const [isStorageHydrated, setIsStorageHydrated] = useState(false)
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'pending'>('idle')
   const [sortColumn, setSortColumn] = useState<SortColumn>('applicationDate')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [currentPage, setCurrentPage] = useState(1)
@@ -65,70 +67,15 @@ function App() {
   const importFileRef = useRef<HTMLInputElement>(null)
   const selectAllCheckboxRef = useRef<HTMLInputElement>(null)
   const [importMode, setImportMode] = useState<ImportMode>('append')
-  const saveRequestIdRef = useRef(0)
 
   // Use notifications hook
   const { notifications, addNotification, removeNotification } = useNotifications()
 
+  const { saveStatus } = useJobPersistence(jobs, setJobs, addNotification)
+
   // Use job form hook
   const { draft, editingId, updateDraft, resetForm, startEdit, submitForm } =
     useJobForm()
-
-  useEffect(() => {
-    let isDisposed = false
-
-    async function hydrateFromStorage(): Promise<void> {
-      const result = await loadJobs()
-      if (isDisposed) {
-        return
-      }
-
-      setJobs(result.jobs.sort(jobService.sortByApplicationDateDesc))
-      setIsStorageHydrated(result.didLoad)
-
-      if (!result.didLoad) {
-        addNotification('Storage is unavailable. Existing jobs were not loaded.', 'error')
-      }
-    }
-
-    void hydrateFromStorage()
-
-    return () => {
-      isDisposed = true
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!isStorageHydrated) {
-      return
-    }
-
-    const requestId = saveRequestIdRef.current + 1
-    saveRequestIdRef.current = requestId
-    let isCancelled = false
-
-    setSaveStatus('pending')
-
-    async function persistJobs(): Promise<void> {
-      try {
-        await saveJobs(jobs)
-      } catch {
-        if (!isCancelled) {
-          addNotification('Autosave failed. Your latest changes are not yet persisted.', 'error')
-        }
-      } finally {
-        if (!isCancelled && requestId === saveRequestIdRef.current) {
-          setSaveStatus('idle')
-        }
-      }
-    }
-
-    void persistJobs()
-
-    return () => {
-      isCancelled = true
-    }
-  }, [jobs, isStorageHydrated])
 
   // Use filtering hooks with filter state
   const { filteredJobs, overdueCount } = useJobFiltering(jobs, filters.state)
@@ -152,23 +99,12 @@ function App() {
     setCurrentPage((current) => Math.min(current, totalPages))
   }, [totalPages])
 
-  const visibleTableIds = useMemo(() => paginatedTableJobs.map((job) => job.id), [paginatedTableJobs])
-  const selectedVisibleIds = useMemo(
-    () => visibleTableIds.filter((id) => selection.selectedIds.has(id)),
-    [visibleTableIds, selection.selectedIds],
-  )
-  const selectedVisibleCount = useMemo(
-    () => selectedVisibleIds.length,
-    [selectedVisibleIds],
-  )
-  const allVisibleSelected = visibleTableIds.length > 0 && selectedVisibleCount === visibleTableIds.length
-  const someVisibleSelected = selectedVisibleCount > 0 && !allVisibleSelected
-
-  useEffect(() => {
-    if (selectAllCheckboxRef.current) {
-      selectAllCheckboxRef.current.indeterminate = someVisibleSelected
-    }
-  }, [someVisibleSelected])
+  const {
+    visibleTableIds,
+    selectedVisibleIds,
+    selectedVisibleCount,
+    allVisibleSelected,
+  } = useTableSelectionState(paginatedTableJobs, selection.selectedIds, selectAllCheckboxRef)
 
   useEffect(() => {
     setCurrentPage(1)
@@ -310,6 +246,44 @@ function App() {
     setSortDirection(column === 'applicationDate' || column === 'nextActionDueDate' ? 'desc' : 'asc')
   }
 
+  const tableViewContextValue = useMemo(
+    () => ({
+      paginatedJobs: paginatedTableJobs,
+      sortedJobs: sortedTableJobs,
+      selectedIds: selection.selectedIds,
+      selectedVisibleCount,
+      allVisibleSelected,
+      sortColumn,
+      sortDirection,
+      currentPage,
+      totalPages,
+      pageSize,
+      onSort: handleSort,
+      onToggleSelection: toggleJobSelection,
+      onToggleSelectAll: toggleSelectAllVisible,
+      onBulkDelete: bulkDeleteSelected,
+      onQuickMove: handleQuickMove,
+      onEdit: handleEditJob,
+      onRemove: handleRemoveJob,
+      onView: openViewOnly,
+      onPageChange: setCurrentPage,
+      onPageSizeChange: setPageSize,
+      selectAllCheckboxRef,
+    }),
+    [
+      paginatedTableJobs,
+      sortedTableJobs,
+      selection.selectedIds,
+      selectedVisibleCount,
+      allVisibleSelected,
+      sortColumn,
+      sortDirection,
+      currentPage,
+      totalPages,
+      pageSize,
+    ],
+  )
+
   return (
     <div className="app-shell">
       <input
@@ -421,30 +395,9 @@ function App() {
           </div>
 
           {view.view === 'table' && (
-            <TableView
-              paginatedJobs={paginatedTableJobs}
-              sortedJobs={sortedTableJobs}
-              selectedIds={selection.selectedIds}
-              selectedVisibleCount={selectedVisibleCount}
-              allVisibleSelected={allVisibleSelected}
-              someVisibleSelected={someVisibleSelected}
-              sortColumn={sortColumn}
-              sortDirection={sortDirection}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              pageSize={pageSize}
-              onSort={handleSort}
-              onToggleSelection={toggleJobSelection}
-              onToggleSelectAll={toggleSelectAllVisible}
-              onBulkDelete={bulkDeleteSelected}
-              onQuickMove={handleQuickMove}
-              onEdit={handleEditJob}
-              onRemove={handleRemoveJob}
-              onView={openViewOnly}
-              onPageChange={setCurrentPage}
-              onPageSizeChange={setPageSize}
-              selectAllCheckboxRef={selectAllCheckboxRef}
-            />
+            <TableViewProvider value={tableViewContextValue}>
+              <TableView />
+            </TableViewProvider>
           )}
 
           {view.view === 'kanban' && (
@@ -469,6 +422,14 @@ function App() {
         <span>Job Tracker {APP_VERSION}</span>
       </footer>
     </div>
+  )
+}
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
   )
 }
 
