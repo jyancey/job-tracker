@@ -37,6 +37,7 @@ import { CalendarView } from './views/CalendarView'
 import { DashboardView } from './views/DashboardView'
 import { CompareView } from './views/CompareView'
 import { ProfileView } from './views/ProfileView'
+import { SettingsView } from './views/SettingsView'
 import { TableViewProvider } from './views/table/TableViewContext'
 import { JobForm } from './components/JobForm'
 import { JobModal } from './components/JobModal'
@@ -52,6 +53,7 @@ const VIEW_LABELS: Record<View, string> = {
   calendar: 'Calendar',
   table: 'All Jobs',
   profile: 'Profile',
+  settings: 'Settings',
 }
 
 function AppContent() {
@@ -387,6 +389,8 @@ function AppContent() {
       
       {view.view === 'profile' ? (
         <ProfileView onClose={() => view.updateView('table')} />
+      ) : view.view === 'settings' ? (
+        <SettingsView onClose={() => view.updateView('table')} />
       ) : (
         <>
           <section className="top-grid">
@@ -431,6 +435,9 @@ function AppContent() {
                 </div>
                 <div className="form-actions-top">
                   <button type="button" className="small" onClick={() => view.updateView('profile')}>
+                    👤 Profile
+                  </button>
+                  <button type="button" className="small" onClick={() => view.updateView('settings')}>
                     ⚙️ Settings
                   </button>
                   <button type="button" className="small" onClick={() => handleExport('json')}>
@@ -477,7 +484,7 @@ function AppContent() {
               <div className="toolbar">
                 <div className="view-tabs">
                   {(Object.keys(VIEW_LABELS) as View[])
-                    .filter((key) => key !== 'profile')
+                    .filter((key) => key !== 'profile' && key !== 'settings')
                     .map((key) => (
                       <button
                         key={key}
@@ -492,9 +499,17 @@ function AppContent() {
                     className={(view.view as View) === 'profile' ? 'active' : ''}
                     onClick={() => view.updateView('profile')}
                     type="button"
-                    title="User profile and AI settings"
+                    title="User profile"
                   >
                     {VIEW_LABELS['profile']}
+                  </button>
+                  <button
+                    className={(view.view as View) === 'settings' ? 'active' : ''}
+                    onClick={() => view.updateView('settings')}
+                    type="button"
+                    title="AI settings"
+                  >
+                    {VIEW_LABELS['settings']}
                   </button>
                 </div>
                 <FilterToolbar
