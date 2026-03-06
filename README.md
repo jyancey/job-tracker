@@ -57,6 +57,7 @@ backend/
 
 docs/
   ├── DAEMON_SETUP.md
+  ├── NEXT_STEPS_PLAN.md
   └── REFACTORING_ANALYSIS.md
 
 scripts/
