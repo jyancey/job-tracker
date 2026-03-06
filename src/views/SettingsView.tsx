@@ -239,7 +239,6 @@ export function SettingsView({ onClose }: SettingsViewProps) {
                   value={aiConfig.model || ''}
                   onChange={(e) => handleAIFieldChange('model', e.target.value)}
                   placeholder="gpt-4o-mini (default)"
-                  defaultValue="gpt-4o-mini"
                 />
                 <small>Recommended: gpt-4o-mini for cost-effectiveness</small>
               </label>
