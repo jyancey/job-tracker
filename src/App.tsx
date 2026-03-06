@@ -25,7 +25,7 @@ import {
 } from './hooks/useJobFiltering'
 import { useFilterState } from './hooks/useFilterState'
 import { useJobSelection } from './hooks/useJobSelection'
-import { useViewState } from './hooks/useViewState'
+import { useViewState, type View } from './hooks/useViewState'
 import { useUndoStack } from './hooks/useUndoStack'
 import { useJobGrouping } from './hooks/useJobGrouping'
 import { useJobForm } from './hooks/useJobForm'
@@ -36,24 +36,22 @@ import { TableView } from './views/TableView'
 import { CalendarView } from './views/CalendarView'
 import { DashboardView } from './views/DashboardView'
 import { CompareView } from './views/CompareView'
+import { ProfileView } from './views/ProfileView'
 import { TableViewProvider } from './views/table/TableViewContext'
 import { JobForm } from './components/JobForm'
 import { JobModal } from './components/JobModal'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { FilterToolbar } from './components/FilterToolbar'
-import { AISettingsPanel } from './components/AISettingsPanel'
-import { UserProfileEditor } from './components/UserProfileEditor'
 import * as jobService from './services/jobService'
 import { scoreJobWithAI } from './services/aiScoringService'
 import { loadAIConfig, loadUserProfile } from './storage/aiStorage'
-
-type View = 'table' | 'kanban' | 'calendar' | 'dashboard'
 
 const VIEW_LABELS: Record<View, string> = {
   dashboard: 'Dashboard',
   kanban: 'Kanban',
   calendar: 'Calendar',
   table: 'All Jobs',
+  profile: 'Profile',
 }
 
 function AppContent() {
@@ -73,8 +71,6 @@ function AppContent() {
   const selectAllCheckboxRef = useRef<HTMLInputElement>(null)
   const [importMode, setImportMode] = useState<ImportMode>('append')
   const [showCompare, setShowCompare] = useState(false)
-  const [showAISettings, setShowAISettings] = useState(false)
-  const [showUserProfile, setShowUserProfile] = useState(false)
 
   // Use notifications hook
   const { notifications, addNotification, removeNotification } = useNotifications()
@@ -388,142 +384,155 @@ function AppContent() {
         style={{ display: 'none' }}
       />
       <ToastContainer notifications={notifications} onRemove={removeNotification} />
-      <section className="top-grid">
-        <header className="hero">
-          <img src="/job-tracker.png" alt="Job Tracker Logo" className="hero-logo" />
-          <div className="hero-bottom">
-            <div className="hero-content">
-              <p className="eyebrow">Job Tracker</p>
-              <h1>Track your search like a pipeline, not a spreadsheet.</h1>
-              <p>
-                Local-only and private. Add opportunities, manage follow-ups, and monitor momentum from one
-                workspace.
-              </p>
-            </div>
-            <div className="hero-metrics">
-              <article>
-                <span>Total Jobs</span>
-                <strong>{jobs.length}</strong>
-              </article>
-              <article>
-                <span>Open Pipeline</span>
-                <strong>{jobs.filter((job) => !['Rejected', 'Withdrawn'].includes(job.status)).length}</strong>
-              </article>
-              <article>
-                <span>Overdue Follow-ups</span>
-                <strong>{overdueCount}</strong>
-                <button type="button" className="ghost small metric-action" onClick={showOverdueOnly}>
-                  View list
-                </button>
-              </article>
-            </div>
-          </div>
-        </header>
+      
+      {view.view === 'profile' ? (
+        <ProfileView onClose={() => view.updateView('table')} />
+      ) : (
+        <>
+          <section className="top-grid">
+            <header className="hero">
+              <img src="/job-tracker.png" alt="Job Tracker Logo" className="hero-logo" />
+              <div className="hero-bottom">
+                <div className="hero-content">
+                  <p className="eyebrow">Job Tracker</p>
+                  <h1>Track your search like a pipeline, not a spreadsheet.</h1>
+                  <p>
+                    Local-only and private. Add opportunities, manage follow-ups, and monitor momentum from
+                    one workspace.
+                  </p>
+                </div>
+                <div className="hero-metrics">
+                  <article>
+                    <span>Total Jobs</span>
+                    <strong>{jobs.length}</strong>
+                  </article>
+                  <article>
+                    <span>Open Pipeline</span>
+                    <strong>
+                      {jobs.filter((job) => !['Rejected', 'Withdrawn'].includes(job.status)).length}
+                    </strong>
+                  </article>
+                  <article>
+                    <span>Overdue Follow-ups</span>
+                    <strong>{overdueCount}</strong>
+                    <button type="button" className="ghost small metric-action" onClick={showOverdueOnly}>
+                      View list
+                    </button>
+                  </article>
+                </div>
+              </div>
+            </header>
 
-        <section className="panel form-panel">
-          <div className="form-header">
-            <div>
-              <h2>{editingId ? 'Edit Job' : 'Add Job'}</h2>
-              {saveStatus === 'pending' && <span className="save-status">Saving...</span>}
-            </div>
-            <div className="form-actions-top">
-              <button type="button" className="small" onClick={() => setShowUserProfile(true)}>
-                📋 Profile
-              </button>
-              <button type="button" className="small" onClick={() => setShowAISettings(true)}>
-                🤖 AI Settings
-              </button>
-              <button type="button" className="small" onClick={() => handleExport('json')}>
-                Export JSON
-              </button>
-              <button type="button" className="small" onClick={() => handleExport('csv')}>
-                Export CSV
-              </button>
-              <button type="button" className="small" onClick={handleImportClick}>
-                Import
-              </button>
-              <select
-                className="compact-select"
-                value={importMode}
-                onChange={(event) => setImportMode(event.target.value as ImportMode)}
-                title="Import behavior"
-              >
-                <option value="append">Import: Append</option>
-                <option value="upsert">Import: Upsert by ID</option>
-                <option value="replace">Import: Replace All</option>
-              </select>
-              <button type="button" className="small ghost" onClick={() => downloadStorageLogs()}>
-                Export DB Logs
-              </button>
-              {undo.canUndo && (
-                <button type="button" className="small" onClick={undo_handler}>
-                  Undo
-                </button>
+            <section className="panel form-panel">
+              <div className="form-header">
+                <div>
+                  <h2>{editingId ? 'Edit Job' : 'Add Job'}</h2>
+                  {saveStatus === 'pending' && <span className="save-status">Saving...</span>}
+                </div>
+                <div className="form-actions-top">
+                  <button type="button" className="small" onClick={() => view.updateView('profile')}>
+                    ⚙️ Settings
+                  </button>
+                  <button type="button" className="small" onClick={() => handleExport('json')}>
+                    Export JSON
+                  </button>
+                  <button type="button" className="small" onClick={() => handleExport('csv')}>
+                    Export CSV
+                  </button>
+                  <button type="button" className="small" onClick={handleImportClick}>
+                    Import
+                  </button>
+                  <select
+                    className="compact-select"
+                    value={importMode}
+                    onChange={(event) => setImportMode(event.target.value as ImportMode)}
+                    title="Import behavior"
+                  >
+                    <option value="append">Import: Append</option>
+                    <option value="upsert">Import: Upsert by ID</option>
+                    <option value="replace">Import: Replace All</option>
+                  </select>
+                  <button type="button" className="small ghost" onClick={() => downloadStorageLogs()}>
+                    Export DB Logs
+                  </button>
+                  {undo.canUndo && (
+                    <button type="button" className="small" onClick={undo_handler}>
+                      Undo
+                    </button>
+                  )}
+                </div>
+              </div>
+              <JobForm
+                draft={draft}
+                editingId={editingId}
+                onUpdateDraft={updateDraft}
+                onSubmit={handleSubmitJob}
+                onCancel={resetForm}
+              />
+            </section>
+          </section>
+
+          <main className="content-grid">
+            <section className="panel views-panel">
+              <div className="toolbar">
+                <div className="view-tabs">
+                  {(Object.keys(VIEW_LABELS) as View[])
+                    .filter((key) => key !== 'profile')
+                    .map((key) => (
+                      <button
+                        key={key}
+                        className={view.view === key ? 'active' : ''}
+                        onClick={() => view.updateView(key)}
+                        type="button"
+                      >
+                        {VIEW_LABELS[key]}
+                      </button>
+                    ))}
+                  <button
+                    className={(view.view as View) === 'profile' ? 'active' : ''}
+                    onClick={() => view.updateView('profile')}
+                    type="button"
+                    title="User profile and AI settings"
+                  >
+                    {VIEW_LABELS['profile']}
+                  </button>
+                </div>
+                <FilterToolbar
+                  state={filters.state}
+                  onDispatch={filters.dispatch}
+                  onToggleAdvanced={filters.toggleAdvancedFilters}
+                  onClearAdvanced={filters.clearAdvancedFilters}
+                />
+              </div>
+
+              {view.view === 'table' && (
+                <>
+                  <TableViewProvider value={tableViewContextValue}>
+                    <TableView />
+                  </TableViewProvider>
+                  {showCompare && <CompareView jobs={selectedJobs} onClose={closeCompare} />}
+                </>
               )}
-            </div>
-          </div>
-          <JobForm
-            draft={draft}
-            editingId={editingId}
-            onUpdateDraft={updateDraft}
-            onSubmit={handleSubmitJob}
-            onCancel={resetForm}
-          />
-        </section>
-      </section>
 
-      <main className="content-grid">
-        <section className="panel views-panel">
-          <div className="toolbar">
-            <div className="view-tabs">
-              {(Object.keys(VIEW_LABELS) as View[]).map((key) => (
-                <button
-                  key={key}
-                  className={view.view === key ? 'active' : ''}
-                  onClick={() => view.updateView(key)}
-                  type="button"
-                >
-                  {VIEW_LABELS[key]}
-                </button>
-              ))}
-            </div>
-            <FilterToolbar
-              state={filters.state}
-              onDispatch={filters.dispatch}
-              onToggleAdvanced={filters.toggleAdvancedFilters}
-              onClearAdvanced={filters.clearAdvancedFilters}
-            />
-          </div>
+              {view.view === 'kanban' && (
+                <KanbanBoard
+                  jobs={byStatus}
+                  onStatusChange={handleQuickMove}
+                  onEdit={handleEditJob}
+                  onDelete={handleRemoveJob}
+                  onView={openViewOnly}
+                />
+              )}
 
-          {view.view === 'table' && (
-            <>
-              <TableViewProvider value={tableViewContextValue}>
-                <TableView />
-              </TableViewProvider>
-              {showCompare && <CompareView jobs={selectedJobs} onClose={closeCompare} />}
-            </>
-          )}
+              {view.view === 'calendar' && <CalendarView dueByDate={dueByDate} onView={openViewOnly} />}
 
-          {view.view === 'kanban' && (
-            <KanbanBoard
-              jobs={byStatus}
-              onStatusChange={handleQuickMove}
-              onEdit={handleEditJob}
-              onDelete={handleRemoveJob}
-              onView={openViewOnly}
-            />
-          )}
+              {view.view === 'dashboard' && <DashboardView byStatus={byStatus} />}
+            </section>
+          </main>
 
-          {view.view === 'calendar' && <CalendarView dueByDate={dueByDate} onView={openViewOnly} />}
-
-          {view.view === 'dashboard' && <DashboardView byStatus={byStatus} />}
-        </section>
-      </main>
-
-      {view.viewingJob && <JobModal job={view.viewingJob} onClose={closeViewOnly} />}
-
-      <AISettingsPanel isOpen={showAISettings} onClose={() => setShowAISettings(false)} />
-      <UserProfileEditor isOpen={showUserProfile} onClose={() => setShowUserProfile(false)} />
+          {view.viewingJob && <JobModal job={view.viewingJob} onClose={closeViewOnly} />}
+        </>
+      )}
 
       <footer className="app-footer">
         <span>Job Tracker {APP_VERSION}</span>

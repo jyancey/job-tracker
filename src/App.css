@@ -1402,3 +1402,171 @@ button.danger:hover {
 label.full-width {
   grid-column: 1 / -1;
 }
+
+/* Profile View Styles */
+.profile-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0 1.25rem;
+  min-height: 100vh;
+}
+
+.profile-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 0;
+  border-bottom: 2px solid #d1d5da;
+}
+
+.profile-view-header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.profile-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid #d1d5da;
+  margin-bottom: 1.5rem;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  color: #586069;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.tab-button:hover {
+  color: #0366d6;
+  border-bottom-color: rgba(3, 102, 214, 0.3);
+}
+
+.tab-button.active {
+  color: #0366d6;
+  border-bottom-color: #0366d6;
+}
+
+.profile-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 900px;
+}
+
+.profile-tab,
+.ai-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profile-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #d1d5da;
+}
+
+.button-primary {
+  background: #0366d6;
+  color: #fff;
+  padding: 0.6rem 1.25rem;
+  border-radius: 9px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button-primary:hover {
+  background: #0256c7;
+}
+
+.button-secondary {
+  background: #f6f8fa;
+  color: #0366d6;
+  border: 1px solid #d1d5da;
+  padding: 0.6rem 1.25rem;
+  border-radius: 9px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.button-secondary:hover {
+  background: #eaeef2;
+  border-color: #0969da;
+}
+
+.button-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.settings-section h2 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  color: #24292e;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.settings-section label {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 0;
+}
+
+.settings-section input,
+.settings-section textarea,
+.settings-section select {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #d1d5da;
+  border-radius: 9px;
+  font-size: 0.95rem;
+}
+
+.settings-section input:focus,
+.settings-section textarea:focus,
+.settings-section select:focus {
+  outline: none;
+  border-color: #0366d6;
+  box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
+}
+
+.half-width {
+  grid-column: span 1;
+}
+
+@media (max-width: 800px) {
+  .profile-view-container {
+    padding: 0 0.75rem;
+  }
+
+  .profile-view-header {
+    padding: 1rem 0;
+  }
+
+  .profile-view-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .tab-button {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9rem;
+  }
+}
