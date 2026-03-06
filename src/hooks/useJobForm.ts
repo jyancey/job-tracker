@@ -49,6 +49,16 @@ export function useJobForm(): UseJobFormResult {
       contactPerson: job.contactPerson,
       nextAction: job.nextAction,
       nextActionDueDate: job.nextActionDueDate,
+      jobDescription: job.jobDescription,
+      jobDescriptionSource: job.jobDescriptionSource,
+      scoreFit: job.scoreFit,
+      scoreCompensation: job.scoreCompensation,
+      scoreLocation: job.scoreLocation,
+      scoreGrowth: job.scoreGrowth,
+      scoreConfidence: job.scoreConfidence,
+      aiScoredAt: job.aiScoredAt,
+      aiModel: job.aiModel,
+      aiReasoning: job.aiReasoning,
     })
     setEditingId(job.id)
   }
