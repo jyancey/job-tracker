@@ -80,6 +80,7 @@ describe('SettingsView', () => {
     await waitFor(() => {
       expect(mockTestDatabaseConnection).toHaveBeenCalledTimes(1)
       expect(screen.getByText('Database connection successful.')).toBeInTheDocument()
+      expect(localStorage.getItem('job-tracker-settings-db-last-success')).toBeTruthy()
     })
   })
 
@@ -97,6 +98,19 @@ describe('SettingsView', () => {
     await waitFor(() => {
       expect(mockTestAIEndpoint).toHaveBeenCalledTimes(1)
       expect(screen.getByText('Connected to OpenAI endpoint (42 ms)')).toBeInTheDocument()
+      expect(localStorage.getItem('job-tracker-settings-ai-last-success')).toBeTruthy()
+    })
+  })
+
+  it('shows persisted health timestamps on load', async () => {
+    localStorage.setItem('job-tracker-settings-db-last-success', '2026-03-06T12:00:00.000Z')
+    localStorage.setItem('job-tracker-settings-ai-last-success', '2026-03-06T13:00:00.000Z')
+
+    render(<SettingsView onClose={() => {}} />)
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('database health status')).toHaveTextContent('DB Last Success:')
+      expect(screen.getByLabelText('ai health status')).toHaveTextContent('AI Last Success:')
     })
   })
 })

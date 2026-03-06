@@ -13,6 +13,18 @@ interface SettingsViewProps {
   onClose: () => void
 }
 
+const DB_HEALTH_KEY = 'job-tracker-settings-db-last-success'
+const AI_HEALTH_KEY = 'job-tracker-settings-ai-last-success'
+
+function formatHealthTimestamp(value: string | null): string {
+  if (!value) {
+    return 'Not tested yet'
+  }
+
+  const parsed = new Date(value)
+  return Number.isNaN(parsed.getTime()) ? 'Not tested yet' : parsed.toLocaleString()
+}
+
 export function SettingsView({ onClose }: SettingsViewProps) {
   const [aiConfig, setAiConfig] = useState<AIConfig>(() => loadAIConfig())
   const [databaseInfo, setDatabaseInfo] = useState<DatabaseInfo | null>(null)
@@ -24,6 +36,8 @@ export function SettingsView({ onClose }: SettingsViewProps) {
   const [testingDatabase, setTestingDatabase] = useState(false)
   const [testingAI, setTestingAI] = useState(false)
   const [creatingDatabase, setCreatingDatabase] = useState(false)
+  const [dbLastSuccess, setDbLastSuccess] = useState<string | null>(() => localStorage.getItem(DB_HEALTH_KEY))
+  const [aiLastSuccess, setAiLastSuccess] = useState<string | null>(() => localStorage.getItem(AI_HEALTH_KEY))
 
   useEffect(() => {
     setLoadingInfo(true)
@@ -83,6 +97,9 @@ export function SettingsView({ onClose }: SettingsViewProps) {
       const result = await testDatabaseConnection()
       if (result.ok) {
         setDatabaseMessage('Database connection successful.')
+        const now = new Date().toISOString()
+        setDbLastSuccess(now)
+        localStorage.setItem(DB_HEALTH_KEY, now)
       } else {
         setDatabaseMessage('Database connection returned an unexpected response.')
       }
@@ -101,6 +118,9 @@ export function SettingsView({ onClose }: SettingsViewProps) {
       const result = await testAIEndpoint(aiConfig)
       if (result.ok) {
         setAiTestMessage(`${result.message} (${result.latencyMs} ms)`)
+        const now = new Date().toISOString()
+        setAiLastSuccess(now)
+        localStorage.setItem(AI_HEALTH_KEY, now)
       } else {
         setAiTestMessage(`Connection failed: ${result.message}`)
       }
@@ -161,6 +181,12 @@ export function SettingsView({ onClose }: SettingsViewProps) {
               >
                 {testingDatabase ? 'Testing...' : 'Test Connection'}
               </button>
+            </div>
+
+            <div className="health-badge-row">
+              <span className="health-badge" aria-label="database health status">
+                DB Last Success: {formatHealthTimestamp(dbLastSuccess)}
+              </span>
             </div>
 
             {databaseMessage && <small className="settings-message">{databaseMessage}</small>}
@@ -285,6 +311,11 @@ export function SettingsView({ onClose }: SettingsViewProps) {
               >
                 {testingAI ? 'Testing...' : 'Test AI Endpoint'}
               </button>
+            </div>
+            <div className="health-badge-row">
+              <span className="health-badge" aria-label="ai health status">
+                AI Last Success: {formatHealthTimestamp(aiLastSuccess)}
+              </span>
             </div>
             {aiTestMessage && <small className="settings-message">{aiTestMessage}</small>}
           </div>

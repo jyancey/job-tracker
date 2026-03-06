@@ -1544,6 +1544,22 @@ label.full-width {
   color: #475569;
 }
 
+.health-badge-row {
+  margin-top: 0.5rem;
+}
+
+.health-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
 .settings-section input,
 .settings-section textarea,
 .settings-section select {
