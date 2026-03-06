@@ -50,7 +50,7 @@ export function JobModal({ job, onClose }: JobModalProps) {
             <strong>{formatDate(job.nextActionDueDate)}</strong>
           </article>
 
-          {job.scoreFit !== undefined && (
+          {job.scoreFit != null && (
             <>
               <article>
                 <span>Fit</span>
@@ -58,19 +58,19 @@ export function JobModal({ job, onClose }: JobModalProps) {
               </article>
               <article>
                 <span>Compensation</span>
-                <strong>{job.scoreCompensation?.toFixed(1) || '-'}/5</strong>
+                <strong>{job.scoreCompensation != null ? job.scoreCompensation.toFixed(1) : '-'}/5</strong>
               </article>
               <article>
                 <span>Location</span>
-                <strong>{job.scoreLocation?.toFixed(1) || '-'}/5</strong>
+                <strong>{job.scoreLocation != null ? job.scoreLocation.toFixed(1) : '-'}/5</strong>
               </article>
               <article>
                 <span>Growth</span>
-                <strong>{job.scoreGrowth?.toFixed(1) || '-'}/5</strong>
+                <strong>{job.scoreGrowth != null ? job.scoreGrowth.toFixed(1) : '-'}/5</strong>
               </article>
               <article>
                 <span>Confidence</span>
-                <strong>{job.scoreConfidence?.toFixed(1) || '-'}/5</strong>
+                <strong>{job.scoreConfidence != null ? job.scoreConfidence.toFixed(1) : '-'}/5</strong>
               </article>
             </>
           )}
