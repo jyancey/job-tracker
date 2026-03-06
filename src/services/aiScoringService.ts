@@ -68,8 +68,28 @@ function formatUserProfile(profile: UserProfile): string {
   return parts.join('\n')
 }
 
+function normalizeApiBaseUrl(baseUrl: string, defaultRoot: string): string {
+  const raw = (baseUrl || defaultRoot).trim()
+  const withoutTrailingSlash = raw.replace(/\/+$/, '')
+  return withoutTrailingSlash.endsWith('/v1')
+    ? withoutTrailingSlash
+    : `${withoutTrailingSlash}/v1`
+}
+
+function normalizeLmStudioBaseUrl(baseUrl: string): { url: string; nativeApi: boolean } {
+  const raw = (baseUrl || 'http://localhost:1234').trim().replace(/\/+$/, '')
+  if (raw.endsWith('/api/v1')) {
+    return { url: raw, nativeApi: true }
+  }
+
+  return {
+    url: raw.endsWith('/v1') ? raw : `${raw}/v1`,
+    nativeApi: false,
+  }
+}
+
 async function callOpenAI(config: AIConfig, messages: Array<{ role: string; content: string }>): Promise<string> {
-  const baseUrl = config.baseUrl || 'https://api.openai.com/v1'
+  const baseUrl = normalizeApiBaseUrl(config.baseUrl || '', 'https://api.openai.com')
   const model = config.model || 'gpt-4o-mini'
   
   const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -96,10 +116,11 @@ async function callOpenAI(config: AIConfig, messages: Array<{ role: string; cont
 }
 
 async function callLMStudio(config: AIConfig, messages: Array<{ role: string; content: string }>): Promise<string> {
-  const baseUrl = config.baseUrl || 'http://localhost:1234/v1'
+  const base = normalizeLmStudioBaseUrl(config.baseUrl || '')
   const model = config.model || 'local-model'
+  const endpoint = base.nativeApi ? `${base.url}/chat` : `${base.url}/chat/completions`
   
-  const response = await fetch(`${baseUrl}/chat/completions`, {
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
