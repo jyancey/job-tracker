@@ -91,15 +91,58 @@ export function parseResumeText(text: string): ParsedResume {
  * Parse resume from uploaded file
  */
 export async function parseResumeFile(file: File): Promise<ParsedResume> {
-  const text = await file.text()
-  
-  // If it's a PDF, we'd need a PDF parser library
-  // For now, just handle text files
-  if (file.type === 'application/pdf') {
-    throw new Error('PDF parsing requires additional dependencies. Please copy/paste your resume text instead.')
+  let text: string
+
+  if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+    try {
+      text = await extractTextFromPDF(file)
+    } catch (err) {
+      throw new Error(
+        `Failed to parse PDF: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      )
+    }
+  } else {
+    // Handle text files
+    text = await file.text()
   }
-  
+
   return parseResumeText(text)
+}
+
+/**
+ * Extract text content from a PDF file
+ */
+async function extractTextFromPDF(file: File): Promise<string> {
+  try {
+    // Dynamically import pdfjs-dist only when needed (browser environment)
+    const pdfjsLib = await import('pdfjs-dist')
+    
+    // Set up the worker for PDF parsing
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
+    
+    const arrayBuffer = await file.arrayBuffer()
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+
+    let fullText = ''
+
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum)
+      const textContent = await page.getTextContent()
+      
+      // Extract text items and join them with spaces
+      const pageText = textContent.items
+        .map((item: any) => ('str' in item ? item.str : ''))
+        .join(' ')
+      
+      fullText += pageText + '\n'
+    }
+
+    return fullText
+  } catch (err) {
+    throw new Error(
+      `Failed to extract text from PDF: ${err instanceof Error ? err.message : 'Unknown error'}`,
+    )
+  }
 }
 
 /**
