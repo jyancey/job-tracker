@@ -11,13 +11,18 @@ jobs:
     runs-on: macos-arm64
     permissions:
       contents: write
+    env:
+      npm_config_script_shell: /bin/bash
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
