@@ -182,7 +182,7 @@ function AppContent() {
               .catch((err) => {
                 addNotification(`AI scoring failed: ${err.message}`, 'error')
               })
-          } catch (err) {
+          } catch {
             // Silently handle errors during async scoring
           }
         }, 0)

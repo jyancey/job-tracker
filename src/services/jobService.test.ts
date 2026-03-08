@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { createJob, updateJob, deleteJob, deleteJobs, updateJobStatus, sortByApplicationDateDesc } from './jobService'
-import type { Job, JobDraft, JobStatus } from '../domain'
+import type { Job, JobDraft } from '../domain'
 
 describe('jobService', (): void => {
   const mockDraft: JobDraft = {

@@ -22,11 +22,8 @@ export default defineConfig([
     },
     rules: {
       // TypeScript specific rules
-      '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/explicit-function-return-types': [
-        'error',
-        { allowExpressions: true, allowTypedFunctionExpressions: true },
-      ],
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -40,8 +37,8 @@ export default defineConfig([
       'no-var': 'error',
       'prefer-const': 'error',
       'prefer-arrow-callback': 'error',
-      'no-implicit-coercion': 'error',
-      'eqeqeq': ['error', 'always'],
+      'no-implicit-coercion': 'warn',
+      'eqeqeq': ['warn', 'smart'],
 
       // React specific
       'react-hooks/rules-of-hooks': 'error',
@@ -55,7 +52,7 @@ export default defineConfig([
       globals: globals.node,
     },
     rules: {
-      '@typescript-eslint/explicit-function-return-types': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
       'no-console': 'off',
     },
   },

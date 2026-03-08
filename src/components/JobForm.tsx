@@ -51,7 +51,7 @@ export function JobForm({ draft, editingId, onUpdateDraft, onSubmit, onCancel }:
         const text = event.target?.result as string
         onUpdateDraft('jobDescription', text)
         onUpdateDraft('jobDescriptionSource', 'upload')
-      } catch (err) {
+      } catch {
         setScrapingError('Failed to read file')
       }
     }
