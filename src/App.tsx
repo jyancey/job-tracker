@@ -15,7 +15,7 @@ import {
   mergeImportedJobs,
   type ImportMode,
 } from './exportImport'
-import { APP_VERSION } from './version'
+import { APP_VERSION, GIT_BRANCH } from './version'
 import {
   useJobFiltering,
   useJobSorting,
@@ -379,6 +379,9 @@ function AppContent() {
 
   return (
     <div className="app-shell">
+      <div className="version-badge" title={`Version ${APP_VERSION} on ${GIT_BRANCH}`}>
+        {APP_VERSION}
+      </div>
       <input
         ref={importFileRef}
         type="file"
@@ -395,7 +398,24 @@ function AppContent() {
         <>
           <section className="top-grid">
             <header className="hero">
-              <img src="/job-tracker.png" alt="Job Tracker Logo" className="hero-logo" />
+              <div className="hero-actions" role="group" aria-label="Profile and settings actions">
+                <button
+                  type="button"
+                  className="small ghost"
+                  onClick={() => view.updateView('profile')}
+                  title="Open profile"
+                >
+                  Profile
+                </button>
+                <button
+                  type="button"
+                  className="small ghost"
+                  onClick={() => view.updateView('settings')}
+                  title="Open settings"
+                >
+                  Settings
+                </button>
+              </div>
               <div className="hero-bottom">
                 <div className="hero-content">
                   <p className="eyebrow">Job Tracker</p>
@@ -434,12 +454,6 @@ function AppContent() {
                   {saveStatus === 'pending' && <span className="save-status">Saving...</span>}
                 </div>
                 <div className="form-actions-top">
-                  <button type="button" className="small" onClick={() => view.updateView('profile')}>
-                    👤 Profile
-                  </button>
-                  <button type="button" className="small" onClick={() => view.updateView('settings')}>
-                    ⚙️ Settings
-                  </button>
                   <button type="button" className="small" onClick={() => handleExport('json')}>
                     Export JSON
                   </button>
@@ -495,22 +509,6 @@ function AppContent() {
                         {VIEW_LABELS[key]}
                       </button>
                     ))}
-                  <button
-                    className={(view.view as View) === 'profile' ? 'active' : ''}
-                    onClick={() => view.updateView('profile')}
-                    type="button"
-                    title="User profile"
-                  >
-                    {VIEW_LABELS['profile']}
-                  </button>
-                  <button
-                    className={(view.view as View) === 'settings' ? 'active' : ''}
-                    onClick={() => view.updateView('settings')}
-                    type="button"
-                    title="AI settings"
-                  >
-                    {VIEW_LABELS['settings']}
-                  </button>
                 </div>
                 <FilterToolbar
                   state={filters.state}
@@ -548,10 +546,6 @@ function AppContent() {
           {view.viewingJob && <JobModal job={view.viewingJob} onClose={closeViewOnly} />}
         </>
       )}
-
-      <footer className="app-footer">
-        <span>Job Tracker {APP_VERSION}</span>
-      </footer>
     </div>
   )
 }
