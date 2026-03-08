@@ -63,7 +63,7 @@ function AppContent() {
   // Data filtering and transformation
   const { filteredJobs, overdueCount } = useJobFiltering(jobs, filters.state)
   const sortedTableJobs = useJobSorting(filteredJobs, { sortColumn: 'applicationDate', sortDirection: 'desc' })
-  const { paginatedJobs: tempPaginatedJobs, totalPages: tempTotalPages } = useJobPagination(sortedTableJobs, {
+  const { totalPages: tempTotalPages } = useJobPagination(sortedTableJobs, {
     currentPage: 1,
     pageSize: 10,
   })
@@ -153,12 +153,11 @@ function AppContent() {
 
     // Trigger AI scoring if applicable
     triggerAiScoring(
-      normalizedDraft.jobDescription,
+      normalizedDraft.jobDescription ?? '',
       normalizedDraft.roleTitle,
       normalizedDraft.company,
       normalizedDraft.salaryRange,
       newJobId || '',
-      normalizedDraft,
       setJobs,
     )
   }
@@ -303,7 +302,12 @@ function AppContent() {
       {view.view === 'profile' ? (
         <ProfileView onClose={() => view.updateView('table')} />
       ) : view.view === 'settings' ? (
-        <SettingsView onClose={() => view.updateView('table')} />
+        <SettingsView
+          onClose={() => view.updateView('table')}
+          jobs={jobs}
+          setJobs={setJobs}
+          addNotification={addNotification}
+        />
       ) : (
         <>
           <section className="top-grid">

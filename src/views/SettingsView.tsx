@@ -1,6 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { ChangeEvent } from 'react'
+import type { Job } from '../domain'
+import { downloadJsonFile } from '../utils/downloadUtils'
 import type { AIConfig } from '../types/ai'
 import { loadAIConfig, saveAIConfig } from '../storage/aiStorage'
+import {
+  applyRestore,
+  backupFilename,
+  calculateRestoreImpact,
+  createBackupSnapshot,
+  parseBackup,
+  type RestoreImpact,
+  type RestoreMode,
+} from '../features/backup'
 import {
   createDatabase,
   fetchDatabaseInfo,
@@ -11,6 +23,9 @@ import {
 
 interface SettingsViewProps {
   onClose: () => void
+  jobs: Job[]
+  setJobs: (updater: (jobs: Job[]) => Job[]) => void
+  addNotification: (message: string, type?: 'success' | 'error' | 'info') => void
 }
 
 const DB_HEALTH_KEY = 'job-tracker-settings-db-last-success'
@@ -25,7 +40,7 @@ function formatHealthTimestamp(value: string | null): string {
   return Number.isNaN(parsed.getTime()) ? 'Not tested yet' : parsed.toLocaleString()
 }
 
-export function SettingsView({ onClose }: SettingsViewProps) {
+export function SettingsView({ onClose, jobs, setJobs, addNotification }: SettingsViewProps) {
   const [aiConfig, setAiConfig] = useState<AIConfig>(() => loadAIConfig())
   const [databaseInfo, setDatabaseInfo] = useState<DatabaseInfo | null>(null)
   const [saved, setSaved] = useState(false)
@@ -36,6 +51,11 @@ export function SettingsView({ onClose }: SettingsViewProps) {
   const [testingDatabase, setTestingDatabase] = useState(false)
   const [testingAI, setTestingAI] = useState(false)
   const [creatingDatabase, setCreatingDatabase] = useState(false)
+  const [restoreMode, setRestoreMode] = useState<RestoreMode>('upsert')
+  const [restoreMessage, setRestoreMessage] = useState('')
+  const [restoreImpact, setRestoreImpact] = useState<RestoreImpact | null>(null)
+  const [pendingRestoreJobs, setPendingRestoreJobs] = useState<Job[] | null>(null)
+  const restoreFileRef = useRef<HTMLInputElement>(null)
   const [dbLastSuccess, setDbLastSuccess] = useState<string | null>(() => localStorage.getItem(DB_HEALTH_KEY))
   const [aiLastSuccess, setAiLastSuccess] = useState<string | null>(() => localStorage.getItem(AI_HEALTH_KEY))
 
@@ -128,6 +148,61 @@ export function SettingsView({ onClose }: SettingsViewProps) {
       setAiTestMessage(err instanceof Error ? err.message : 'Failed to test AI endpoint')
     } finally {
       setTestingAI(false)
+    }
+  }
+
+  const handleBackupDownload = () => {
+    const snapshot = createBackupSnapshot(jobs)
+    downloadJsonFile(snapshot, backupFilename())
+    addNotification(`Backup created for ${jobs.length} jobs`, 'success')
+  }
+
+  const handleRestoreFilePick = () => {
+    restoreFileRef.current?.click()
+  }
+
+  const handleRestoreFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const content = (e.target?.result as string) || ''
+      const parsed = parseBackup(content)
+      if (!parsed) {
+        setPendingRestoreJobs(null)
+        setRestoreImpact(null)
+        setRestoreMessage('Invalid backup file. Expected Job Tracker backup JSON.')
+        addNotification('Invalid backup file', 'error')
+        return
+      }
+
+      const impact = calculateRestoreImpact(jobs, parsed.jobs, restoreMode)
+      setPendingRestoreJobs(parsed.jobs)
+      setRestoreImpact(impact)
+      setRestoreMessage(`Loaded backup with ${parsed.jobs.length} jobs from ${new Date(parsed.createdAt).toLocaleString()}`)
+    }
+
+    reader.readAsText(file)
+    event.target.value = ''
+  }
+
+  const handleApplyRestore = () => {
+    if (!pendingRestoreJobs) {
+      return
+    }
+
+    setJobs((current) => applyRestore(current, pendingRestoreJobs, restoreMode))
+    addNotification('Backup restore applied successfully', 'success')
+    setRestoreMessage('Restore applied. Your job list was updated.')
+    setPendingRestoreJobs(null)
+    setRestoreImpact(null)
+  }
+
+  const handleRestoreModeChange = (mode: RestoreMode) => {
+    setRestoreMode(mode)
+    if (pendingRestoreJobs) {
+      setRestoreImpact(calculateRestoreImpact(jobs, pendingRestoreJobs, mode))
     }
   }
 
@@ -318,6 +393,62 @@ export function SettingsView({ onClose }: SettingsViewProps) {
               </span>
             </div>
             {aiTestMessage && <small className="settings-message">{aiTestMessage}</small>}
+          </div>
+
+          <div className="settings-section">
+            <h2>Backup and Restore</h2>
+
+            <input
+              ref={restoreFileRef}
+              type="file"
+              accept=".json,application/json"
+              style={{ display: 'none' }}
+              onChange={handleRestoreFileChange}
+            />
+
+            <div className="settings-actions-row">
+              <button type="button" className="button-secondary" onClick={handleBackupDownload}>
+                Download Backup Snapshot
+              </button>
+              <button type="button" className="button-secondary" onClick={handleRestoreFilePick}>
+                Choose Restore File
+              </button>
+            </div>
+
+            <label className="full-width" style={{ marginTop: '0.8rem' }}>
+              Restore Mode
+              <select value={restoreMode} onChange={(e) => handleRestoreModeChange(e.target.value as RestoreMode)}>
+                <option value="upsert">Upsert (update matching IDs, insert new)</option>
+                <option value="append">Append (add all incoming)</option>
+                <option value="replace">Replace (overwrite all current jobs)</option>
+              </select>
+            </label>
+
+            {restoreImpact && (
+              <div className="settings-message" aria-label="restore impact preview">
+                Preview: +{restoreImpact.inserted} inserted, {restoreImpact.updated} updated, -
+                {restoreImpact.removed} removed. Final total: {restoreImpact.finalCount} jobs.
+              </div>
+            )}
+
+            {restoreMode === 'replace' && restoreImpact && restoreImpact.removed > 0 && (
+              <div className="error-message-inline">
+                Replace mode will remove {restoreImpact.removed} current jobs not present in backup.
+              </div>
+            )}
+
+            <div className="settings-actions-row" style={{ marginTop: '0.8rem' }}>
+              <button
+                type="button"
+                className="button-primary"
+                onClick={handleApplyRestore}
+                disabled={!pendingRestoreJobs}
+              >
+                Apply Restore
+              </button>
+            </div>
+
+            {restoreMessage && <small className="settings-message">{restoreMessage}</small>}
           </div>
         </div>
 
