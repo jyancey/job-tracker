@@ -78,7 +78,7 @@ jobs:
           EOF
 
       - name: Upload packaged release artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: release-${{ steps.tag_version.outputs.version }}
           path: release/${{ steps.tag_version.outputs.version }}/
