@@ -1,7 +1,7 @@
 # Job Tracker - Next Steps
 **Updated:** March 8, 2026  
 **Current Version:** v2.5.6+  
-**Test Suite Status:** ✅ 438 tests passing across 50 files
+**Test Suite Status:** ✅ 541 tests passing across 59 files (+5 Playwright E2E)
 
 ---
 
@@ -11,24 +11,34 @@
 - **Phase 1:** Engineering Foundation - Component and utility tests
 - **Phase 2:** Workflow Components - Forms, drag-drop, tables, Kanban (117 tests)
 - **Phase 3:** Hooks, Services, Views, Utilities - All batches complete (121 tests)
-- **Total Coverage:** 438 passing tests, 50 test files, ~85%+ statement coverage
+- **Total Coverage:** 541 passing tests, 59 test files, ~87% statement coverage
 - **Status:** All Phase 1-3 testing objectives met. Test infrastructure is solid.
+
+### E2E Coverage (✅ Baseline Complete)
+- Playwright configured and stable in local/CI-friendly mode
+- 5 end-to-end tests currently passing:
+  - smoke: homepage load
+  - smoke: settings open/close
+  - CRUD workflow (create/edit/delete)
+  - filter + sort workflow
+  - cross-view navigation (dashboard/analytics/calendar/kanban/table)
 
 ### Architecture (🟡 Partially Complete)
 - **Completed Refactoring:**
-  - Extracted 11 custom hooks from App.tsx
+  - Extracted multiple custom hooks from App.tsx (including actions/compare/table context composition)
   - Separated domain logic (domain.ts)
   - Isolated storage layer (storage.ts, sqliteStore.js)
   - Created service modules (jobService, aiScoringService, resumeParsingService)
+  - Split export/import responsibilities into focused modules (`csvParser`, `jsonTransfer`, `jobMerger`)
   - Component extraction (views, inputs, tables, workflows)
+  - Extracted `AppShellView` to separate render/routing from orchestration
 
 - **Remaining Issues (from REFACTORING_ANALYSIS.md):**
-  - App.tsx still 475 lines (down from ~800+, but could go further)
-  - exportImport.ts at 239 lines (mixed CSV/JSON/merge logic)
+  - App.tsx is now 233 lines (target reached; monitor for future creep)
   - storage.ts at 195 lines (mixed logging/API/fallback)
-  - TableView.tsx has 22 props (prop drilling issue)
+  - TableView context exists; continue simplifying table sub-components incrementally
   - 10 components without tests (low priority UI components)
-  - No E2E/smoke tests yet (Playwright)
+  - E2E coverage is baseline-complete; bulk ops/import-export/drag-drop paths remain to add
 
 ### Features (🟢 Strong Foundation, 🟡 Growth Opportunities)
 **Current Capabilities:**
@@ -45,13 +55,13 @@
 - ✅ Local storage with SQLite backend option
 
 **Missing from Original Roadmap (NEXT_STEPS_PLAN.md):**
-- ❌ Pipeline intelligence metrics (conversion rates, time-in-stage)
+- ✅ Pipeline intelligence metrics (conversion rates, time-in-stage)
 - ❌ "Today" and "This Week" action-focused views
 - ❌ Action priority levels and snooze functionality
 - ❌ Saved filter presets ("Saved Views")
 - ❌ Full-text search across all job fields
-- ❌ Backup snapshots with restore points
-- ❌ Import preview with diff before destructive operations
+- ✅ Backup snapshots with restore points
+- ✅ Import preview with diff before destructive operations
 
 ---
 
@@ -218,10 +228,18 @@
 
 ---
 
-#### A5. Backup & Restore System (HIGH VALUE) 🔒
+#### A5. Backup & Restore System (HIGH VALUE) 🔒 (✅ Completed)
 **Priority:** P1 - Data safety  
 **Effort:** 1-2 weeks  
 **User Impact:** Peace of mind, recovery from mistakes
+
+**Delivered (March 8, 2026):**
+- Manual backup snapshot download
+- Restore modes with impact summary (append/upsert/replace)
+- Automatic backup scheduling (daily/weekly/monthly/disabled)
+- Backup retention policy (keep last N, prune old snapshots)
+- Import/restore diff preview with field-level change details
+- Backup-specific test coverage: 46 tests
 
 **Features:**
 - Manual backup:
@@ -267,12 +285,12 @@
 ### Track B: Code Quality & Architecture (Developer Velocity)
 **Goal:** Make future feature development faster and safer
 
-#### B1. App.tsx Final Refactoring (MEDIUM EFFORT)
+#### B1. App.tsx Final Refactoring (MEDIUM EFFORT) (✅ Completed)
 **Priority:** P2 - Maintainability  
 **Effort:** 4-6 hours  
-**Current State:** 475 lines, still orchestrating too much
+**Current State:** 233 lines, orchestration-focused
 
-**Target:** Reduce to ~250 lines by extracting:
+**Outcome:** Target achieved by extracting orchestration helpers and presentation shell.
 
 **Extraction 1: useAppState hook**
 ```typescript
@@ -301,7 +319,7 @@
 - Easier to reason about state flow
 - Reduces cognitive load for new features
 
-**Estimated Tests:** 25 new tests for extracted hooks  
+**Estimated Tests:** Completed with existing + new hook/regression coverage  
 **Risk:** Low (existing tests serve as regression suite)
 
 ---
@@ -335,7 +353,7 @@ const { onEdit, onDelete } = useTableContext()
 
 ---
 
-#### B3. Split exportImport.ts Module (LOW EFFORT)
+#### B3. Split exportImport.ts Module (LOW EFFORT) (✅ Completed)
 **Priority:** P3 - Organization  
 **Effort:** 3-4 hours  
 **Current State:** 239 lines, mixed CSV/JSON/merge
@@ -360,10 +378,10 @@ src/exportImport.ts    (~50 lines: orchestrates the above)
 
 ---
 
-#### B4. Add Playwright E2E Smoke Tests (MEDIUM EFFORT)
+#### B4. Add Playwright E2E Smoke Tests (MEDIUM EFFORT) (✅ Baseline Completed)
 **Priority:** P2 - Regression safety  
 **Effort:** 1 week  
-**Current State:** No E2E tests, only unit/integration
+**Current State:** 5 E2E tests passing (smoke + CRUD + filter/sort + navigation)
 
 **Test Coverage (5-7 critical paths):**
 1. **Happy path CRUD:**
@@ -460,10 +478,10 @@ src/exportImport.ts    (~50 lines: orchestrates the above)
 **Goal:** Improve confidence and findability
 
 **Week 1:**
-- [ ] A5: Backup & Restore System
-  - [ ] Manual backup/restore
-  - [ ] Automatic backup scheduling
-  - [ ] Import preview with diff
+- [x] A5: Backup & Restore System
+  - [x] Manual backup/restore
+  - [x] Automatic backup scheduling
+  - [x] Import preview with diff
 
 **Week 2:**
 - [ ] Polish and bug fixes
@@ -478,21 +496,21 @@ src/exportImport.ts    (~50 lines: orchestrates the above)
 **Goal:** Improve developer velocity for future work
 
 **Week 1:**
-- [ ] B1: App.tsx Final Refactoring
-  - [ ] Extract useAppState, useJobCRUD, useUndo
-  - [ ] Update tests
-- [ ] B2: TableView Prop Drilling Fix
-  - [ ] Implement TableContext
-  - [ ] Update child components
+- [x] B1: App.tsx Final Refactoring
+  - [x] Extracted orchestration hooks + moved render/routing to `AppShellView`
+  - [x] Updated tests and validated regression suite
+- [x] B2: TableView Prop Drilling Fix
+  - [x] Implemented `TableViewContext`
+  - [x] Updated child components
 
 **Week 2:**
-- [ ] B3: Split exportImport.ts
-  - [ ] Create focused modules
-  - [ ] Update imports
-- [ ] B4: Playwright E2E Tests
-  - [ ] Setup and configure
-  - [ ] Implement 7 critical path tests
-  - [ ] CI integration
+- [x] B3: Split exportImport.ts
+  - [x] Created focused modules
+  - [x] Updated imports
+- [x] B4: Playwright E2E Tests
+  - [x] Setup and configure
+  - [x] Implement baseline critical-path tests
+  - [ ] Expand to bulk ops/import-export/drag-drop scenarios
 
 **Deliverable:** v2.7.1 maintenance release with improved architecture
 
@@ -569,7 +587,7 @@ The following items from the original NEXT_STEPS_PLAN.md are **deferred** for no
 
 ## Appendix: Testing Status
 
-### Current Test Coverage (438 tests, 50 files)
+### Current Test Coverage (541 tests, 59 files)
 
 **Phase 1 (Engineering Foundation):**
 - Domain logic, utilities, storage layer
@@ -591,6 +609,10 @@ The following items from the original NEXT_STEPS_PLAN.md are **deferred** for no
 - Views: ~85%
 - **Overall:** ~87% statement coverage
 
+**Playwright E2E Coverage:**
+- 5 passing tests in `e2e/`
+- Smoke + CRUD + filter/sort + cross-view navigation
+
 **Files Still Untested (Low Priority):**
 - Minor UI components (badges, icons, tooltips)
 - CSS modules
@@ -601,22 +623,22 @@ The following items from the original NEXT_STEPS_PLAN.md are **deferred** for no
 ## Next Actions
 
 **Immediate (This Week):**
-1. Review and approve this roadmap
-2. Create GitHub issues/project board for Sprint 1 tasks
-3. Begin implementation of A1 (Pipeline Intelligence Dashboard)
+1. Start A2: priority field + Today/This Week task views
+2. Start A3: saved filter presets (MVP CRUD + apply)
+3. Start A4: full-text search enhancements and UX polish
 
 **This Month:**
-1. Complete Sprint 1 (features)
-2. Start Sprint 2 (backup system)
-3. Begin planning v2.6.0 release
+1. Complete A2, A3, and A4 feature set
+2. Expand E2E suite for bulk operations/import-export/drag-drop
+3. Plan v2.6.x feature release
 
 **This Quarter:**
-1. Complete Sprints 1-3
-2. Release v2.6.0 and v2.7.0
-3. Gather user feedback on new features
+1. Ship remaining roadmap features (A2/A3/A4)
+2. Continue storage-layer cleanup (B5)
+3. Gather user feedback on task-centric workflows
 4. Plan next phase based on usage data
 
 ---
 
-**Document Status:** Ready for review  
-**Next Review Date:** After Sprint 1 completion (~3 weeks)
+**Document Status:** Updated after Sprint 2 and Sprint 3 completion  
+**Next Review Date:** After A2/A3 implementation checkpoint (~2 weeks)
