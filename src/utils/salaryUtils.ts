@@ -5,7 +5,10 @@ export function parseSalaryRange(salaryRange: string, minStr: string, maxStr: st
   const numbers = salaryRange.match(/\d+/g) || []
   if (!numbers.length) return false
 
-  const first = parseInt(numbers[0]!, 10)
+  const firstValue = numbers[0]
+  if (!firstValue) return false
+
+  const first = parseInt(firstValue, 10)
   const min = minStr ? parseInt(minStr, 10) : 0
   const max = maxStr ? parseInt(maxStr, 10) : Infinity
 

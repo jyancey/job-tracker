@@ -192,10 +192,10 @@ function AppContent() {
 
   function apiKeyConfigured(config: ReturnType<typeof loadAIConfig>): boolean {
     if (config.provider === 'openai') {
-      return !!config.apiKey?.trim()
+      return Boolean(config.apiKey?.trim())
     }
     if (config.provider === 'lmstudio') {
-      return !!config.baseUrl?.trim()
+      return Boolean(config.baseUrl?.trim())
     }
     return false
   }
@@ -338,6 +338,8 @@ function AppContent() {
     setSortDirection(column === 'applicationDate' || column === 'nextActionDueDate' ? 'desc' : 'asc')
   }
 
+  // Handlers are intentionally captured for table context and refreshed with state updates.
+  /* eslint-disable react-hooks/exhaustive-deps */
   const tableViewContextValue = useMemo(
     () => ({
       paginatedJobs: paginatedTableJobs,
@@ -376,6 +378,7 @@ function AppContent() {
       pageSize,
     ],
   )
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
     <div className="app-shell">

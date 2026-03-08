@@ -24,11 +24,11 @@ function logStorageInfo(message: string, details?: Record<string, unknown>): voi
   }
 
   if (details) {
-    console.info(`[storage] ${message}`, details)
+    console.warn(`[storage] ${message}`, details)
     return
   }
 
-  console.info(`[storage] ${message}`)
+  console.warn(`[storage] ${message}`)
 }
 
 function logStorageError(message: string, error: unknown): void {

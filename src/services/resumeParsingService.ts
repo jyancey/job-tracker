@@ -22,6 +22,24 @@ export interface ParsedResume {
   rawText: string
 }
 
+interface PdfTextItem {
+  str?: string
+}
+
+interface PdfPage {
+  getTextContent: () => Promise<{ items: PdfTextItem[] }>
+}
+
+interface PdfDocument {
+  numPages: number
+  getPage: (n: number) => Promise<PdfPage>
+}
+
+interface PdfJsModuleLike {
+  GlobalWorkerOptions: { workerSrc: string }
+  getDocument: (options: unknown) => { promise: Promise<PdfDocument> }
+}
+
 /**
  * Parse resume from text content
  */
@@ -169,12 +187,12 @@ async function extractTextWithLegacyPdfJs(file: File): Promise<string> {
   const pdf = await pdfjsLegacy.getDocument({
     data: new Uint8Array(arrayBuffer),
     disableWorker: true,
-  } as any).promise
+  }).promise
 
   return extractTextFromDocument(pdf)
 }
 
-async function extractTextFromDocument(pdf: { numPages: number; getPage: (n: number) => Promise<{ getTextContent: () => Promise<{ items: unknown[] }> }> }): Promise<string> {
+async function extractTextFromDocument(pdf: PdfDocument): Promise<string> {
   let fullText = ''
 
   for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
@@ -182,7 +200,7 @@ async function extractTextFromDocument(pdf: { numPages: number; getPage: (n: num
     const textContent = await page.getTextContent()
 
     const pageText = textContent.items
-      .map((item: any) => ('str' in item ? item.str : ''))
+      .map((item) => item.str ?? '')
       .join(' ')
 
     fullText += pageText + '\n'
@@ -205,16 +223,23 @@ function isPdfRuntimeCompatibilityError(error: unknown): boolean {
   )
 }
 
-function resolvePdfJsModule(moduleValue: any): any {
+function resolvePdfJsModule(moduleValue: unknown): PdfJsModuleLike {
   if (moduleValue && typeof moduleValue === 'object' && 'getDocument' in moduleValue) {
-    return moduleValue
+    return moduleValue as PdfJsModuleLike
   }
 
-  if (moduleValue?.default && typeof moduleValue.default === 'object' && 'getDocument' in moduleValue.default) {
-    return moduleValue.default
+  if (
+    moduleValue &&
+    typeof moduleValue === 'object' &&
+    'default' in moduleValue &&
+    moduleValue.default &&
+    typeof moduleValue.default === 'object' &&
+    'getDocument' in moduleValue.default
+  ) {
+    return moduleValue.default as PdfJsModuleLike
   }
 
-  return moduleValue
+  throw new Error('Unable to resolve pdfjs module interface')
 }
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number, timeoutMessage: string): Promise<T> {
