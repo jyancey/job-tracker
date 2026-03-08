@@ -13,7 +13,7 @@ jobs:
       contents: write
     env:
       npm_config_script_shell: /bin/bash
-      PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+      PATH: /opt/homebrew/bin:/opt/macports/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
     defaults:
       run:
         shell: bash

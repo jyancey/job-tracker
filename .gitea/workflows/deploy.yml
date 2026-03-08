@@ -16,7 +16,7 @@ jobs:
     if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
     env:
       npm_config_script_shell: /bin/bash
-      PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+      PATH: /opt/homebrew/bin:/opt/macports/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
     defaults:
       run:
         shell: bash
