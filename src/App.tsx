@@ -1,27 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
-import {
-  type Job,
-  type JobStatus,
-} from './domain'
+import type { Job } from './domain'
 import { KanbanBoard } from './components/KanbanBoard'
 import { downloadStorageLogs } from './storage'
 import { ToastContainer } from './components/Toast'
-import { downloadFile } from './utils/downloadUtils'
-import {
-  exportToCsv,
-  exportToJson,
-  importJobsFromFile,
-  mergeImportedJobs,
-  type ImportMode,
-} from './exportImport'
 import { APP_VERSION, GIT_BRANCH } from './version'
 import {
   useJobFiltering,
   useJobSorting,
   useJobPagination,
-  type SortColumn,
-  type SortDirection,
 } from './hooks/useJobFiltering'
 import { useFilterState } from './hooks/useFilterState'
 import { useJobSelection } from './hooks/useJobSelection'
@@ -32,6 +19,9 @@ import { useJobForm } from './hooks/useJobForm'
 import { useNotifications } from './hooks/useNotifications'
 import { useJobPersistence } from './hooks/useJobPersistence'
 import { useTableSelectionState } from './hooks/useTableSelectionState'
+import { useSortAndPagination } from './hooks/useSortAndPagination'
+import { useJobOperations } from './hooks/useJobOperations'
+import { useImportExport } from './hooks/useImportExport'
 import { TableView } from './views/TableView'
 import { CalendarView } from './views/CalendarView'
 import { DashboardView } from './views/DashboardView'
@@ -44,8 +34,6 @@ import { JobModal } from './components/JobModal'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { FilterToolbar } from './components/FilterToolbar'
 import * as jobService from './services/jobService'
-import { scoreJobWithAI } from './services/aiScoringService'
-import { loadAIConfig, loadUserProfile } from './storage/aiStorage'
 
 const VIEW_LABELS: Record<View, string> = {
   dashboard: 'Dashboard',
@@ -58,178 +46,150 @@ const VIEW_LABELS: Record<View, string> = {
 
 function AppContent() {
   const [jobs, setJobs] = useState<Job[]>([])
-  const [sortColumn, setSortColumn] = useState<SortColumn>('applicationDate')
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  
-  // Use custom hooks for state management
+  const [showCompare, setShowCompare] = useState(false)
+  const selectAllCheckboxRef = useRef<HTMLInputElement>(null)
+
+  // State management hooks
   const filters = useFilterState()
   const selection = useJobSelection()
   const view = useViewState()
   const undo = useUndoStack()
-  
-  const importFileRef = useRef<HTMLInputElement>(null)
-  const selectAllCheckboxRef = useRef<HTMLInputElement>(null)
-  const [importMode, setImportMode] = useState<ImportMode>('append')
-  const [showCompare, setShowCompare] = useState(false)
-
-  // Use notifications hook
   const { notifications, addNotification, removeNotification } = useNotifications()
-
   const { saveStatus } = useJobPersistence(jobs, setJobs, addNotification)
+  const { draft, editingId, updateDraft, resetForm, startEdit, submitForm } = useJobForm()
 
-  // Use job form hook
-  const { draft, editingId, updateDraft, resetForm, startEdit, submitForm } =
-    useJobForm()
-
-  // Use filtering hooks with filter state
+  // Data filtering and transformation
   const { filteredJobs, overdueCount } = useJobFiltering(jobs, filters.state)
+  const sortedTableJobs = useJobSorting(filteredJobs, { sortColumn: 'applicationDate', sortDirection: 'desc' })
+  const { paginatedJobs: tempPaginatedJobs, totalPages: tempTotalPages } = useJobPagination(sortedTableJobs, {
+    currentPage: 1,
+    pageSize: 10,
+  })
 
-  // Use sorting hook
-  const sortedTableJobs = useJobSorting(filteredJobs, {
+  // Sort and pagination state management
+  const { sortColumn, sortDirection, currentPage, pageSize, handleSort, setCurrentPage, setPageSize } =
+    useSortAndPagination({ totalPages: tempTotalPages })
+
+  // Recompute paginated jobs with sort applied
+  const recomputedSortedTableJobs = useJobSorting(filteredJobs, {
     sortColumn,
     sortDirection,
   })
 
-  // Use pagination hook
-  const { paginatedJobs: paginatedTableJobs, totalPages } = useJobPagination(sortedTableJobs, {
+  const { paginatedJobs, totalPages } = useJobPagination(recomputedSortedTableJobs, {
     currentPage,
     pageSize,
   })
 
-  // Use grouping hooks
+  // Job operations (mutations, AI scoring)
+  const { handleRemoveJob: removeJobHelper, handleQuickMove, triggerAiScoring } = useJobOperations({
+    editingId,
+    resetForm,
+    viewingJob: view.viewingJob,
+    closeViewOnly: view.closeViewOnly,
+    addNotification,
+  })
+
+  // Import/Export operations
+  const {
+    importFileRef,
+    importMode,
+    setImportMode,
+    handleExport,
+    handleImportClick,
+    handleImportFile,
+  } = useImportExport({
+    jobs,
+    setJobs,
+    selection,
+    undo,
+    setCurrentPage,
+    addNotification,
+  })
+
+  // Grouping for other views
   const { byStatus, dueByDate } = useJobGrouping(jobs)
 
-  useEffect(() => {
-    setCurrentPage((current) => Math.min(current, totalPages))
-  }, [totalPages])
+  // Table selection state
+  const { visibleTableIds, selectedVisibleIds, selectedVisibleCount, allVisibleSelected } =
+    useTableSelectionState(paginatedJobs, selection.selectedIds, selectAllCheckboxRef)
 
-  const {
-    visibleTableIds,
-    selectedVisibleIds,
-    selectedVisibleCount,
-    allVisibleSelected,
-  } = useTableSelectionState(paginatedTableJobs, selection.selectedIds, selectAllCheckboxRef)
-
+  // Reset page on filter changes
   useEffect(() => {
     setCurrentPage(1)
-  }, [filters.state.query, filters.state.statusFilter, filters.state.dateRangeStart, filters.state.dateRangeEnd, filters.state.salaryRangeMin, filters.state.salaryRangeMax, filters.state.contactPersonFilter])
+  }, [
+    filters.state.query,
+    filters.state.statusFilter,
+    filters.state.dateRangeStart,
+    filters.state.dateRangeEnd,
+    filters.state.salaryRangeMin,
+    filters.state.salaryRangeMax,
+    filters.state.contactPersonFilter,
+    setCurrentPage,
+  ])
 
-  function handleSubmitJob(event: React.FormEvent<HTMLFormElement>): void {
+  // Handle job submission with optional AI scoring
+  const handleSubmitJob = (event: React.FormEvent<HTMLFormElement>) => {
     const normalizedDraft = submitForm(event)
     if (!normalizedDraft) {
       return
     }
 
     let newJobId: string | null = editingId || null
-    
-    // Create or update the job
+
     if (editingId) {
       setJobs((current) => jobService.updateJob(current, editingId, normalizedDraft))
     } else {
       setJobs((current) => {
         const updated = jobService.createJob(current, normalizedDraft)
-        // Get the newly created job ID (first item after sorting)
-        const newJob = updated[0]
-        newJobId = newJob.id
+        newJobId = updated[0].id
         return updated
       })
     }
-    
+
     resetForm()
 
-    // Trigger auto-scoring if AI is enabled, profile configured, and job description exists
-    const jobDescription = normalizedDraft.jobDescription
-    const shouldAutoScore = jobDescription && jobDescription.trim() && newJobId
-    
-    if (shouldAutoScore) {
-      const aiConfig = loadAIConfig()
-      const userProfile = loadUserProfile()
-
-      if (aiConfig.provider !== 'disabled' && apiKeyConfigured(aiConfig)) {
-        setTimeout(() => {
-          try {
-            scoreJobWithAI(
-              {
-                jobDescription: jobDescription,
-                jobTitle: normalizedDraft.roleTitle,
-                company: normalizedDraft.company,
-                salaryRange: normalizedDraft.salaryRange,
-                userProfile,
-              },
-              aiConfig,
-            )
-              .then((result) => {
-                // Update the job with AI scores
-                if (newJobId) {
-                  setJobs((current) =>
-                    jobService.updateJob(current, newJobId as string, {
-                      ...normalizedDraft,
-                      scoreFit: result.scoreFit,
-                      scoreCompensation: result.scoreCompensation,
-                      scoreLocation: result.scoreLocation,
-                      scoreGrowth: result.scoreGrowth,
-                      scoreConfidence: result.scoreConfidence,
-                      aiScoredAt: result.analyzedAt,
-                      aiModel: result.model,
-                      aiReasoning: result.reasoning,
-                    }),
-                  )
-                  addNotification('AI scoring completed successfully', 'success')
-                }
-              })
-              .catch((err) => {
-                addNotification(`AI scoring failed: ${err.message}`, 'error')
-              })
-          } catch {
-            // Silently handle errors during async scoring
-          }
-        }, 0)
-      }
-    }
+    // Trigger AI scoring if applicable
+    triggerAiScoring(
+      normalizedDraft.jobDescription,
+      normalizedDraft.roleTitle,
+      normalizedDraft.company,
+      normalizedDraft.salaryRange,
+      newJobId || '',
+      normalizedDraft,
+      setJobs,
+    )
   }
 
-  function apiKeyConfigured(config: ReturnType<typeof loadAIConfig>): boolean {
-    if (config.provider === 'openai') {
-      return Boolean(config.apiKey?.trim())
-    }
-    if (config.provider === 'lmstudio') {
-      return Boolean(config.baseUrl?.trim())
-    }
-    return false
-  }
-
-  function handleEditJob(job: Job): void {
+  // Handle edit job
+  const handleEditJob = (job: Job) => {
     startEdit(job)
   }
 
-  function handleRemoveJob(id: string): void {
-    setJobs((current) => jobService.deleteJob(current, id))
-    if (editingId === id) {
-      resetForm()
-    }
-    if (view.viewingJob?.id === id) {
-      view.closeViewOnly()
-    }
+  // Handle remove job
+  const handleRemoveJob = (id: string) => {
+    removeJobHelper(id, setJobs)
   }
 
-  function handleQuickMove(id: string, nextStatus: JobStatus): void {
-    setJobs((current) => jobService.updateJobStatus(current, id, nextStatus))
+  // Handle quick move (status change)
+  const handleQuickMoveJob = (id: string, nextStatus: string) => {
+    handleQuickMove(id, nextStatus as any, setJobs)
   }
 
-  function toggleJobSelection(id: string): void {
+  // Selection handlers
+  const toggleJobSelection = (id: string) => {
     selection.toggle(id)
   }
 
-  function toggleSelectAllVisible(): void {
+  const toggleSelectAllVisible = () => {
     if (visibleTableIds.length === 0) {
       return
     }
     selection.toggleAll(visibleTableIds, allVisibleSelected)
   }
 
-  function bulkDeleteSelected(): void {
+  // Bulk delete handler
+  const bulkDeleteSelected = () => {
     if (selectedVisibleIds.length === 0) return
 
     const hiddenSelectedCount = selection.selectedIds.size - selectedVisibleIds.length
@@ -242,7 +202,8 @@ function AppContent() {
     )
   }
 
-  function handleCompare(): void {
+  // Compare handler
+  const handleCompare = () => {
     if (selection.selectedIds.size === 0) {
       addNotification('Select jobs to compare', 'info')
       return
@@ -250,15 +211,17 @@ function AppContent() {
     setShowCompare(true)
   }
 
-  function closeCompare(): void {
+  const closeCompare = () => {
     setShowCompare(false)
   }
 
+  // Get jobs for comparison
   const selectedJobs = useMemo(() => {
     return jobs.filter((job) => selection.selectedIds.has(job.id))
   }, [jobs, selection.selectedIds])
 
-  function undo_handler(): void {
+  // Undo handler
+  const handleUndo = () => {
     const previous = undo.undo()
     if (previous) {
       setJobs(previous)
@@ -266,84 +229,26 @@ function AppContent() {
     }
   }
 
-  function handleExport(format: 'json' | 'csv'): void {
-    try {
-      const content = format === 'json' ? exportToJson(jobs) : exportToCsv(jobs)
-      const timestamp = new Date().toISOString().slice(0, 10)
-      downloadFile(content, `job-tracker-${timestamp}.${format}`, `text/${format}`)
-      addNotification(`Exported ${jobs.length} job(s) as ${format.toUpperCase()}`, 'success')
-    } catch {
-      addNotification('Export failed', 'error')
-    }
-  }
-
-  function handleImportClick(): void {
-    importFileRef.current?.click()
-  }
-
-  function handleImportFile(event: React.ChangeEvent<HTMLInputElement>): void {
-    const input = event.target
-    const file = input.files?.[0]
-    if (!file) return
-
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      try {
-        const content = e.target?.result as string
-        const imported = importJobsFromFile(content, file.name)
-        if (imported.length === 0) {
-          addNotification('No valid jobs found in file. Expected CSV or JSON job rows.', 'error')
-          return
-        }
-
-        const merge = mergeImportedJobs(jobs, imported, importMode)
-        undo.pushState(jobs)
-        setJobs(merge.jobs.sort(jobService.sortByApplicationDateDesc))
-        selection.clear()
-        setCurrentPage(1)
-        addNotification(
-          `Import ${importMode}: ${merge.inserted} inserted${merge.updated ? `, ${merge.updated} updated` : ''}.`,
-          'success',
-        )
-      } catch {
-        addNotification('Import failed', 'error')
-      } finally {
-        // Allow picking the same file again without changing its name.
-        input.value = ''
-      }
-    }
-    reader.readAsText(file)
-  }
-
-  function showOverdueOnly(): void {
+  // Show only overdue jobs
+  const showOverdueOnly = () => {
     view.updateView('table')
     filters.updateStatusFilter('Overdue Follow-ups')
   }
 
-  function openViewOnly(job: Job): void {
+  const openViewOnly = (job: Job) => {
     view.openViewOnly(job)
   }
 
-  function closeViewOnly(): void {
+  const closeViewOnly = () => {
     view.closeViewOnly()
   }
 
-  function handleSort(column: SortColumn): void {
-    if (sortColumn === column) {
-      setSortDirection((current) => (current === 'asc' ? 'desc' : 'asc'))
-      return
-    }
-
-    setSortColumn(column)
-    setSortDirection(column === 'applicationDate' || column === 'nextActionDueDate' ? 'desc' : 'asc')
-  }
-
-  // Handlers are intentionally captured for table context and refreshed with state updates.
+  // Build table view context
   /* eslint-disable react-hooks/exhaustive-deps */
   const tableViewContextValue = useMemo(
     () => ({
-      paginatedJobs: paginatedTableJobs,
-      sortedJobs: sortedTableJobs,
+      paginatedJobs: paginatedJobs,
+      sortedJobs: recomputedSortedTableJobs,
       selectedIds: selection.selectedIds,
       selectedVisibleCount,
       allVisibleSelected,
@@ -357,7 +262,7 @@ function AppContent() {
       onToggleSelectAll: toggleSelectAllVisible,
       onBulkDelete: bulkDeleteSelected,
       onCompare: handleCompare,
-      onQuickMove: handleQuickMove,
+      onQuickMove: handleQuickMoveJob,
       onEdit: handleEditJob,
       onRemove: handleRemoveJob,
       onView: openViewOnly,
@@ -366,8 +271,8 @@ function AppContent() {
       selectAllCheckboxRef,
     }),
     [
-      paginatedTableJobs,
-      sortedTableJobs,
+      paginatedJobs,
+      recomputedSortedTableJobs,
       selection.selectedIds,
       selectedVisibleCount,
       allVisibleSelected,
@@ -392,7 +297,7 @@ function AppContent() {
         style={{ display: 'none' }}
       />
       <ToastContainer notifications={notifications} onRemove={removeNotification} />
-      
+
       {view.view === 'profile' ? (
         <ProfileView onClose={() => view.updateView('table')} />
       ) : view.view === 'settings' ? (
@@ -442,7 +347,11 @@ function AppContent() {
                   <article>
                     <span>Overdue Follow-ups</span>
                     <strong>{overdueCount}</strong>
-                    <button type="button" className="ghost small metric-action" onClick={showOverdueOnly}>
+                    <button
+                      type="button"
+                      className="ghost small metric-action"
+                      onClick={showOverdueOnly}
+                    >
                       View list
                     </button>
                   </article>
@@ -469,7 +378,7 @@ function AppContent() {
                   <select
                     className="compact-select"
                     value={importMode}
-                    onChange={(event) => setImportMode(event.target.value as ImportMode)}
+                    onChange={(event) => setImportMode(event.target.value as any)}
                     title="Import behavior"
                   >
                     <option value="append">Import: Append</option>
@@ -480,7 +389,7 @@ function AppContent() {
                     Export DB Logs
                   </button>
                   {undo.canUndo && (
-                    <button type="button" className="small" onClick={undo_handler}>
+                    <button type="button" className="small" onClick={handleUndo}>
                       Undo
                     </button>
                   )}
@@ -533,7 +442,7 @@ function AppContent() {
               {view.view === 'kanban' && (
                 <KanbanBoard
                   jobs={byStatus}
-                  onStatusChange={handleQuickMove}
+                  onStatusChange={handleQuickMoveJob}
                   onEdit={handleEditJob}
                   onDelete={handleRemoveJob}
                   onView={openViewOnly}
