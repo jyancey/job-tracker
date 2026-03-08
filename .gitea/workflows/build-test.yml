@@ -16,6 +16,7 @@ jobs:
     runs-on: macos-arm64
     env:
       npm_config_script_shell: /bin/bash
+      PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
     defaults:
       run:
         shell: bash
@@ -46,6 +47,7 @@ jobs:
     needs: test
     env:
       npm_config_script_shell: /bin/bash
+      PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
     defaults:
       run:
         shell: bash

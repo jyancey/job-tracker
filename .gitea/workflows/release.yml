@@ -13,6 +13,7 @@ jobs:
       contents: write
     env:
       npm_config_script_shell: /bin/bash
+      PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
     defaults:
       run:
         shell: bash
@@ -43,21 +44,21 @@ jobs:
 
       - name: Create source tarball
         run: |
-          mkdir -p release/${{ steps.tag_version.outputs.version }}
-          tar --exclude='node_modules' --exclude='.git' --exclude='dist' \
+          /bin/mkdir -p release/${{ steps.tag_version.outputs.version }}
+          /usr/bin/tar --exclude='node_modules' --exclude='.git' --exclude='dist' \
             -czf release/${{ steps.tag_version.outputs.version }}/job-tracker-${{ steps.tag_version.outputs.version }}-source.tar.gz .
         shell: bash
 
       - name: Create distribution zip
         run: |
           cd dist
-          zip -r ../release/${{ steps.tag_version.outputs.version }}/job-tracker-${{ steps.tag_version.outputs.version }}-dist.zip .
+          /usr/bin/zip -r ../release/${{ steps.tag_version.outputs.version }}/job-tracker-${{ steps.tag_version.outputs.version }}-dist.zip .
           cd ..
         shell: bash
 
       - name: Create release notes
         run: |
-          cat > release/${{ steps.tag_version.outputs.version }}/RELEASE_NOTES.md << 'EOF'
+          /bin/cat > release/${{ steps.tag_version.outputs.version }}/RELEASE_NOTES.md << 'EOF'
           # Job Tracker ${{ steps.tag_version.outputs.version }}
 
           ## What's New
@@ -86,5 +87,5 @@ jobs:
       - name: Publish release assets
         run: |
           cd release/${{ steps.tag_version.outputs.version }}
-          ls -la
+          /bin/ls -la
         shell: bash

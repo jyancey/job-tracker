@@ -16,6 +16,7 @@ jobs:
     if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
     env:
       npm_config_script_shell: /bin/bash
+      PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
     defaults:
       run:
         shell: bash
@@ -39,19 +40,19 @@ jobs:
 
       - name: Create deployment artifact
         run: |
-          mkdir -p deploy
-          cp -r dist/* deploy/
-          echo "Build timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')" > deploy/BUILD_INFO.txt
-          echo "Git commit: ${{ github.sha }}" >> deploy/BUILD_INFO.txt
-          echo "Git branch: ${{ github.ref_name }}" >> deploy/BUILD_INFO.txt
+          /bin/mkdir -p deploy
+          /bin/cp -r dist/* deploy/
+          /bin/echo "Build timestamp: $(/bin/date -u +'%Y-%m-%dT%H:%M:%SZ')" > deploy/BUILD_INFO.txt
+          /bin/echo "Git commit: ${{ github.sha }}" >> deploy/BUILD_INFO.txt
+          /bin/echo "Git branch: ${{ github.ref_name }}" >> deploy/BUILD_INFO.txt
 
       - name: Deploy artifact information
         run: |
-          echo "Deployment ready:"
-          echo "- Static files ready in deploy/ directory"
-          echo "- Can be deployed to any static host (Netlify, Vercel, GitHub Pages, etc.)"
-          echo "- Recommended: Copy dist/ folder to your hosting provider"
-          ls -la deploy/
+          /bin/echo "Deployment ready:"
+          /bin/echo "- Static files ready in deploy/ directory"
+          /bin/echo "- Can be deployed to any static host (Netlify, Vercel, GitHub Pages, etc.)"
+          /bin/echo "- Recommended: Copy dist/ folder to your hosting provider"
+          /bin/ls -la deploy/
 
       - name: Upload deployment artifacts
         uses: actions/upload-artifact@v4
