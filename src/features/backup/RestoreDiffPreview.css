@@ -1,0 +1,259 @@
+.restore-diff-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-height: 70vh;
+  overflow: hidden;
+}
+
+.diff-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+.diff-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.diff-summary {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.diff-stat {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.diff-stat.added {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.diff-stat.updated {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.diff-stat.removed {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.diff-stat.unchanged {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+.diff-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary, #666);
+}
+
+.diff-changes {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 200px;
+}
+
+.diff-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.diff-note {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  color: var(--text-secondary, #666);
+  font-size: 0.875rem;
+}
+
+.job-diff-card {
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 6px;
+  padding: 1rem;
+  background-color: white;
+}
+
+.job-diff-card.diff-added {
+  border-left: 4px solid #28a745;
+  background-color: #f8fff9;
+}
+
+.job-diff-card.diff-updated {
+  border-left: 4px solid #ffc107;
+  background-color: #fffef8;
+}
+
+.job-diff-card.diff-removed {
+  border-left: 4px solid #dc3545;
+  background-color: #fff8f8;
+}
+
+.job-diff-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.change-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-added {
+  background-color: #28a745;
+  color: white;
+}
+
+.badge-updated {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.badge-removed {
+  background-color: #dc3545;
+  color: white;
+}
+
+.job-diff-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.job-diff-title strong {
+  font-size: 1rem;
+}
+
+.job-diff-role {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #666);
+}
+
+.field-changes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color, #e0e0e0);
+}
+
+.field-change {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.field-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-primary, #333);
+}
+
+.field-change-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.field-old-value,
+.field-new-value {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.field-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary, #666);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.field-value {
+  font-size: 0.875rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 3px;
+  background-color: white;
+  border: 1px solid var(--border-color, #e0e0e0);
+  word-break: break-word;
+}
+
+.field-old-value .field-value {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.field-new-value .field-value {
+  font-weight: 500;
+}
+
+.diff-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color, #e0e0e0);
+}
+
+.diff-actions button {
+  padding: 0.5rem 1.5rem;
+}
+
+.button-primary {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.button-primary:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.button-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button-secondary {
+  background-color: white;
+  color: #007bff;
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.button-secondary:hover:not(:disabled) {
+  background-color: #f8f9fa;
+}
+
+.button-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

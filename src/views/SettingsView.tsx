@@ -8,8 +8,18 @@ import {
   applyRestore,
   backupFilename,
   calculateRestoreImpact,
+  calculateRestoreDiff,
   createBackupSnapshot,
+  formatBackupInterval,
+  getNextBackupTime,
+  loadBackupConfig,
+  loadBackupState,
   parseBackup,
+  RestoreDiffPreview,
+  saveBackupConfig,
+  type BackupConfig,
+  type BackupInterval,
+  type RestoreDiff,
   type RestoreImpact,
   type RestoreMode,
 } from '../features/backup'
@@ -42,6 +52,7 @@ function formatHealthTimestamp(value: string | null): string {
 
 export function SettingsView({ onClose, jobs, setJobs, addNotification }: SettingsViewProps) {
   const [aiConfig, setAiConfig] = useState<AIConfig>(() => loadAIConfig())
+  const [backupConfig, setBackupConfig] = useState<BackupConfig>(() => loadBackupConfig())
   const [databaseInfo, setDatabaseInfo] = useState<DatabaseInfo | null>(null)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -55,6 +66,8 @@ export function SettingsView({ onClose, jobs, setJobs, addNotification }: Settin
   const [restoreMessage, setRestoreMessage] = useState('')
   const [restoreImpact, setRestoreImpact] = useState<RestoreImpact | null>(null)
   const [pendingRestoreJobs, setPendingRestoreJobs] = useState<Job[] | null>(null)
+  const [showDiffPreview, setShowDiffPreview] = useState(false)
+  const [restoreDiff, setRestoreDiff] = useState<RestoreDiff | null>(null)
   const restoreFileRef = useRef<HTMLInputElement>(null)
   const [dbLastSuccess, setDbLastSuccess] = useState<string | null>(() => localStorage.getItem(DB_HEALTH_KEY))
   const [aiLastSuccess, setAiLastSuccess] = useState<string | null>(() => localStorage.getItem(AI_HEALTH_KEY))
@@ -82,8 +95,10 @@ export function SettingsView({ onClose, jobs, setJobs, addNotification }: Settin
   const handleSaveSettings = () => {
     try {
       saveAIConfig(aiConfig)
+      saveBackupConfig(backupConfig)
       setSaved(true)
       setError('')
+      addNotification('Settings saved successfully', 'success')
       setTimeout(() => setSaved(false), 3000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save settings')
@@ -172,14 +187,18 @@ export function SettingsView({ onClose, jobs, setJobs, addNotification }: Settin
       if (!parsed) {
         setPendingRestoreJobs(null)
         setRestoreImpact(null)
+        setRestoreDiff(null)
         setRestoreMessage('Invalid backup file. Expected Job Tracker backup JSON.')
         addNotification('Invalid backup file', 'error')
         return
       }
 
       const impact = calculateRestoreImpact(jobs, parsed.jobs, restoreMode)
+      const diff = calculateRestoreDiff(jobs, parsed.jobs, restoreMode)
       setPendingRestoreJobs(parsed.jobs)
       setRestoreImpact(impact)
+      setRestoreDiff(diff)
+      setShowDiffPreview(true)
       setRestoreMessage(`Loaded backup with ${parsed.jobs.length} jobs from ${new Date(parsed.createdAt).toLocaleString()}`)
     }
 
@@ -197,13 +216,24 @@ export function SettingsView({ onClose, jobs, setJobs, addNotification }: Settin
     setRestoreMessage('Restore applied. Your job list was updated.')
     setPendingRestoreJobs(null)
     setRestoreImpact(null)
+    setRestoreDiff(null)
+    setShowDiffPreview(false)
   }
 
   const handleRestoreModeChange = (mode: RestoreMode) => {
     setRestoreMode(mode)
     if (pendingRestoreJobs) {
       setRestoreImpact(calculateRestoreImpact(jobs, pendingRestoreJobs, mode))
+      setRestoreDiff(calculateRestoreDiff(jobs, pendingRestoreJobs, mode))
     }
+  }
+
+  const handleDiffPreviewConfirm = () => {
+    handleApplyRestore()
+  }
+
+  const handleDiffPreviewCancel = () => {
+    setShowDiffPreview(false)
   }
 
   return (
@@ -396,7 +426,60 @@ export function SettingsView({ onClose, jobs, setJobs, addNotification }: Settin
           </div>
 
           <div className="settings-section">
-            <h2>Backup and Restore</h2>
+            <h2>Automatic Backups</h2>
+
+            <label className="full-width">
+              Backup Interval
+              <select
+                value={backupConfig.interval}
+                onChange={(e) => setBackupConfig({ ...backupConfig, interval: e.target.value as BackupInterval })}
+              >
+                <option value="disabled">Disabled</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+              <small>
+                Automatic backups will be created when you save jobs and enough time has passed since the last backup.
+              </small>
+            </label>
+
+            <label className="full-width">
+              Keep Last N Backups
+              <input
+                type="number"
+                min="1"
+                max="30"
+                value={backupConfig.keepLastN}
+                onChange={(e) =>
+                  setBackupConfig({ ...backupConfig, keepLastN: Math.max(1, parseInt(e.target.value) || 7) })
+                }
+              />
+              <small>Older automatic backups will be deleted to save space.</small>
+            </label>
+
+            {backupConfig.interval !== 'disabled' && (
+              <div className="settings-message">
+                <strong>Current Status:</strong> {formatBackupInterval(backupConfig.interval)} backups enabled.
+                {(() => {
+                  const state = loadBackupState()
+                  const nextBackup = getNextBackupTime(state.lastBackupAt, backupConfig.interval)
+                  return state.lastBackupAt ? (
+                    <>
+                      {' '}
+                      Last backup: {new Date(state.lastBackupAt).toLocaleString()}.
+                      {nextBackup && ` Next backup: ${nextBackup.toLocaleString()}.`}
+                    </>
+                  ) : (
+                    ' No backups created yet.'
+                  )
+                })()}
+              </div>
+            )}
+          </div>
+
+          <div className="settings-section">
+            <h2>Manual Backup and Restore</h2>
 
             <input
               ref={restoreFileRef}
@@ -464,6 +547,18 @@ export function SettingsView({ onClose, jobs, setJobs, addNotification }: Settin
           </button>
         </div>
       </div>
+
+      {showDiffPreview && restoreDiff && (
+        <div className="modal-overlay" onClick={handleDiffPreviewCancel}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <RestoreDiffPreview
+              diff={restoreDiff}
+              onConfirm={handleDiffPreviewConfirm}
+              onCancel={handleDiffPreviewCancel}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

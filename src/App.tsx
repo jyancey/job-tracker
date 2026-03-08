@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import type { Job } from './domain'
 import { KanbanBoard } from './components/KanbanBoard'
@@ -23,6 +23,7 @@ import { useCompareJobs } from './hooks/useCompareJobs'
 import { useAppActions } from './hooks/useAppActions'
 import { useTableSelectionState } from './hooks/useTableSelectionState'
 import { useSortAndPagination } from './hooks/useSortAndPagination'
+import { useTableViewContext } from './hooks/useTableViewContext'
 import { useJobOperations } from './hooks/useJobOperations'
 import { useImportExport } from './hooks/useImportExport'
 import { TableView } from './views/TableView'
@@ -175,46 +176,30 @@ function AppContent() {
   })
 
   // Build table view context
-  /* eslint-disable react-hooks/exhaustive-deps */
-  const tableViewContextValue = useMemo(
-    () => ({
-      paginatedJobs: paginatedJobs,
-      sortedJobs: recomputedSortedTableJobs,
-      selectedIds: selection.selectedIds,
-      selectedVisibleCount,
-      allVisibleSelected,
-      sortColumn,
-      sortDirection,
-      currentPage,
-      totalPages,
-      pageSize,
-      onSort: handleSort,
-      onToggleSelection: toggleJobSelection,
-      onToggleSelectAll: toggleSelectAllVisible,
-      onBulkDelete: bulkDeleteSelected,
-      onCompare: handleCompare,
-      onQuickMove: handleQuickMoveJob,
-      onEdit: handleEditJob,
-      onRemove: handleRemoveJob,
-      onView: openViewOnly,
-      onPageChange: setCurrentPage,
-      onPageSizeChange: setPageSize,
-      selectAllCheckboxRef,
-    }),
-    [
-      paginatedJobs,
-      recomputedSortedTableJobs,
-      selection.selectedIds,
-      selectedVisibleCount,
-      allVisibleSelected,
-      sortColumn,
-      sortDirection,
-      currentPage,
-      totalPages,
-      pageSize,
-    ],
-  )
-  /* eslint-enable react-hooks/exhaustive-deps */
+  const tableViewContextValue = useTableViewContext({
+    paginatedJobs,
+    sortedJobs: recomputedSortedTableJobs,
+    selectedIds: selection.selectedIds,
+    selectedVisibleCount,
+    allVisibleSelected,
+    sortColumn,
+    sortDirection,
+    currentPage,
+    totalPages,
+    pageSize,
+    handleSort,
+    toggleJobSelection,
+    toggleSelectAllVisible,
+    bulkDeleteSelected,
+    handleCompare,
+    handleQuickMoveJob,
+    handleEditJob,
+    handleRemoveJob,
+    openViewOnly,
+    setCurrentPage,
+    setPageSize,
+    selectAllCheckboxRef,
+  })
 
   return (
     <div className="app-shell">
