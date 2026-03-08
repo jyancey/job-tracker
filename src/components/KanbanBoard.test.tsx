@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { KanbanBoard } from './KanbanBoard'
-import type { Job } from '../domain'
+import type { Job, JobStatus } from '../domain'
 
 function createJob(id: string, status: string = 'Applied'): Job {
   return {
@@ -56,9 +56,9 @@ describe('KanbanBoard', () => {
   it('passes jobs to columns correctly', () => {
     const appliedJobs = [createJob('1', 'Applied'), createJob('2', 'Applied')]
     const interviewJobs = [createJob('3', 'Interview')]
-    const jobs = new Map([
-      ['Applied', appliedJobs],
-      ['Interview', interviewJobs],
+    const jobs = new Map<JobStatus, Job[]>([
+      ['Applied' as JobStatus, appliedJobs],
+      ['Interview' as JobStatus, interviewJobs],
     ])
 
     const { container } = render(
