@@ -19,6 +19,8 @@ import { useJobForm } from './hooks/useJobForm'
 import { useNotifications } from './hooks/useNotifications'
 import { useJobPersistence } from './hooks/useJobPersistence'
 import { useJobSubmission } from './hooks/useJobSubmission'
+import { useCompareJobs } from './hooks/useCompareJobs'
+import { useAppActions } from './hooks/useAppActions'
 import { useTableSelectionState } from './hooks/useTableSelectionState'
 import { useSortAndPagination } from './hooks/useSortAndPagination'
 import { useJobOperations } from './hooks/useJobOperations'
@@ -35,7 +37,6 @@ import { JobForm } from './components/JobForm'
 import { JobModal } from './components/JobModal'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { FilterToolbar } from './components/FilterToolbar'
-import * as jobService from './services/jobService'
 
 const VIEW_LABELS: Record<View, string> = {
   dashboard: 'Dashboard',
@@ -49,7 +50,6 @@ const VIEW_LABELS: Record<View, string> = {
 
 function AppContent() {
   const [jobs, setJobs] = useState<Job[]>([])
-  const [showCompare, setShowCompare] = useState(false)
   const selectAllCheckboxRef = useRef<HTMLInputElement>(null)
 
   // State management hooks
@@ -139,87 +139,40 @@ function AppContent() {
     triggerAiScoring,
   })
 
-  // Handle edit job
-  const handleEditJob = (job: Job) => {
-    startEdit(job)
-  }
+  const {
+    handleEditJob,
+    handleRemoveJob,
+    handleQuickMoveJob,
+    toggleJobSelection,
+    toggleSelectAllVisible,
+    bulkDeleteSelected,
+    handleUndo,
+    showOverdueOnly,
+    openViewOnly,
+    closeViewOnly,
+  } = useAppActions({
+    jobs,
+    setJobs,
+    selection,
+    visibleTableIds,
+    selectedVisibleIds,
+    allVisibleSelected,
+    undo,
+    addNotification,
+    removeJobHelper,
+    quickMoveHelper: handleQuickMove,
+    startEdit,
+    openViewOnly: view.openViewOnly,
+    closeViewOnly: view.closeViewOnly,
+    updateView: view.updateView,
+    showOverdueFilter: () => filters.updateStatusFilter('Overdue Follow-ups'),
+  })
 
-  // Handle remove job
-  const handleRemoveJob = (id: string) => {
-    removeJobHelper(id, setJobs)
-  }
-
-  // Handle quick move (status change)
-  const handleQuickMoveJob = (id: string, nextStatus: string) => {
-    handleQuickMove(id, nextStatus as any, setJobs)
-  }
-
-  // Selection handlers
-  const toggleJobSelection = (id: string) => {
-    selection.toggle(id)
-  }
-
-  const toggleSelectAllVisible = () => {
-    if (visibleTableIds.length === 0) {
-      return
-    }
-    selection.toggleAll(visibleTableIds, allVisibleSelected)
-  }
-
-  // Bulk delete handler
-  const bulkDeleteSelected = () => {
-    if (selectedVisibleIds.length === 0) return
-
-    const hiddenSelectedCount = selection.selectedIds.size - selectedVisibleIds.length
-    undo.pushState(jobs)
-    setJobs((current) => jobService.deleteJobs(current, selectedVisibleIds))
-    selection.removeMultiple(selectedVisibleIds)
-    addNotification(
-      `Deleted ${selectedVisibleIds.length} visible job(s). ${hiddenSelectedCount > 0 ? `${hiddenSelectedCount} hidden selection(s) kept.` : ''}`,
-      'success',
-    )
-  }
-
-  // Compare handler
-  const handleCompare = () => {
-    if (selection.selectedIds.size === 0) {
-      addNotification('Select jobs to compare', 'info')
-      return
-    }
-    setShowCompare(true)
-  }
-
-  const closeCompare = () => {
-    setShowCompare(false)
-  }
-
-  // Get jobs for comparison
-  const selectedJobs = useMemo(() => {
-    return jobs.filter((job) => selection.selectedIds.has(job.id))
-  }, [jobs, selection.selectedIds])
-
-  // Undo handler
-  const handleUndo = () => {
-    const previous = undo.undo()
-    if (previous) {
-      setJobs(previous)
-      addNotification('Undo successful', 'info')
-    }
-  }
-
-  // Show only overdue jobs
-  const showOverdueOnly = () => {
-    view.updateView('table')
-    filters.updateStatusFilter('Overdue Follow-ups')
-  }
-
-  const openViewOnly = (job: Job) => {
-    view.openViewOnly(job)
-  }
-
-  const closeViewOnly = () => {
-    view.closeViewOnly()
-  }
+  const { showCompare, selectedJobs, handleCompare, closeCompare } = useCompareJobs({
+    jobs,
+    selectedIds: selection.selectedIds,
+    addNotification,
+  })
 
   // Build table view context
   /* eslint-disable react-hooks/exhaustive-deps */
