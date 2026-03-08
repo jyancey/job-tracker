@@ -133,8 +133,8 @@ describe('useJobPersistence', () => {
     const setJobs = vi.fn()
 
     const { rerender } = renderHook(
-      ({ jobs: j }) => useJobPersistence(j, setJobs, vi.fn()),
-      { initialProps: { jobs: [] } },
+      ({ jobs: j }: { jobs: Job[] }) => useJobPersistence(j, setJobs, vi.fn()),
+      { initialProps: { jobs: [] as Job[] } },
     )
 
     await waitFor(() => {
@@ -171,8 +171,8 @@ describe('useJobPersistence', () => {
 
     const jobs = [createJob()]
     const { result, rerender } = renderHook(
-      ({ jobs: j }) => useJobPersistence(j, vi.fn(), vi.fn()),
-      { initialProps: { jobs: [] } },
+      ({ jobs: j }: { jobs: Job[] }) => useJobPersistence(j, vi.fn(), vi.fn()),
+      { initialProps: { jobs: [] as Job[] } },
     )
 
     await waitFor(() => {
@@ -199,8 +199,8 @@ describe('useJobPersistence', () => {
     const addNotification = vi.fn()
 
     const { rerender } = renderHook(
-      ({ jobs: j }) => useJobPersistence(j, vi.fn(), addNotification),
-      { initialProps: { jobs: [] } },
+      ({ jobs: j }: { jobs: Job[] }) => useJobPersistence(j, vi.fn(), addNotification),
+      { initialProps: { jobs: [] as Job[] } },
     )
 
     await waitFor(() => {
@@ -244,8 +244,8 @@ describe('useJobPersistence', () => {
     mockedSaveJobs.mockResolvedValue(undefined)
 
     const { rerender } = renderHook(
-      ({ jobs: j }) => useJobPersistence(j, vi.fn(), vi.fn()),
-      { initialProps: { jobs: [] } },
+      ({ jobs: j }: { jobs: Job[] }) => useJobPersistence(j, vi.fn(), vi.fn()),
+      { initialProps: { jobs: [] as Job[] } },
     )
 
     await waitFor(() => {
@@ -317,8 +317,8 @@ describe('useJobPersistence', () => {
     mockedLoadJobs.mockResolvedValue({ jobs: [], didLoad: false })
 
     const { rerender } = renderHook(
-      ({ jobs: j }) => useJobPersistence(j, vi.fn(), vi.fn()),
-      { initialProps: { jobs: [] } },
+      ({ jobs: j }: { jobs: Job[] }) => useJobPersistence(j, vi.fn(), vi.fn()),
+      { initialProps: { jobs: [] as Job[] } },
     )
 
     await waitFor(() => {

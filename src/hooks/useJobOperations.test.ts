@@ -5,12 +5,12 @@ import { useJobOperations } from './useJobOperations'
 
 // Mock dependencies
 vi.mock('../services/jobService', () => ({
-  deleteJob: vi.fn((jobs, id) => jobs.filter((j) => j.id !== id)),
-  updateJobStatus: vi.fn((jobs, id, status) =>
-    jobs.map((j) => (j.id === id ? { ...j, status } : j)),
+  deleteJob: vi.fn((jobs: Job[], id: string) => jobs.filter((j: Job) => j.id !== id)),
+  updateJobStatus: vi.fn((jobs: Job[], id: string, status: JobStatus) =>
+    jobs.map((j: Job) => (j.id === id ? { ...j, status } : j)),
   ),
-  updateJob: vi.fn((jobs, id, updates) =>
-    jobs.map((j) => (j.id === id ? { ...j, ...updates } : j)),
+  updateJob: vi.fn((jobs: Job[], id: string, updates: Partial<Job>) =>
+    jobs.map((j: Job) => (j.id === id ? { ...j, ...updates } : j)),
   ),
 }))
 

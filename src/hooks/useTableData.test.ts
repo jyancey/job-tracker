@@ -49,12 +49,12 @@ describe('useTableData', () => {
       statusFilter: 'All',
       dateRangeStart: '',
       dateRangeEnd: '',
-      salaryRangeMin: 0,
-      salaryRangeMax: 999999,
+      salaryRangeMin: '0',
+      salaryRangeMax: '999999',
       contactPersonFilter: '',
     }
-    const sort: SortOptions = { column: 'applicationDate', direction: 'desc' }
-    const pagination: PaginationOptions = { page: 1, pageSize: 10 }
+    const sort: SortOptions = { sortColumn: 'applicationDate', sortDirection: 'desc' }
+    const pagination: PaginationOptions = { currentPage: 1, pageSize: 10 }
 
     const filteredJobs = [jobs[0], jobs[1]]
     const sortedJobs = [jobs[1], jobs[0]]
@@ -85,12 +85,12 @@ describe('useTableData', () => {
       statusFilter: 'Applied',
       dateRangeStart: '',
       dateRangeEnd: '',
-      salaryRangeMin: 50000,
-      salaryRangeMax: 200000,
+      salaryRangeMin: '50000',
+      salaryRangeMax: '200000',
       contactPersonFilter: '',
     }
-    const sort: SortOptions = { column: 'company', direction: 'asc' }
-    const pagination: PaginationOptions = { page: 1, pageSize: 10 }
+    const sort: SortOptions = { sortColumn: 'company', sortDirection: 'asc' }
+    const pagination: PaginationOptions = { currentPage: 1, pageSize: 10 }
 
     const filteredJobs = [jobs[0], jobs[1]]
     mockedUseJobFiltering.mockReturnValue({
@@ -115,12 +115,12 @@ describe('useTableData', () => {
       statusFilter: 'All',
       dateRangeStart: '',
       dateRangeEnd: '',
-      salaryRangeMin: 0,
-      salaryRangeMax: 999999,
+      salaryRangeMin: '0',
+      salaryRangeMax: '999999',
       contactPersonFilter: '',
     }
-    const sort: SortOptions = { column: 'applicationDate', direction: 'desc' }
-    const pagination: PaginationOptions = { page: 1, pageSize: 10 }
+    const sort: SortOptions = { sortColumn: 'applicationDate', sortDirection: 'desc' }
+    const pagination: PaginationOptions = { currentPage: 1, pageSize: 10 }
 
     mockedUseJobFiltering.mockReturnValue({
       filteredJobs: jobs,
@@ -144,12 +144,12 @@ describe('useTableData', () => {
       statusFilter: 'All',
       dateRangeStart: '',
       dateRangeEnd: '',
-      salaryRangeMin: 0,
-      salaryRangeMax: 999999,
+      salaryRangeMin: '0',
+      salaryRangeMax: '999999',
       contactPersonFilter: '',
     }
-    const sort: SortOptions = { column: 'applicationDate', direction: 'desc' }
-    const pagination: PaginationOptions = { page: 1, pageSize: 10 }
+    const sort: SortOptions = { sortColumn: 'applicationDate', sortDirection: 'desc' }
+    const pagination: PaginationOptions = { currentPage: 1, pageSize: 10 }
 
     mockedUseJobFiltering.mockReturnValue({
       filteredJobs: [],
@@ -181,12 +181,12 @@ describe('useTableData', () => {
       statusFilter: 'All',
       dateRangeStart: '',
       dateRangeEnd: '',
-      salaryRangeMin: 0,
-      salaryRangeMax: 999999,
+      salaryRangeMin: '0',
+      salaryRangeMax: '999999',
       contactPersonFilter: '',
     }
-    const sort: SortOptions = { column: 'applicationDate', direction: 'desc' }
-    const pagination: PaginationOptions = { page: 2, pageSize: 2 }
+    const sort: SortOptions = { sortColumn: 'applicationDate', sortDirection: 'desc' }
+    const pagination: PaginationOptions = { currentPage: 2, pageSize: 2 }
 
     mockedUseJobFiltering.mockReturnValue({
       filteredJobs: jobs,
@@ -210,12 +210,12 @@ describe('useTableData', () => {
       statusFilter: 'Interview',
       dateRangeStart: '2026-01-01',
       dateRangeEnd: '2026-03-01',
-      salaryRangeMin: 150000,
-      salaryRangeMax: 300000,
+      salaryRangeMin: '150000',
+      salaryRangeMax: '300000',
       contactPersonFilter: '',
     }
-    const sort: SortOptions = { column: 'applicationDate', direction: 'desc' }
-    const pagination: PaginationOptions = { page: 1, pageSize: 10 }
+    const sort: SortOptions = { sortColumn: 'applicationDate', sortDirection: 'desc' }
+    const pagination: PaginationOptions = { currentPage: 1, pageSize: 10 }
 
     const filteredJobs = [jobs[5], jobs[12], jobs[23]]
     mockedUseJobFiltering.mockReturnValue({
@@ -240,12 +240,12 @@ describe('useTableData', () => {
       statusFilter: 'All',
       dateRangeStart: '',
       dateRangeEnd: '',
-      salaryRangeMin: 0,
-      salaryRangeMax: 999999,
+      salaryRangeMin: '0',
+      salaryRangeMax: '999999',
       contactPersonFilter: '',
     }
-    const sort: SortOptions = { column: 'applicationDate', direction: 'desc' }
-    const pagination: PaginationOptions = { page: 1, pageSize: 10 }
+    const sort: SortOptions = { sortColumn: 'applicationDate', sortDirection: 'desc' }
+    const pagination: PaginationOptions = { currentPage: 1, pageSize: 10 }
 
     mockedUseJobFiltering.mockReturnValue({
       filteredJobs: jobs,
