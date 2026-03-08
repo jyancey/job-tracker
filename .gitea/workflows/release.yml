@@ -76,28 +76,12 @@ jobs:
           All tests passing (11/11). Build verified and production-ready.
           EOF
 
-      - name: Upload artifacts to release
-        uses: actions/upload-release-assets@v2
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Upload packaged release artifacts
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./release/${{ steps.tag_version.outputs.version }}/
-          asset_name: job-tracker-${{ steps.tag_version.outputs.version }}
-          asset_content_type: application/zip
-        continue-on-error: true
-
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.tag_version.outputs.version }}
-          release_name: Job Tracker ${{ steps.tag_version.outputs.version }}
-          body_path: release/${{ steps.tag_version.outputs.version }}/RELEASE_NOTES.md
-          draft: false
-          prerelease: false
-        continue-on-error: true
+          name: release-${{ steps.tag_version.outputs.version }}
+          path: release/${{ steps.tag_version.outputs.version }}/
+          retention-days: 30
 
       - name: Publish release assets
         run: |
