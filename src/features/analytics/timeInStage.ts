@@ -1,4 +1,4 @@
-import { Job, JobStatus } from '../../domain'
+import type { Job, JobStatus } from '../../domain'
 
 /**
  * Time spent in each stage (in days)

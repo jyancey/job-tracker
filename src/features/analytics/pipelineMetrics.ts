@@ -1,4 +1,5 @@
-import { Job, JobStatus, JOB_STATUSES } from '../../domain'
+import { JOB_STATUSES } from '../../domain'
+import type { Job, JobStatus } from '../../domain'
 
 /**
  * Conversion metrics between pipeline stages
@@ -72,16 +73,6 @@ export interface StatusDistribution {
  * Calculate conversion rates between pipeline stages
  */
 export function calculateConversionMetrics(jobs: Job[]): ConversionMetrics {
-  // Helper to find jobs that progressed from one status to another or are currently at target
-  const countProgressedTo = (fromStatus: JobStatus, toStatuses: JobStatus[]): number => {
-    return jobs.filter((job) => {
-      // Jobs currently at target status or beyond
-      const currentStatusIndex = JOB_STATUSES.indexOf(job.status)
-      const targetIndices = toStatuses.map((s) => JOB_STATUSES.indexOf(s))
-      return targetIndices.some((idx) => currentStatusIndex >= idx)
-    }).length
-  }
-
   // Helper to count jobs that reached at least a certain status
   const countAtOrPast = (status: JobStatus): number => {
     const statusIndex = JOB_STATUSES.indexOf(status)
@@ -91,13 +82,8 @@ export function calculateConversionMetrics(jobs: Job[]): ConversionMetrics {
     }).length
   }
 
-  // Count jobs that started at each stage (excluding Rejected/Withdrawn)
-  const activeJobs = jobs.filter((j) => j.status !== 'Rejected' && j.status !== 'Withdrawn')
-  
-  const wishlistCount = jobs.filter((j) => {
-    // Ever was in wishlist (including those who progressed)
-    return true // All jobs implicitly start somewhere
-  }).length
+  // All jobs are included in the top-of-funnel baseline.
+  const wishlistCount = jobs.length
 
   const appliedCount = countAtOrPast('Applied')
   const phoneScreenCount = countAtOrPast('Phone Screen')

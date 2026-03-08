@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import type { Job, JobStatus } from '../domain'
+import type { Job, JobDraft, JobStatus } from '../domain'
 import * as jobService from '../services/jobService'
 import { scoreJobWithAI } from '../services/aiScoringService'
 import { loadAIConfig, loadUserProfile } from '../storage/aiStorage'
@@ -23,6 +23,30 @@ export function useJobOperations({
   closeViewOnly,
   addNotification,
 }: UseJobOperationsProps) {
+  const toJobDraft = (job: Job): JobDraft => ({
+    company: job.company,
+    roleTitle: job.roleTitle,
+    applicationDate: job.applicationDate,
+    status: job.status,
+    jobUrl: job.jobUrl,
+    atsUrl: job.atsUrl,
+    salaryRange: job.salaryRange,
+    notes: job.notes,
+    contactPerson: job.contactPerson,
+    nextAction: job.nextAction,
+    nextActionDueDate: job.nextActionDueDate,
+    jobDescription: job.jobDescription,
+    jobDescriptionSource: job.jobDescriptionSource,
+    scoreFit: job.scoreFit,
+    scoreCompensation: job.scoreCompensation,
+    scoreLocation: job.scoreLocation,
+    scoreGrowth: job.scoreGrowth,
+    scoreConfidence: job.scoreConfidence,
+    aiScoredAt: job.aiScoredAt,
+    aiModel: job.aiModel,
+    aiReasoning: job.aiReasoning,
+  })
+
   const handleEditJob = useCallback(
     (startEdit: (job: Job) => void, job: Job) => {
       startEdit(job)
@@ -61,7 +85,6 @@ export function useJobOperations({
       company: string,
       salaryRange: string,
       jobId: string,
-      normalizedDraft: Partial<Job>,
       setJobs: (updater: (jobs: Job[]) => Job[]) => void,
     ) => {
       const shouldAutoScore = jobDescription && jobDescription.trim() && jobId
@@ -91,9 +114,14 @@ export function useJobOperations({
           )
             .then((result) => {
               if (jobId) {
-                setJobs((current) =>
-                  jobService.updateJob(current, jobId, {
-                    ...normalizedDraft,
+                setJobs((current) => {
+                  const existing = jobService.findJobById(current, jobId)
+                  if (!existing) {
+                    return current
+                  }
+
+                  return jobService.updateJob(current, jobId, {
+                    ...toJobDraft(existing),
                     scoreFit: result.scoreFit,
                     scoreCompensation: result.scoreCompensation,
                     scoreLocation: result.scoreLocation,
@@ -102,8 +130,8 @@ export function useJobOperations({
                     aiScoredAt: result.analyzedAt,
                     aiModel: result.model,
                     aiReasoning: result.reasoning,
-                  }),
-                )
+                  })
+                })
                 addNotification('AI scoring completed successfully', 'success')
               }
             })

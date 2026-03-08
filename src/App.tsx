@@ -18,6 +18,7 @@ import { useJobGrouping } from './hooks/useJobGrouping'
 import { useJobForm } from './hooks/useJobForm'
 import { useNotifications } from './hooks/useNotifications'
 import { useJobPersistence } from './hooks/useJobPersistence'
+import { useJobSubmission } from './hooks/useJobSubmission'
 import { useTableSelectionState } from './hooks/useTableSelectionState'
 import { useSortAndPagination } from './hooks/useSortAndPagination'
 import { useJobOperations } from './hooks/useJobOperations'
@@ -130,37 +131,13 @@ function AppContent() {
     setCurrentPage,
   ])
 
-  // Handle job submission with optional AI scoring
-  const handleSubmitJob = (event: React.FormEvent<HTMLFormElement>) => {
-    const normalizedDraft = submitForm(event)
-    if (!normalizedDraft) {
-      return
-    }
-
-    let newJobId: string | null = editingId || null
-
-    if (editingId) {
-      setJobs((current) => jobService.updateJob(current, editingId, normalizedDraft))
-    } else {
-      setJobs((current) => {
-        const updated = jobService.createJob(current, normalizedDraft)
-        newJobId = updated[0].id
-        return updated
-      })
-    }
-
-    resetForm()
-
-    // Trigger AI scoring if applicable
-    triggerAiScoring(
-      normalizedDraft.jobDescription ?? '',
-      normalizedDraft.roleTitle,
-      normalizedDraft.company,
-      normalizedDraft.salaryRange,
-      newJobId || '',
-      setJobs,
-    )
-  }
+  const { handleSubmitJob } = useJobSubmission({
+    editingId,
+    submitForm,
+    resetForm,
+    setJobs,
+    triggerAiScoring,
+  })
 
   // Handle edit job
   const handleEditJob = (job: Job) => {

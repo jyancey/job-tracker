@@ -77,7 +77,7 @@ export function useImportExport({
 
           const merge = mergeImportedJobs(jobs, imported, importMode)
           undo.pushState(jobs)
-          setJobs((current) => merge.jobs.sort(jobService.sortByApplicationDateDesc))
+          setJobs(() => merge.jobs.sort(jobService.sortByApplicationDateDesc))
           selection.clear()
           setCurrentPage(1)
           addNotification(
