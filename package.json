@@ -12,7 +12,9 @@
     "preview": "node server.js",
     "serve": "node server.js",
     "test": "vitest",
+    "pretest:run": "node scripts/generate-version.js",
     "test:run": "vitest run",
+    "pretest:coverage": "node scripts/generate-version.js",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
