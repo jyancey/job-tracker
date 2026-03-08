@@ -25,6 +25,7 @@ import { useImportExport } from './hooks/useImportExport'
 import { TableView } from './views/TableView'
 import { CalendarView } from './views/CalendarView'
 import { DashboardView } from './views/DashboardView'
+import { AnalyticsView } from './views/AnalyticsView'
 import { CompareView } from './views/CompareView'
 import { ProfileView } from './views/ProfileView'
 import { SettingsView } from './views/SettingsView'
@@ -37,6 +38,7 @@ import * as jobService from './services/jobService'
 
 const VIEW_LABELS: Record<View, string> = {
   dashboard: 'Dashboard',
+  analytics: 'Analytics',
   kanban: 'Kanban',
   calendar: 'Calendar',
   table: 'All Jobs',
@@ -452,6 +454,8 @@ function AppContent() {
               {view.view === 'calendar' && <CalendarView dueByDate={dueByDate} onView={openViewOnly} />}
 
               {view.view === 'dashboard' && <DashboardView byStatus={byStatus} />}
+
+              {view.view === 'analytics' && <AnalyticsView jobs={jobs} />}
             </section>
           </main>
 

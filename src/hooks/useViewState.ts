@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import type { Job } from '../domain'
 
-export type View = 'table' | 'kanban' | 'calendar' | 'dashboard' | 'profile' | 'settings'
+export type View = 'table' | 'kanban' | 'calendar' | 'dashboard' | 'analytics' | 'profile' | 'settings'
 
 /**
  * Custom hook to manage view navigation and modal state

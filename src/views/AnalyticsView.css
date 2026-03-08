@@ -1,0 +1,253 @@
+.analytics-view {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.analytics-header {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #1a1a1a;
+}
+
+.analytics-section {
+  margin-bottom: 3rem;
+}
+
+.analytics-section h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: #333;
+  border-bottom: 2px solid #e5e5e5;
+  padding-bottom: 0.5rem;
+}
+
+/* Stats Grid (Overview) */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.stat-card {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2563eb;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Conversion Grid */
+.conversion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.conversion-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.conversion-label {
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.9;
+}
+
+.conversion-rate {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.conversion-detail {
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+/* Trends Grid */
+.trends-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.trend-card {
+  background: white;
+  border: 2px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.trend-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.trend-label {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-bottom: 0.75rem;
+}
+
+.trend-change {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.trend-up {
+  color: #22c55e;
+}
+
+.trend-down {
+  color: #ef4444;
+}
+
+.trend-neutral {
+  color: #6c757d;
+}
+
+/* Time in Stage Grid */
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.time-card {
+  background: #f8f9fa;
+  border-left: 4px solid #2563eb;
+  border-radius: 4px;
+  padding: 1.5rem 1rem;
+}
+
+.time-status {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.time-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1a1a1a;
+  margin-bottom: 0.25rem;
+}
+
+.time-count {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+/* Stuck Jobs Section */
+.stuck-jobs-section {
+  background: #fee;
+  border: 2px solid #fcc;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.stuck-jobs-section h3 {
+  color: #c00;
+  border-bottom-color: #fcc;
+}
+
+.stuck-jobs-description {
+  color: #a00;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.stuck-jobs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.stuck-job-item {
+  background: white;
+  border: 1px solid #fcc;
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.stuck-job-header {
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.stuck-job-details {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.stuck-job-status {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.stuck-job-duration {
+  color: #a00;
+  font-weight: 500;
+}
+
+.stuck-jobs-more {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #fcc;
+  color: #a00;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .analytics-view {
+    padding: 1rem;
+  }
+
+  .analytics-header {
+    font-size: 1.5rem;
+  }
+
+  .stats-grid,
+  .conversion-grid,
+  .trends-grid,
+  .time-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .stat-value,
+  .conversion-rate,
+  .trend-value,
+  .time-value {
+    font-size: 2rem;
+  }
+}
