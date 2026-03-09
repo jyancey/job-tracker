@@ -1,7 +1,7 @@
 # Job Tracker - Next Steps
 **Updated:** March 8, 2026  
 **Current Version:** v2.5.6+  
-**Test Suite Status:** ✅ 541 tests passing across 59 files (+5 Playwright E2E)
+**Test Suite Status:** ✅ 550 tests passing across 61 files (+5 Playwright E2E)
 
 ---
 
@@ -11,7 +11,7 @@
 - **Phase 1:** Engineering Foundation - Component and utility tests
 - **Phase 2:** Workflow Components - Forms, drag-drop, tables, Kanban (117 tests)
 - **Phase 3:** Hooks, Services, Views, Utilities - All batches complete (121 tests)
-- **Total Coverage:** 541 passing tests, 59 test files, ~87% statement coverage
+- **Total Coverage:** 550 passing tests, 61 test files, ~87% statement coverage
 - **Status:** All Phase 1-3 testing objectives met. Test infrastructure is solid.
 
 ### E2E Coverage (✅ Baseline Complete)
@@ -28,6 +28,7 @@
   - Extracted multiple custom hooks from App.tsx (including actions/compare/table context composition)
   - Separated domain logic (domain.ts)
   - Isolated storage layer (storage.ts, sqliteStore.js)
+  - Split frontend storage concerns into focused modules (`jobsApi`, `storageLogger`, `fallbackStorage`)
   - Created service modules (jobService, aiScoringService, resumeParsingService)
   - Split export/import responsibilities into focused modules (`csvParser`, `jsonTransfer`, `jobMerger`)
   - Component extraction (views, inputs, tables, workflows)
@@ -35,7 +36,7 @@
 
 - **Remaining Issues (from REFACTORING_ANALYSIS.md):**
   - App.tsx is now 233 lines (target reached; monitor for future creep)
-  - storage.ts at 195 lines (mixed logging/API/fallback)
+  - storage.ts now orchestrates dedicated modules (logging/API/fallback split complete)
   - TableView now uses context-driven subcomponents (`TableBulkActions`, `TableHeader`, `TableBody`, `TableRow`)
   - 10 components without tests (low priority UI components)
   - E2E coverage is baseline-complete; bulk ops/import-export/drag-drop paths remain to add
@@ -282,7 +283,7 @@
 
 ---
 
-### Track B: Code Quality & Architecture (Developer Velocity)
+### Track B: Code Quality & Architecture (Developer Velocity) (✅ Completed)
 **Goal:** Make future feature development faster and safer
 
 #### B1. App.tsx Final Refactoring (MEDIUM EFFORT) (✅ Completed)
@@ -428,25 +429,32 @@ src/exportImport.ts    (~50 lines: orchestrates the above)
 
 ---
 
-#### B5. Storage Layer Cleanup (LOW PRIORITY)
+#### B5. Storage Layer Cleanup (LOW PRIORITY) (✅ Completed)
 **Priority:** P3 - Organization  
 **Effort:** 3-4 hours  
-**Current State:** storage.ts mixes logging, API, fallback
+**Current State:** `storage.ts` is an orchestrator over focused storage modules
 
-**Note:** `jobsApi.js` already exists but isn't properly integrated
+**Delivered (March 8, 2026):**
+1. Added typed API wrapper in `src/storage/jobsApi.ts`
+2. Extracted logging into `src/storage/storageLogger.ts`
+3. Extracted local fallback persistence into `src/storage/fallbackStorage.ts`
+4. Refactored `src/storage.ts` to orchestrate these modules and re-export log utilities
+5. Added focused tests for extracted modules:
+  - `src/storage/jobsApi.test.ts`
+  - `src/storage/fallbackStorage.test.ts`
 
-**Refactoring:**
-1. Migrate `jobsApi.js` → `jobsApi.ts` (TypeScript)
-2. Extract logging to `storageLogger.ts`
-3. Create `fallbackStorage.ts` for localStorage logic
-4. Make `storage.ts` orchestrate the above
+**Refactoring Applied:**
+1. Introduced `jobsApi.ts` (frontend API client layer)
+2. Extracted storage logging lifecycle to `storageLogger.ts`
+3. Isolated local fallback read/write in `fallbackStorage.ts`
+4. Kept `storage.ts` as orchestration entrypoint used by app hooks
 
 **Impact:**
 - Clearer separation of concerns
 - Each module independently testable
 - Easier to swap storage backends (e.g., IndexedDB)
 
-**Estimated Tests:** 8-10 new tests  
+**Validation:** storage tests + build all passing after module split  
 **Risk:** Low
 
 ---
@@ -519,7 +527,11 @@ src/exportImport.ts    (~50 lines: orchestrates the above)
 - [x] B4: Playwright E2E Tests
   - [x] Setup and configure
   - [x] Implement baseline critical-path tests
-  - [ ] Expand to bulk ops/import-export/drag-drop scenarios
+  - Future enhancement: expand to bulk ops/import-export/drag-drop scenarios
+- [x] B5: Storage Layer Cleanup
+  - [x] Added `jobsApi`, `storageLogger`, `fallbackStorage` modules
+  - [x] Converted `storage.ts` to orchestrator pattern
+  - [x] Added focused storage module tests
 
 **Deliverable:** v2.7.1 maintenance release with improved architecture
 
@@ -596,7 +608,7 @@ The following items from the original NEXT_STEPS_PLAN.md are **deferred** for no
 
 ## Appendix: Testing Status
 
-### Current Test Coverage (541 tests, 59 files)
+### Current Test Coverage (550 tests, 61 files)
 
 **Phase 1 (Engineering Foundation):**
 - Domain logic, utilities, storage layer
@@ -643,7 +655,7 @@ The following items from the original NEXT_STEPS_PLAN.md are **deferred** for no
 
 **This Quarter:**
 1. Ship remaining roadmap features (A2/A3/A4)
-2. Continue storage-layer cleanup (B5)
+2. Expand E2E coverage for bulk ops/import-export/drag-drop
 3. Gather user feedback on task-centric workflows
 4. Plan next phase based on usage data
 
