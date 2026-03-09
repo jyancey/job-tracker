@@ -62,6 +62,7 @@ interface AppShellViewProps {
   handleUndo: () => void
   filtersState: FilterState
   filterStatusFromAnalytics: (status: StatusFilter) => void
+  selectStuckJobFromAnalytics: (job: Job) => void
   dispatchFilter: (action: FilterAction) => void
   toggleAdvancedFilters: () => void
   clearAdvancedFilters: () => void
@@ -105,6 +106,7 @@ export function AppShellView({
   handleUndo,
   filtersState,
   filterStatusFromAnalytics,
+  selectStuckJobFromAnalytics,
   dispatchFilter,
   toggleAdvancedFilters,
   clearAdvancedFilters,
@@ -273,7 +275,7 @@ export function AppShellView({
 
               {view === 'calendar' && <CalendarView dueByDate={dueByDate} onView={openViewOnly} />}
               {view === 'dashboard' && <DashboardView byStatus={byStatus} />}
-              {view === 'analytics' && <AnalyticsView jobs={jobs} onFilterByStatus={filterStatusFromAnalytics} />}
+              {view === 'analytics' && <AnalyticsView jobs={jobs} onFilterByStatus={filterStatusFromAnalytics} onSelectJob={selectStuckJobFromAnalytics} />}
             </section>
           </main>
 

@@ -13,9 +13,10 @@ import './AnalyticsView.css'
 interface AnalyticsViewProps {
   jobs: Job[]
   onFilterByStatus?: (status: StatusFilter) => void
+  onSelectJob?: (job: Job) => void
 }
 
-export function AnalyticsView({ jobs, onFilterByStatus }: AnalyticsViewProps) {
+export function AnalyticsView({ jobs, onFilterByStatus, onSelectJob }: AnalyticsViewProps) {
   const conversionMetrics = calculateConversionMetrics(jobs)
   const weeklyTrends = calculateWeeklyTrends(jobs)
   const timeInStage = calculateTimeInStage(jobs)
@@ -180,7 +181,13 @@ export function AnalyticsView({ jobs, onFilterByStatus }: AnalyticsViewProps) {
           </p>
           <div className="stuck-jobs-list">
             {stuckJobs.slice(0, 10).map((stuck: StuckJob) => (
-              <div key={stuck.job.id} className="stuck-job-item">
+              <div
+                key={stuck.job.id}
+                className={`stuck-job-item ${onSelectJob ? 'stuck-job-interactive' : ''}`}
+                onClick={() => onSelectJob?.(stuck.job)}
+                role={onSelectJob ? 'button' : undefined}
+                tabIndex={onSelectJob ? 0 : undefined}
+              >
                 <div className="stuck-job-header">
                   <strong>{stuck.job.roleTitle}</strong> at {stuck.job.company}
                 </div>

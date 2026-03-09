@@ -158,6 +158,10 @@ function AppContent() {
     setCurrentPage(1)
   }
 
+  const selectStuckJobFromAnalytics = (job: Job) => {
+    view.openViewOnly(job)
+  }
+
   // Build table view context
   const tableViewContextValue = useTableViewContext({
     paginatedJobs,
@@ -214,6 +218,7 @@ function AppContent() {
       handleUndo={handleUndo}
       filtersState={filters.state}
       filterStatusFromAnalytics={filterStatusFromAnalytics}
+      selectStuckJobFromAnalytics={selectStuckJobFromAnalytics}
       dispatchFilter={filters.dispatch}
       toggleAdvancedFilters={filters.toggleAdvancedFilters}
       clearAdvancedFilters={filters.clearAdvancedFilters}

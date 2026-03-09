@@ -174,4 +174,99 @@ describe('AnalyticsView', () => {
 
     expect(onFilterByStatus).toHaveBeenCalledWith('Offer')
   })
+
+  it('invokes onSelectJob callback when clicking stuck job items', async () => {
+    const onSelectJob = vi.fn()
+    const user = userEvent.setup()
+
+    const oldDate = new Date()
+    oldDate.setDate(oldDate.getDate() - 30)
+
+    const stuckJob = createJob({
+      status: 'Applied',
+      updatedAt: oldDate.toISOString(),
+      company: 'Acme Corp',
+      roleTitle: 'Senior Engineer',
+    })
+
+    const { container } = render(
+      <AnalyticsView jobs={[stuckJob]} onSelectJob={onSelectJob} />
+    )
+
+    const stuckJobItem = container.querySelector('.stuck-job-item')
+    expect(stuckJobItem).not.toBeNull()
+
+    await user.click(stuckJobItem as HTMLElement)
+
+    expect(onSelectJob).toHaveBeenCalledWith(stuckJob)
+    expect(onSelectJob).toHaveBeenCalledTimes(1)
+  })
+
+  it('passes correct job object to onSelectJob when multiple stuck jobs exist', async () => {
+    const onSelectJob = vi.fn()
+    const user = userEvent.setup()
+
+    const oldDate = new Date()
+    oldDate.setDate(oldDate.getDate() - 30)
+
+    const stuckJob1 = createJob({
+      status: 'Applied',
+      updatedAt: oldDate.toISOString(),
+      company: 'Company A',
+      roleTitle: 'Engineer',
+    })
+
+    const stuckJob2 = createJob({
+      status: 'Interview',
+      updatedAt: oldDate.toISOString(),
+      company: 'Company B',
+      roleTitle: 'Manager',
+    })
+
+    const { container } = render(
+      <AnalyticsView jobs={[stuckJob1, stuckJob2]} onSelectJob={onSelectJob} />
+    )
+
+    const stuckJobItems = container.querySelectorAll('.stuck-job-item')
+    expect(stuckJobItems).toHaveLength(2)
+
+    // Click the second stuck job item
+    await user.click(stuckJobItems[1] as HTMLElement)
+
+    // Should pass the second job
+    expect(onSelectJob).toHaveBeenCalledWith(stuckJob2)
+  })
+
+  it('does not apply interactive styling when onSelectJob is not provided', () => {
+    const oldDate = new Date()
+    oldDate.setDate(oldDate.getDate() - 30)
+
+    const stuckJob = createJob({
+      status: 'Applied',
+      updatedAt: oldDate.toISOString(),
+    })
+
+    const { container } = render(<AnalyticsView jobs={[stuckJob]} />)
+
+    const stuckJobItem = container.querySelector('.stuck-job-item')
+    expect(stuckJobItem).not.toBeNull()
+    expect(stuckJobItem?.classList.contains('stuck-job-interactive')).toBe(false)
+  })
+
+  it('applies interactive styling when onSelectJob is provided', () => {
+    const onSelectJob = vi.fn()
+    const oldDate = new Date()
+    oldDate.setDate(oldDate.getDate() - 30)
+
+    const stuckJob = createJob({
+      status: 'Applied',
+      updatedAt: oldDate.toISOString(),
+    })
+
+    const { container } = render(<AnalyticsView jobs={[stuckJob]} onSelectJob={onSelectJob} />)
+
+    const stuckJobItem = container.querySelector('.stuck-job-item')
+    expect(stuckJobItem).not.toBeNull()
+    expect(stuckJobItem?.classList.contains('stuck-job-interactive')).toBe(true)
+  })
 })
