@@ -1,7 +1,7 @@
 # Job Tracker - Next Steps
 **Updated:** March 8, 2026  
 **Current Version:** v2.5.6+  
-**Test Suite Status:** ✅ 552 tests passing across 61 files (+6 Playwright E2E)
+**Test Suite Status:** ✅ 556 tests passing across 61 files (+8 Playwright E2E)
 
 ---
 
@@ -110,7 +110,9 @@
 
 **Latest A1 Enhancement (March 8, 2026):**
 - Analytics cards now support drill-down navigation to the table with status filters applied.
-- Added test coverage for drill-down callback behavior and an E2E path for analytics → table filtering.
+- Stuck job items are now clickable and open the job modal directly (quick win feature).
+- Added test coverage for drill-down callback behavior, stuck job click interaction, and E2E paths.
+- Test totals: **556 unit tests (+4), 8 E2E tests (+2)**
 
 **Estimated Tests:** 25-30 new tests  
 **Dependencies:** None (uses existing Job domain)
