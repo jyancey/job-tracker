@@ -28,13 +28,16 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { getTodayString } from './utils/dateUtils'
 import { countOverdueTasks, getThisWeekTasks, getTodayTasks, groupTasksByDueDate } from './features/tasks/taskFilters'
 import * as jobService from './services/jobService'
+import { useSavedViews } from './features/savedViews/useSavedViews'
 
 function AppContent() {
   const [jobs, setJobs] = useState<Job[]>([])
+  const [activeSavedViewId, setActiveSavedViewId] = useState('')
   const selectAllCheckboxRef = useRef<HTMLInputElement>(null)
 
   // State management hooks
   const filters = useFilterState()
+  const { savedViews, saveView, deleteView, renameView } = useSavedViews()
   const selection = useJobSelection()
   const view = useViewState()
   const undo = useUndoStack()
@@ -51,7 +54,7 @@ function AppContent() {
   })
 
   // Sort and pagination state management
-  const { sortColumn, sortDirection, currentPage, pageSize, handleSort, setCurrentPage, setPageSize } =
+  const { sortColumn, sortDirection, currentPage, pageSize, handleSort, setSortColumn, setSortDirection, setCurrentPage, setPageSize } =
     useSortAndPagination({ totalPages: tempTotalPages })
 
   // Recompute paginated jobs with sort applied
@@ -171,6 +174,85 @@ function AppContent() {
     view.openViewOnly(job)
   }
 
+  const applySavedView = (id: string) => {
+    if (!id) {
+      setActiveSavedViewId('')
+      return
+    }
+
+    const preset = savedViews.find((viewPreset) => viewPreset.id === id)
+    if (!preset) {
+      return
+    }
+
+    filters.updateFilter(preset.filters)
+    setSortColumn(preset.sortColumn)
+    setSortDirection(preset.sortDirection)
+    setCurrentPage(1)
+    view.updateView('table')
+    setActiveSavedViewId(id)
+    addNotification(`Applied saved view: ${preset.name}`, 'info')
+  }
+
+  const saveCurrentView = () => {
+    const defaultName = activeSavedViewId
+      ? savedViews.find((viewPreset) => viewPreset.id === activeSavedViewId)?.name ?? 'Saved View'
+      : `Saved View ${savedViews.length + 1}`
+    const name = window.prompt('Save current filters as:', defaultName)?.trim()
+    if (!name) {
+      return
+    }
+
+    const savedId = saveView({
+      id: activeSavedViewId || undefined,
+      name,
+      filters: filters.state,
+      sortColumn,
+      sortDirection,
+    })
+    setActiveSavedViewId(savedId)
+    addNotification('Saved current view', 'success')
+  }
+
+  const renameSavedView = () => {
+    if (!activeSavedViewId) {
+      return
+    }
+
+    const current = savedViews.find((viewPreset) => viewPreset.id === activeSavedViewId)
+    if (!current) {
+      return
+    }
+
+    const nextName = window.prompt('Rename saved view:', current.name)?.trim()
+    if (!nextName) {
+      return
+    }
+
+    renameView(activeSavedViewId, nextName)
+    addNotification('Saved view renamed', 'success')
+  }
+
+  const deleteSavedView = () => {
+    if (!activeSavedViewId) {
+      return
+    }
+
+    const current = savedViews.find((viewPreset) => viewPreset.id === activeSavedViewId)
+    if (!current) {
+      return
+    }
+
+    const confirmed = window.confirm(`Delete saved view \"${current.name}\"?`)
+    if (!confirmed) {
+      return
+    }
+
+    deleteView(activeSavedViewId)
+    setActiveSavedViewId('')
+    addNotification('Saved view deleted', 'info')
+  }
+
   const handleCompleteTask = (jobId: string) => {
     setJobs((current) => jobService.completeJobAction(current, jobId))
     addNotification('Task marked complete', 'success')
@@ -250,6 +332,12 @@ function AppContent() {
       dispatchFilter={filters.dispatch}
       toggleAdvancedFilters={filters.toggleAdvancedFilters}
       clearAdvancedFilters={filters.clearAdvancedFilters}
+      savedViews={savedViews.map((saved) => ({ id: saved.id, name: saved.name }))}
+      activeSavedViewId={activeSavedViewId}
+      applySavedView={applySavedView}
+      saveCurrentView={saveCurrentView}
+      renameSavedView={renameSavedView}
+      deleteSavedView={deleteSavedView}
       tableViewContextValue={tableViewContextValue}
       showCompare={showCompare}
       selectedJobs={selectedJobs}

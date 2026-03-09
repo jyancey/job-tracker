@@ -491,10 +491,10 @@ src/exportImport.ts    (~50 lines: orchestrates the above)
   - [x] Add tests
 
 **Week 3:**
-- [ ] A3: Saved Filter Presets
-  - [ ] Implement saved view CRUD
-  - [ ] Build manager UI
-  - [ ] Integrate with toolbar
+- [x] A3: Saved Filter Presets (✅ COMPLETED March 8, 2026)
+  - [x] Implement saved view CRUD
+  - [x] Build manager UI
+  - [x] Integrate with toolbar
 - [ ] A4: Full-Text Search Enhancement
   - [ ] Implement search function
   - [ ] Integrate with filters
@@ -502,7 +502,7 @@ src/exportImport.ts    (~50 lines: orchestrates the above)
 **Deliverable:** v2.6.0 release with:
 - Analytics Dashboard (✅ complete with drill-down, stuck job modals, CSV export, trend sparklines)
 - Task management views (✅ Today + This Week + priority + snooze/complete)
-- Saved filter presets (A3)
+- Saved filter presets (✅ persisted presets with apply/save/rename/delete + sort restore)
 - Full-text search (A4)
 
 ---

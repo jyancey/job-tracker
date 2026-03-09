@@ -30,6 +30,12 @@ interface FilterToolbarProps {
   onDispatch: (action: FilterAction) => void
   onToggleAdvanced: () => void
   onClearAdvanced: () => void
+  savedViews: Array<{ id: string; name: string }>
+  activeSavedViewId: string
+  onApplySavedView: (id: string) => void
+  onSaveCurrentView: () => void
+  onRenameSavedView: () => void
+  onDeleteSavedView: () => void
 }
 
 export function FilterToolbar({
@@ -37,6 +43,12 @@ export function FilterToolbar({
   onDispatch,
   onToggleAdvanced,
   onClearAdvanced,
+  savedViews,
+  activeSavedViewId,
+  onApplySavedView,
+  onSaveCurrentView,
+  onRenameSavedView,
+  onDeleteSavedView,
 }: FilterToolbarProps) {
   return (
     <>
@@ -64,6 +76,37 @@ export function FilterToolbar({
             Clear Overdue Filter
           </button>
         )}
+        <select
+          value={activeSavedViewId}
+          onChange={(event) => onApplySavedView(event.target.value)}
+          aria-label="Saved views"
+        >
+          <option value="">Saved views</option>
+          {savedViews.map((view) => (
+            <option key={view.id} value={view.id}>
+              {view.name}
+            </option>
+          ))}
+        </select>
+        <button type="button" className="small ghost" onClick={onSaveCurrentView}>
+          Save View
+        </button>
+        <button
+          type="button"
+          className="small ghost"
+          onClick={onRenameSavedView}
+          disabled={!activeSavedViewId}
+        >
+          Rename
+        </button>
+        <button
+          type="button"
+          className="small ghost"
+          onClick={onDeleteSavedView}
+          disabled={!activeSavedViewId}
+        >
+          Delete View
+        </button>
       </div>
 
       {state.showAdvancedFilters && (

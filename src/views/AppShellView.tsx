@@ -70,6 +70,12 @@ interface AppShellViewProps {
   dispatchFilter: (action: FilterAction) => void
   toggleAdvancedFilters: () => void
   clearAdvancedFilters: () => void
+  savedViews: Array<{ id: string; name: string }>
+  activeSavedViewId: string
+  applySavedView: (id: string) => void
+  saveCurrentView: () => void
+  renameSavedView: () => void
+  deleteSavedView: () => void
   tableViewContextValue: TableViewContextValue
   showCompare: boolean
   selectedJobs: Job[]
@@ -122,6 +128,12 @@ export function AppShellView({
   dispatchFilter,
   toggleAdvancedFilters,
   clearAdvancedFilters,
+  savedViews,
+  activeSavedViewId,
+  applySavedView,
+  saveCurrentView,
+  renameSavedView,
+  deleteSavedView,
   tableViewContextValue,
   showCompare,
   selectedJobs,
@@ -272,6 +284,12 @@ export function AppShellView({
                   onDispatch={dispatchFilter}
                   onToggleAdvanced={toggleAdvancedFilters}
                   onClearAdvanced={clearAdvancedFilters}
+                  savedViews={savedViews}
+                  activeSavedViewId={activeSavedViewId}
+                  onApplySavedView={applySavedView}
+                  onSaveCurrentView={saveCurrentView}
+                  onRenameSavedView={renameSavedView}
+                  onDeleteSavedView={deleteSavedView}
                 />
               </div>
 

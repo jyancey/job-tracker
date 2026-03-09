@@ -17,6 +17,25 @@ function createState(overrides: Partial<FilterState> = {}): FilterState {
   }
 }
 
+function createSavedViewProps(overrides: Partial<{
+  savedViews: Array<{ id: string; name: string }>
+  activeSavedViewId: string
+  onApplySavedView: (id: string) => void
+  onSaveCurrentView: () => void
+  onRenameSavedView: () => void
+  onDeleteSavedView: () => void
+}> = {}) {
+  return {
+    savedViews: [],
+    activeSavedViewId: '',
+    onApplySavedView: vi.fn(),
+    onSaveCurrentView: vi.fn(),
+    onRenameSavedView: vi.fn(),
+    onDeleteSavedView: vi.fn(),
+    ...overrides,
+  }
+}
+
 describe('FilterToolbar', () => {
   afterEach(() => {
     cleanup()
@@ -32,6 +51,7 @@ describe('FilterToolbar', () => {
         onDispatch={vi.fn()}
         onToggleAdvanced={onToggleAdvanced}
         onClearAdvanced={vi.fn()}
+        {...createSavedViewProps()}
       />,
     )
 
@@ -50,10 +70,11 @@ describe('FilterToolbar', () => {
         onDispatch={onDispatch}
         onToggleAdvanced={vi.fn()}
         onClearAdvanced={vi.fn()}
+        {...createSavedViewProps()}
       />,
     )
 
-    await user.selectOptions(within(container).getByRole('combobox'), 'Interview')
+    await user.selectOptions(within(container).getAllByRole('combobox')[0], 'Interview')
 
     expect(onDispatch).toHaveBeenCalledWith({ type: 'status', value: 'Interview' })
   })
@@ -68,6 +89,7 @@ describe('FilterToolbar', () => {
         onDispatch={onDispatch}
         onToggleAdvanced={vi.fn()}
         onClearAdvanced={vi.fn()}
+        {...createSavedViewProps()}
       />,
     )
 
@@ -87,6 +109,7 @@ describe('FilterToolbar', () => {
         onDispatch={onDispatch}
         onToggleAdvanced={vi.fn()}
         onClearAdvanced={onClearAdvanced}
+        {...createSavedViewProps()}
       />,
     )
 
@@ -107,5 +130,34 @@ describe('FilterToolbar', () => {
     expect(onDispatch).toHaveBeenCalledWith({ type: 'salaryMax', value: '150000' })
     expect(onDispatch).toHaveBeenCalledWith({ type: 'contact', value: 'Taylor' })
     expect(onClearAdvanced).toHaveBeenCalledTimes(1)
+  })
+
+  it('handles saved view actions', async () => {
+    const user = userEvent.setup()
+    const onApplySavedView = vi.fn()
+    const onSaveCurrentView = vi.fn()
+    const onRenameSavedView = vi.fn()
+    const onDeleteSavedView = vi.fn()
+
+    render(
+      <FilterToolbar
+        state={createState()}
+        onDispatch={vi.fn()}
+        onToggleAdvanced={vi.fn()}
+        onClearAdvanced={vi.fn()}
+        savedViews={[{ id: 'view-1', name: 'Interview Funnel' }]}
+        activeSavedViewId=""
+        onApplySavedView={onApplySavedView}
+        onSaveCurrentView={onSaveCurrentView}
+        onRenameSavedView={onRenameSavedView}
+        onDeleteSavedView={onDeleteSavedView}
+      />,
+    )
+
+    await user.selectOptions(screen.getByLabelText('Saved views'), 'view-1')
+    expect(onApplySavedView).toHaveBeenCalledWith('view-1')
+
+    await user.click(screen.getByRole('button', { name: 'Save View' }))
+    expect(onSaveCurrentView).toHaveBeenCalledTimes(1)
   })
 })
