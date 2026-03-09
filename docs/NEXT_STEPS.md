@@ -472,13 +472,16 @@ src/exportImport.ts    (~50 lines: orchestrates the above)
 **Goal:** Deliver measurable user value
 
 **Week 1:**
-- [x] A1: Pipeline Intelligence Dashboard (✅ COMPLETED March 8, 2026)
+- [x] A1: Pipeline Intelligence Dashboard (✅ FULLY COMPLETED with Quick Wins)
   - [x] Implement conversion metrics calculations
   - [x] Create dashboard widgets
   - [x] Add comprehensive tests
   - [x] Integration with main app
   - [x] Analytics drill-down to filtered table (bonus)
   - [x] Stuck job modal click-through (bonus quick win)
+  - [x] CSV export of analytics metrics (Quick Win #1)
+  - [x] Sparkline mini-charts for trend visualization (Quick Win #2)
+  - [x] Stuck job badge and threshold details in modal (Quick Win #3)
 
 **Week 2:**
 - [ ] A2: Today/This Week Action Views
@@ -497,7 +500,7 @@ src/exportImport.ts    (~50 lines: orchestrates the above)
   - [ ] Integrate with filters
 
 **Deliverable:** v2.6.0 release with:
-- Analytics Dashboard (✅ complete with drill-down + stuck job modals)
+- Analytics Dashboard (✅ complete with drill-down, stuck job modals, CSV export, trend sparklines)
 - Task management views (A2)
 - Saved filter presets (A3)
 - Full-text search (A4)

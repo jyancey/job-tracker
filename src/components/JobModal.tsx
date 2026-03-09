@@ -1,5 +1,6 @@
 import type { Job } from '../domain'
 import { formatDate } from '../utils/dateUtils'
+import { calculateDaysInCurrentStatus, DEFAULT_STUCK_THRESHOLDS } from '../features/analytics'
 
 interface JobModalProps {
   job: Job | null
@@ -11,18 +12,36 @@ export function JobModal({ job, onClose }: JobModalProps) {
     return null
   }
 
+  // Check if job is stuck
+  const daysInStatus = calculateDaysInCurrentStatus(job)
+  const threshold = DEFAULT_STUCK_THRESHOLDS[job.status as keyof typeof DEFAULT_STUCK_THRESHOLDS]
+  const isStuck = threshold !== undefined && daysInStatus > threshold
+
   return (
     <div className="job-modal-backdrop" onClick={onClose}>
       <section className="job-modal" onClick={(event) => event.stopPropagation()}>
         <header className="job-modal-header">
           <div>
-            <h3>{job.roleTitle}</h3>
+            <div className="job-modal-title-row">
+              <h3>{job.roleTitle}</h3>
+              {isStuck && (
+                <span className="stuck-job-badge" title={`Stuck for ${daysInStatus} days (threshold: ${threshold} days)`}>
+                  ⚠️ Stuck
+                </span>
+              )}
+            </div>
             <p>{job.company}</p>
           </div>
           <button type="button" className="ghost" onClick={onClose}>
             Close
           </button>
         </header>
+
+        {isStuck && (
+          <div className="stuck-job-info">
+            <strong>This job has been in {job.status} for {daysInStatus} days</strong> (threshold: {threshold} days)
+          </div>
+        )}
 
         <div className="job-modal-grid">
           <article>

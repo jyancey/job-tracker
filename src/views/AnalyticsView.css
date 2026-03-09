@@ -4,10 +4,37 @@
   margin: 0 auto;
 }
 
+.analytics-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
 .analytics-header {
   font-size: 2rem;
-  margin-bottom: 2rem;
+  margin: 0;
   color: #1a1a1a;
+}
+
+.analytics-export-btn {
+  padding: 0.5rem 1rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.analytics-export-btn:hover {
+  background: #1d4ed8;
+}
+
+.analytics-export-btn:active {
+  background: #1e40af;
 }
 
 .analytics-drilldown-hint {
@@ -118,17 +145,24 @@
   padding: 1.5rem;
 }
 
+.trend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
 .trend-value {
   font-size: 2.5rem;
   font-weight: bold;
   color: #1a1a1a;
-  margin-bottom: 0.5rem;
 }
 
 .trend-label {
   font-size: 0.875rem;
   color: #6c757d;
   margin-bottom: 0.75rem;
+  margin-top: 0.75rem;
 }
 
 .trend-change {

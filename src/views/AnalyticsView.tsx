@@ -8,6 +8,8 @@ import {
   calculateStatusDistribution,
   type StuckJob,
 } from '../features/analytics'
+import { downloadAnalyticsCSV } from '../features/analytics/analyticsExport'
+import { Sparkline } from '../components/Sparkline'
 import './AnalyticsView.css'
 
 interface AnalyticsViewProps {
@@ -40,7 +42,16 @@ export function AnalyticsView({ jobs, onFilterByStatus, onSelectJob }: Analytics
 
   return (
     <div className="analytics-view">
-      <h2 className="analytics-header">Pipeline Analytics</h2>
+      <div className="analytics-header-bar">
+        <h2 className="analytics-header">Pipeline Analytics</h2>
+        <button
+          className="analytics-export-btn"
+          onClick={() => downloadAnalyticsCSV(jobs)}
+          title="Export analytics metrics as CSV"
+        >
+          📥 Export CSV
+        </button>
+      </div>
       {onFilterByStatus && <p className="analytics-drilldown-hint">Click cards to open a filtered table view.</p>}
 
       {/* Overview Stats */}
@@ -115,28 +126,60 @@ export function AnalyticsView({ jobs, onFilterByStatus, onSelectJob }: Analytics
         <h3>Weekly Momentum</h3>
         <div className="trends-grid">
           <div className="trend-card">
-            <div className="trend-value">{weeklyTrends.currentWeek.newApplications}</div>
+            <div className="trend-header">
+              <div className="trend-value">{weeklyTrends.currentWeek.newApplications}</div>
+              <Sparkline
+                values={[weeklyTrends.previousWeek.newApplications, weeklyTrends.currentWeek.newApplications]}
+                height={24}
+                width={60}
+                color={weeklyTrends.changes.newApplications > 0 ? '#10b981' : '#ef4444'}
+              />
+            </div>
             <div className="trend-label">Applications This Week</div>
             <div className={`trend-change ${getTrendClass(weeklyTrends.changes.newApplications)}`}>
               {formatTrend(weeklyTrends.changes.newApplications)} from last week
             </div>
           </div>
           <div className="trend-card">
-            <div className="trend-value">{weeklyTrends.currentWeek.phoneScreens}</div>
+            <div className="trend-header">
+              <div className="trend-value">{weeklyTrends.currentWeek.phoneScreens}</div>
+              <Sparkline
+                values={[weeklyTrends.previousWeek.phoneScreens, weeklyTrends.currentWeek.phoneScreens]}
+                height={24}
+                width={60}
+                color={weeklyTrends.changes.phoneScreens > 0 ? '#10b981' : '#ef4444'}
+              />
+            </div>
             <div className="trend-label">Phone Screens</div>
             <div className={`trend-change ${getTrendClass(weeklyTrends.changes.phoneScreens)}`}>
               {formatTrend(weeklyTrends.changes.phoneScreens)} from last week
             </div>
           </div>
           <div className="trend-card">
-            <div className="trend-value">{weeklyTrends.currentWeek.interviews}</div>
+            <div className="trend-header">
+              <div className="trend-value">{weeklyTrends.currentWeek.interviews}</div>
+              <Sparkline
+                values={[weeklyTrends.previousWeek.interviews, weeklyTrends.currentWeek.interviews]}
+                height={24}
+                width={60}
+                color={weeklyTrends.changes.interviews > 0 ? '#10b981' : '#ef4444'}
+              />
+            </div>
             <div className="trend-label">Interviews</div>
             <div className={`trend-change ${getTrendClass(weeklyTrends.changes.interviews)}`}>
               {formatTrend(weeklyTrends.changes.interviews)} from last week
             </div>
           </div>
           <div className="trend-card">
-            <div className="trend-value">{weeklyTrends.currentWeek.offers}</div>
+            <div className="trend-header">
+              <div className="trend-value">{weeklyTrends.currentWeek.offers}</div>
+              <Sparkline
+                values={[weeklyTrends.previousWeek.offers, weeklyTrends.currentWeek.offers]}
+                height={24}
+                width={60}
+                color={weeklyTrends.changes.offers > 0 ? '#10b981' : '#ef4444'}
+              />
+            </div>
             <div className="trend-label">Offers</div>
             <div className={`trend-change ${getTrendClass(weeklyTrends.changes.offers)}`}>
               {formatTrend(weeklyTrends.changes.offers)} from last week
