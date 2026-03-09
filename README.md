@@ -22,6 +22,7 @@ Track your search like a pipeline, not a spreadsheet. Manage opportunities, foll
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 20+ and npm
 
 ### Installation
@@ -48,6 +49,7 @@ You can also run as a macOS daemon. See [docs/DAEMON_SETUP.md](docs/DAEMON_SETUP
 ## Development
 
 ### Project Structure
+
 ```
 backend/
   ├── jobsApi.js            # Shared /api/jobs request handler
@@ -116,9 +118,11 @@ npm run build
 Workflow files are located in `.gitea/workflows/`:
 
 ### 1. **Build & Test** (`build-test.yml`)
+
 Triggers on: `push` to main/develop, `pull_request` against main/develop
 
 **Steps:**
+
 - Lint code (ESLint)
 - Run full test suite
 - Build application
@@ -127,9 +131,11 @@ Triggers on: `push` to main/develop, `pull_request` against main/develop
 **Status:** ✅ Passing on current main branch
 
 ### 2. **Release** (`release.yml`)
+
 Triggers on: `git tag` (e.g., `git tag v1.0.0 && git push origin v1.0.0`)
 
 **Steps:**
+
 - Run full test suite
 - Build application
 - Package source tarball (`.tar.gz`)
@@ -138,13 +144,16 @@ Triggers on: `git tag` (e.g., `git tag v1.0.0 && git push origin v1.0.0`)
 - Upload packaged artifacts for download from workflow run
 
 **Artifacts:**
+
 - `job-tracker-vX.Y.Z-source.tar.gz` — Source code archive
 - `job-tracker-vX.Y.Z-dist.zip` — Production build (deploy to static host)
 
 ### 3. **Deploy** (`deploy.yml`)
+
 Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dispatch`
 
 **Steps:**
+
 - Build application
 - Create deployment artifact with metadata
 - Upload to artifacts (30-day retention)
@@ -154,11 +163,13 @@ Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dis
 ## Usage Tips
 
 ### Adding a Job
+
 1. Fill out the "Add Job" form (Company, Role, Status, etc.)
 2. Click **Add Job** to add to pipeline
 3. Metric cards update instantly
 
 ### Smart Filtering
+
 - **Status Filter** — Quick drop-down for All statuses, Overdue Follow-ups, Wishlist, Applied, Phone Screen, Interview, Offer, Rejected, Withdrawn
 - **Advanced Filters** — Click "More Filters" to refine by:
   - Application date range
@@ -167,12 +178,14 @@ Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dis
 - **Overdue Follow-ups** — Click "View list" metric button to see jobs past their due date
 
 ### Bulk Operations
+
 1. Select jobs via checkboxes (or select-all)
 2. Manage selections across pagination
 3. Click "Delete Selected on Page" — only visible selected rows are removed
 4. Hidden selections preserved and reported
 
 ### Import/Export
+
 - **Export** — JSON or CSV from toolbar; CSV opens in Excel/Sheets
 - **Import** — JSON file with merge strategy:
   - **Append** — Add imported jobs to existing
@@ -180,6 +193,7 @@ Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dis
   - **Replace** — Clear all, keep only imported
 
 ### Storage & Debugging
+
 - Job data is stored in `data/job-tracker.sqlite` (or `JOB_TRACKER_DB_PATH` if set)
 - The SQLite file can be opened with DB Browser for SQLite, `sqlite3`, and other compatible readers
 - Click **Export DB Logs** in form panel to download debug logs
@@ -200,7 +214,7 @@ Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dis
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+| --- | --- |
 | **UI Framework** | React 19 |
 | **Language** | TypeScript 5 |
 | **Build Tool** | Vite 7 |
@@ -235,5 +249,5 @@ Report issues, suggest features, or contribute pull requests on the project repo
 
 ---
 
-**Last Updated:** March 2026  
-**Current Release Tag:** v2.5.6
+**Last Updated:** March 8, 2026  
+**Current Release Tag:** v2.6.0

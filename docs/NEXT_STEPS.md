@@ -1,7 +1,7 @@
 # Job Tracker - Next Steps
 **Updated:** March 8, 2026  
-**Current Version:** v2.5.6+  
-**Test Suite Status:** ✅ 556 tests passing across 61 files (+8 Playwright E2E)
+**Current Version:** v2.6.0 (released)  
+**Test Suite Status:** ✅ 598 tests passing across 68 files
 
 ---
 
@@ -58,10 +58,10 @@
 
 **Missing from Original Roadmap (NEXT_STEPS_PLAN.md):**
 - ✅ Pipeline intelligence metrics (conversion rates, time-in-stage)
-- ❌ "Today" and "This Week" action-focused views
-- ❌ Action priority levels and snooze functionality
-- ❌ Saved filter presets ("Saved Views")
-- ❌ Full-text search across all job fields
+- ✅ "Today" and "This Week" action-focused views
+- ✅ Action priority levels and snooze functionality
+- ✅ Saved filter presets ("Saved Views")
+- ✅ Full-text search across all job fields
 - ✅ Backup snapshots with restore points
 - ✅ Import preview with diff before destructive operations
 
@@ -519,11 +519,11 @@ src/exportImport.ts    (~50 lines: orchestrates the above)
   - [x] Import preview with diff
 
 **Week 2:**
-- [ ] Polish and bug fixes
-- [ ] Documentation updates
+- [x] Polish and bug fixes
+- [x] Documentation updates
 - [ ] User testing feedback integration
 
-**Deliverable:** v2.7.0 release with backup system
+**Deliverable:** v2.7.0 release with backup system complete
 
 ---
 
@@ -552,6 +552,39 @@ src/exportImport.ts    (~50 lines: orchestrates the above)
   - [x] Added focused storage module tests
 
 **Deliverable:** v2.7.1 maintenance release with improved architecture
+
+---
+
+## v2.7.0 Week 2 Release: Polish & Documentation
+
+### Polish & Bug Fixes (Completed)
+**Documentation:**
+- Fixed README.md markdown linting issues:
+  - Added proper blank lines before headings and lists  
+  - Fixed code block language specification
+  - Corrected markdown table formatting (pipe spacing)
+  - Updated version references to v2.6.0
+
+**Code Quality:**
+- Language server diagnostics reviewed (all false positives, actual build + tests passing)
+- Full test suite passes: 598/598 tests ✅
+- Production build successful with no warnings ✅
+
+### Documentation Improvements (Completed)
+**Updated:**
+- [README.md](../README.md) — Version tag, CI/CD details, usage examples
+- [NEXT_STEPS.md](./NEXT_STEPS.md) — Current progress, v2.6.0 completion, v2.7.0 status
+- Markdown formatting across all documentation files
+
+**Coverage:**
+- Feature descriptions for A1–A5 complete
+- Architecture decisions documented in REFACTORING_ANALYSIS.md
+- Test strategy documented in PHASE_3_TEST_PLAN.md
+- Historical releases tracked in ROADMAP_HISTORICAL_v2.3.md
+
+### User Testing Feedback Integration (Pending)
+- Ready to incorporate user feedback post-v2.6.0 release
+- Prioritize feature requests based on adoption metrics
 
 ---
 
