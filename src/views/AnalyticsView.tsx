@@ -1,4 +1,5 @@
 import type { Job } from '../domain'
+import type { StatusFilter } from '../types/filters'
 import {
   calculateConversionMetrics,
   calculateWeeklyTrends,
@@ -11,9 +12,10 @@ import './AnalyticsView.css'
 
 interface AnalyticsViewProps {
   jobs: Job[]
+  onFilterByStatus?: (status: StatusFilter) => void
 }
 
-export function AnalyticsView({ jobs }: AnalyticsViewProps) {
+export function AnalyticsView({ jobs, onFilterByStatus }: AnalyticsViewProps) {
   const conversionMetrics = calculateConversionMetrics(jobs)
   const weeklyTrends = calculateWeeklyTrends(jobs)
   const timeInStage = calculateTimeInStage(jobs)
@@ -31,35 +33,40 @@ export function AnalyticsView({ jobs }: AnalyticsViewProps) {
     return 'trend-neutral'
   }
 
+  const drillDown = (status: StatusFilter) => {
+    onFilterByStatus?.(status)
+  }
+
   return (
     <div className="analytics-view">
       <h2 className="analytics-header">Pipeline Analytics</h2>
+      {onFilterByStatus && <p className="analytics-drilldown-hint">Click cards to open a filtered table view.</p>}
 
       {/* Overview Stats */}
       <section className="analytics-section">
         <h3>Overview</h3>
         <div className="stats-grid">
-          <div className="stat-card">
+          <div className="stat-card interactive-card" onClick={() => drillDown('All')} role="button" tabIndex={0}>
             <div className="stat-value">{jobs.length}</div>
             <div className="stat-label">Total Jobs</div>
           </div>
-          <div className="stat-card">
+          <div className="stat-card interactive-card" onClick={() => drillDown('Wishlist')} role="button" tabIndex={0}>
             <div className="stat-value">{statusDistribution['Wishlist']}</div>
             <div className="stat-label">Wishlist</div>
           </div>
-          <div className="stat-card">
+          <div className="stat-card interactive-card" onClick={() => drillDown('Applied')} role="button" tabIndex={0}>
             <div className="stat-value">{statusDistribution['Applied']}</div>
             <div className="stat-label">Applied</div>
           </div>
-          <div className="stat-card">
+          <div className="stat-card interactive-card" onClick={() => drillDown('Phone Screen')} role="button" tabIndex={0}>
             <div className="stat-value">{statusDistribution['Phone Screen']}</div>
             <div className="stat-label">Phone Screens</div>
           </div>
-          <div className="stat-card">
+          <div className="stat-card interactive-card" onClick={() => drillDown('Interview')} role="button" tabIndex={0}>
             <div className="stat-value">{statusDistribution['Interview']}</div>
             <div className="stat-label">Interviews</div>
           </div>
-          <div className="stat-card">
+          <div className="stat-card interactive-card" onClick={() => drillDown('Offer')} role="button" tabIndex={0}>
             <div className="stat-value">{statusDistribution['Offer']}</div>
             <div className="stat-label">Offers</div>
           </div>
@@ -70,21 +77,21 @@ export function AnalyticsView({ jobs }: AnalyticsViewProps) {
       <section className="analytics-section">
         <h3>Conversion Rates</h3>
         <div className="conversion-grid">
-          <div className="conversion-card">
+          <div className="conversion-card interactive-card" onClick={() => drillDown('Applied')} role="button" tabIndex={0}>
             <div className="conversion-label">Wishlist → Applied</div>
             <div className="conversion-rate">{conversionMetrics.wishlistToApplied.rate}%</div>
             <div className="conversion-detail">
               {conversionMetrics.wishlistToApplied.converted} of {conversionMetrics.wishlistToApplied.total}
             </div>
           </div>
-          <div className="conversion-card">
+          <div className="conversion-card interactive-card" onClick={() => drillDown('Phone Screen')} role="button" tabIndex={0}>
             <div className="conversion-label">Applied → Phone Screen</div>
             <div className="conversion-rate">{conversionMetrics.appliedToPhoneScreen.rate}%</div>
             <div className="conversion-detail">
               {conversionMetrics.appliedToPhoneScreen.converted} of {conversionMetrics.appliedToPhoneScreen.total}
             </div>
           </div>
-          <div className="conversion-card">
+          <div className="conversion-card interactive-card" onClick={() => drillDown('Interview')} role="button" tabIndex={0}>
             <div className="conversion-label">Phone Screen → Interview</div>
             <div className="conversion-rate">{conversionMetrics.phoneScreenToInterview.rate}%</div>
             <div className="conversion-detail">
@@ -92,7 +99,7 @@ export function AnalyticsView({ jobs }: AnalyticsViewProps) {
               {conversionMetrics.phoneScreenToInterview.total}
             </div>
           </div>
-          <div className="conversion-card">
+          <div className="conversion-card interactive-card" onClick={() => drillDown('Offer')} role="button" tabIndex={0}>
             <div className="conversion-label">Interview → Offer</div>
             <div className="conversion-rate">{conversionMetrics.interviewToOffer.rate}%</div>
             <div className="conversion-detail">
@@ -141,22 +148,22 @@ export function AnalyticsView({ jobs }: AnalyticsViewProps) {
       <section className="analytics-section">
         <h3>Median Time in Stage</h3>
         <div className="time-grid">
-          <div className="time-card">
+          <div className="time-card interactive-card" onClick={() => drillDown('Wishlist')} role="button" tabIndex={0}>
             <div className="time-status">Wishlist</div>
             <div className="time-value">{timeInStage.Wishlist.median} days</div>
             <div className="time-count">{timeInStage.Wishlist.jobs} jobs</div>
           </div>
-          <div className="time-card">
+          <div className="time-card interactive-card" onClick={() => drillDown('Applied')} role="button" tabIndex={0}>
             <div className="time-status">Applied</div>
             <div className="time-value">{timeInStage.Applied.median} days</div>
             <div className="time-count">{timeInStage.Applied.jobs} jobs</div>
           </div>
-          <div className="time-card">
+          <div className="time-card interactive-card" onClick={() => drillDown('Phone Screen')} role="button" tabIndex={0}>
             <div className="time-status">Phone Screen</div>
             <div className="time-value">{timeInStage['Phone Screen'].median} days</div>
             <div className="time-count">{timeInStage['Phone Screen'].jobs} jobs</div>
           </div>
-          <div className="time-card">
+          <div className="time-card interactive-card" onClick={() => drillDown('Interview')} role="button" tabIndex={0}>
             <div className="time-status">Interview</div>
             <div className="time-value">{timeInStage.Interview.median} days</div>
             <div className="time-count">{timeInStage.Interview.jobs} jobs</div>

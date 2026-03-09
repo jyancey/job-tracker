@@ -1,7 +1,7 @@
 # Job Tracker - Next Steps
 **Updated:** March 8, 2026  
 **Current Version:** v2.5.6+  
-**Test Suite Status:** ✅ 550 tests passing across 61 files (+5 Playwright E2E)
+**Test Suite Status:** ✅ 552 tests passing across 61 files (+6 Playwright E2E)
 
 ---
 
@@ -11,12 +11,13 @@
 - **Phase 1:** Engineering Foundation - Component and utility tests
 - **Phase 2:** Workflow Components - Forms, drag-drop, tables, Kanban (117 tests)
 - **Phase 3:** Hooks, Services, Views, Utilities - All batches complete (121 tests)
-- **Total Coverage:** 550 passing tests, 61 test files, ~87% statement coverage
+- **Total Coverage:** 552 passing tests, 61 test files, ~87% statement coverage
 - **Status:** All Phase 1-3 testing objectives met. Test infrastructure is solid.
 
 ### E2E Coverage (✅ Baseline Complete)
 - Playwright configured and stable in local/CI-friendly mode
 - 5 end-to-end tests currently passing:
+  - analytics drill-down to filtered table
   - smoke: homepage load
   - smoke: settings open/close
   - CRUD workflow (create/edit/delete)
@@ -104,8 +105,12 @@
 **Success Criteria:**
 - Metrics update in real-time as jobs change
 - Visual indicators for trends (up/down/stable)
-- Clicking metric cards filters main table view
+- Clicking metric cards filters main table view ✅
 - All calculations tested with edge cases (empty data, single job, etc.)
+
+**Latest A1 Enhancement (March 8, 2026):**
+- Analytics cards now support drill-down navigation to the table with status filters applied.
+- Added test coverage for drill-down callback behavior and an E2E path for analytics → table filtering.
 
 **Estimated Tests:** 25-30 new tests  
 **Dependencies:** None (uses existing Job domain)
@@ -608,7 +613,7 @@ The following items from the original NEXT_STEPS_PLAN.md are **deferred** for no
 
 ## Appendix: Testing Status
 
-### Current Test Coverage (550 tests, 61 files)
+### Current Test Coverage (552 tests, 61 files)
 
 **Phase 1 (Engineering Foundation):**
 - Domain logic, utilities, storage layer
@@ -631,8 +636,8 @@ The following items from the original NEXT_STEPS_PLAN.md are **deferred** for no
 - **Overall:** ~87% statement coverage
 
 **Playwright E2E Coverage:**
-- 5 passing tests in `e2e/`
-- Smoke + CRUD + filter/sort + cross-view navigation
+- 6 passing tests in `e2e/`
+- Smoke + CRUD + analytics drill-down + filter/sort + cross-view navigation
 
 **Files Still Untested (Low Priority):**
 - Minor UI components (badges, icons, tooltips)

@@ -3,6 +3,7 @@ import type { Job } from '../domain'
 import type { View } from '../hooks/useViewState'
 import type { ImportMode } from '../exportImport'
 import type { FilterAction, FilterState } from '../components/FilterToolbar'
+import type { StatusFilter } from '../types/filters'
 import type { Notification } from '../notifications'
 import type { TableViewContextValue } from './table/TableViewContext'
 import { APP_VERSION, GIT_BRANCH } from '../version'
@@ -60,6 +61,7 @@ interface AppShellViewProps {
   canUndo: boolean
   handleUndo: () => void
   filtersState: FilterState
+  filterStatusFromAnalytics: (status: StatusFilter) => void
   dispatchFilter: (action: FilterAction) => void
   toggleAdvancedFilters: () => void
   clearAdvancedFilters: () => void
@@ -102,6 +104,7 @@ export function AppShellView({
   canUndo,
   handleUndo,
   filtersState,
+  filterStatusFromAnalytics,
   dispatchFilter,
   toggleAdvancedFilters,
   clearAdvancedFilters,
@@ -270,7 +273,7 @@ export function AppShellView({
 
               {view === 'calendar' && <CalendarView dueByDate={dueByDate} onView={openViewOnly} />}
               {view === 'dashboard' && <DashboardView byStatus={byStatus} />}
-              {view === 'analytics' && <AnalyticsView jobs={jobs} />}
+              {view === 'analytics' && <AnalyticsView jobs={jobs} onFilterByStatus={filterStatusFromAnalytics} />}
             </section>
           </main>
 

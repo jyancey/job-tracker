@@ -22,6 +22,7 @@ import { useSortAndPagination } from './hooks/useSortAndPagination'
 import { useTableViewContext } from './hooks/useTableViewContext'
 import { useJobOperations } from './hooks/useJobOperations'
 import { useImportExport } from './hooks/useImportExport'
+import type { StatusFilter } from './types/filters'
 import { AppShellView } from './views/AppShellView'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
@@ -151,6 +152,12 @@ function AppContent() {
     addNotification,
   })
 
+  const filterStatusFromAnalytics = (status: StatusFilter) => {
+    filters.updateStatusFilter(status)
+    view.updateView('table')
+    setCurrentPage(1)
+  }
+
   // Build table view context
   const tableViewContextValue = useTableViewContext({
     paginatedJobs,
@@ -206,6 +213,7 @@ function AppContent() {
       canUndo={undo.canUndo}
       handleUndo={handleUndo}
       filtersState={filters.state}
+      filterStatusFromAnalytics={filterStatusFromAnalytics}
       dispatchFilter={filters.dispatch}
       toggleAdvancedFilters={filters.toggleAdvancedFilters}
       clearAdvancedFilters={filters.clearAdvancedFilters}

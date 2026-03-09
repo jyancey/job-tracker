@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { AnalyticsView } from './AnalyticsView'
 import { Job, JobStatus } from '../domain'
 
@@ -144,5 +145,33 @@ describe('AnalyticsView', () => {
     // Should render without errors
     expect(screen.getAllByText('Pipeline Analytics')[0]).toBeInTheDocument()
     expect(screen.getAllByText('0')[0]).toBeInTheDocument() // Total Jobs: 0
+  })
+
+  it('invokes drill-down callback when clicking overview cards', async () => {
+    const onFilterByStatus = vi.fn()
+    const user = userEvent.setup()
+
+    const { container } = render(<AnalyticsView jobs={[createJob({ status: 'Applied' })]} onFilterByStatus={onFilterByStatus} />)
+
+    const appliedCard = container.querySelector('.stats-grid .stat-card.interactive-card:nth-child(3)')
+    expect(appliedCard).not.toBeNull()
+
+    await user.click(appliedCard as HTMLElement)
+
+    expect(onFilterByStatus).toHaveBeenCalledWith('Applied')
+  })
+
+  it('invokes drill-down callback when clicking conversion cards', async () => {
+    const onFilterByStatus = vi.fn()
+    const user = userEvent.setup()
+
+    const { container } = render(<AnalyticsView jobs={[createJob({ status: 'Interview' })]} onFilterByStatus={onFilterByStatus} />)
+
+    const offerConversionCard = container.querySelector('.conversion-grid .conversion-card.interactive-card:nth-child(4)')
+    expect(offerConversionCard).not.toBeNull()
+
+    await user.click(offerConversionCard as HTMLElement)
+
+    expect(onFilterByStatus).toHaveBeenCalledWith('Offer')
   })
 })

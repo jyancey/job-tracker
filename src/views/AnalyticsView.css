@@ -10,6 +10,28 @@
   color: #1a1a1a;
 }
 
+.analytics-drilldown-hint {
+  margin-top: -1rem;
+  margin-bottom: 1.5rem;
+  color: #5b6472;
+  font-size: 0.875rem;
+}
+
+.interactive-card {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.interactive-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.interactive-card:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
 .analytics-section {
   margin-bottom: 3rem;
 }
