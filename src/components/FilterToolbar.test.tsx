@@ -51,6 +51,8 @@ describe('FilterToolbar', () => {
         onDispatch={vi.fn()}
         onToggleAdvanced={onToggleAdvanced}
         onClearAdvanced={vi.fn()}
+        searchMatchesCount={0}
+        totalJobsCount={0}
         {...createSavedViewProps()}
       />,
     )
@@ -70,6 +72,8 @@ describe('FilterToolbar', () => {
         onDispatch={onDispatch}
         onToggleAdvanced={vi.fn()}
         onClearAdvanced={vi.fn()}
+        searchMatchesCount={0}
+        totalJobsCount={0}
         {...createSavedViewProps()}
       />,
     )
@@ -89,6 +93,8 @@ describe('FilterToolbar', () => {
         onDispatch={onDispatch}
         onToggleAdvanced={vi.fn()}
         onClearAdvanced={vi.fn()}
+        searchMatchesCount={0}
+        totalJobsCount={0}
         {...createSavedViewProps()}
       />,
     )
@@ -109,11 +115,13 @@ describe('FilterToolbar', () => {
         onDispatch={onDispatch}
         onToggleAdvanced={vi.fn()}
         onClearAdvanced={onClearAdvanced}
+        searchMatchesCount={0}
+        totalJobsCount={0}
         {...createSavedViewProps()}
       />,
     )
 
-    fireEvent.change(screen.getByPlaceholderText('Search company, role, or notes'), {
+    fireEvent.change(screen.getByLabelText('Search jobs'), {
       target: { value: 'Acme' },
     })
     fireEvent.change(screen.getByPlaceholderText('From'), { target: { value: '2026-03-01' } })
@@ -145,6 +153,8 @@ describe('FilterToolbar', () => {
         onDispatch={vi.fn()}
         onToggleAdvanced={vi.fn()}
         onClearAdvanced={vi.fn()}
+        searchMatchesCount={3}
+        totalJobsCount={10}
         savedViews={[{ id: 'view-1', name: 'Interview Funnel' }]}
         activeSavedViewId=""
         onApplySavedView={onApplySavedView}
@@ -159,5 +169,27 @@ describe('FilterToolbar', () => {
 
     await user.click(screen.getByRole('button', { name: 'Save View' }))
     expect(onSaveCurrentView).toHaveBeenCalledTimes(1)
+
+    expect(screen.getByText('3/10 matches')).toBeInTheDocument()
+  })
+
+  it('clears search query from quick search control', async () => {
+    const user = userEvent.setup()
+    const onDispatch = vi.fn()
+
+    render(
+      <FilterToolbar
+        state={createState({ query: 'Acme' })}
+        onDispatch={onDispatch}
+        onToggleAdvanced={vi.fn()}
+        onClearAdvanced={vi.fn()}
+        searchMatchesCount={1}
+        totalJobsCount={5}
+        {...createSavedViewProps()}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Clear Search' }))
+    expect(onDispatch).toHaveBeenCalledWith({ type: 'query', value: '' })
   })
 })

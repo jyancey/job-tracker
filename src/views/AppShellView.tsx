@@ -70,6 +70,8 @@ interface AppShellViewProps {
   dispatchFilter: (action: FilterAction) => void
   toggleAdvancedFilters: () => void
   clearAdvancedFilters: () => void
+  searchMatchesCount: number
+  totalJobsCount: number
   savedViews: Array<{ id: string; name: string }>
   activeSavedViewId: string
   applySavedView: (id: string) => void
@@ -128,6 +130,8 @@ export function AppShellView({
   dispatchFilter,
   toggleAdvancedFilters,
   clearAdvancedFilters,
+  searchMatchesCount,
+  totalJobsCount,
   savedViews,
   activeSavedViewId,
   applySavedView,
@@ -284,6 +288,8 @@ export function AppShellView({
                   onDispatch={dispatchFilter}
                   onToggleAdvanced={toggleAdvancedFilters}
                   onClearAdvanced={clearAdvancedFilters}
+                  searchMatchesCount={searchMatchesCount}
+                  totalJobsCount={totalJobsCount}
                   savedViews={savedViews}
                   activeSavedViewId={activeSavedViewId}
                   onApplySavedView={applySavedView}

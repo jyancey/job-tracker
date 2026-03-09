@@ -14,6 +14,7 @@ interface UseTableViewContextParams {
   currentPage: number
   totalPages: number
   pageSize: number
+  searchQuery: string
   handleSort: (column: SortColumn) => void
   toggleJobSelection: (id: string) => void
   toggleSelectAllVisible: () => void
@@ -44,6 +45,7 @@ export function useTableViewContext(params: UseTableViewContextParams): TableVie
     currentPage,
     totalPages,
     pageSize,
+    searchQuery,
     handleSort,
     toggleJobSelection,
     toggleSelectAllVisible,
@@ -71,6 +73,7 @@ export function useTableViewContext(params: UseTableViewContextParams): TableVie
       currentPage,
       totalPages,
       pageSize,
+      searchQuery,
       onSort: handleSort,
       onToggleSelection: toggleJobSelection,
       onToggleSelectAll: toggleSelectAllVisible,
@@ -95,6 +98,7 @@ export function useTableViewContext(params: UseTableViewContextParams): TableVie
       currentPage,
       totalPages,
       pageSize,
+      searchQuery,
     ],
   )
   /* eslint-enable react-hooks/exhaustive-deps */

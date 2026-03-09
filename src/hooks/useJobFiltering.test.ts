@@ -41,7 +41,7 @@ describe('useJobFiltering', () => {
   it('filters by query across multiple fields', () => {
     const jobs = [
       createJob({ id: '1', company: 'TechCorp', roleTitle: 'Engineer' }),
-      createJob({ id: '2', company: 'StartupXYZ', roleTitle: 'Manager' }),
+      createJob({ id: '2', company: 'StartupXYZ', roleTitle: 'Manager', contactPerson: 'Taylor' }),
       createJob({ id: '3', company: 'OtherCorp', roleTitle: 'TechLead', notes: 'TechCorp connection' }),
     ]
     const { result } = renderHook(() =>
@@ -50,6 +50,20 @@ describe('useJobFiltering', () => {
 
     expect(result.current.filteredJobs).toHaveLength(2)
     expect(result.current.filteredJobs.map((j) => j.id)).toEqual(['1', '3'])
+  })
+
+  it('supports tokenized AND query matching across searchable fields', () => {
+    const jobs = [
+      createJob({ id: '1', company: 'TechCorp', notes: 'React frontend', contactPerson: 'Taylor' }),
+      createJob({ id: '2', company: 'TechCorp', notes: 'Backend services', contactPerson: 'Taylor' }),
+    ]
+
+    const { result } = renderHook(() =>
+      useJobFiltering(jobs, { statusFilter: 'All', query: 'techcorp react', dateRangeStart: '', dateRangeEnd: '', salaryRangeMin: '', salaryRangeMax: '', contactPersonFilter: '' }),
+    )
+
+    expect(result.current.filteredJobs).toHaveLength(1)
+    expect(result.current.filteredJobs[0].id).toBe('1')
   })
 
   it('filters by date range inclusively', () => {

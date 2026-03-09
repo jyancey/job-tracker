@@ -640,6 +640,23 @@ fieldset legend {
   min-width: 200px;
 }
 
+.quick-filters input {
+  min-width: 260px;
+}
+
+.search-match-count {
+  font-size: 0.8rem;
+  color: var(--gh-fg-muted);
+  white-space: nowrap;
+}
+
+.search-highlight {
+  background: #fff3b0;
+  color: inherit;
+  padding: 0 1px;
+  border-radius: 2px;
+}
+
 .advanced-filters {
   display: flex;
   gap: 0.45rem;

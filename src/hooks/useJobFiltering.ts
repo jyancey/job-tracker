@@ -5,29 +5,25 @@ import { compareStrings } from '../utils/stringUtils'
 import { parseSalaryRange } from '../utils/salaryUtils'
 import { calculateJobScore, DEFAULT_SCORE_WEIGHTS } from '../scoring'
 import type { FilterOptions, SortOptions, PaginationOptions } from '../types/filters'
+import { searchJobs } from '../features/search/searchJobs'
 
 // Re-export types from centralized location for backward compatibility
 export type { StatusFilter, SortColumn, SortDirection, FilterOptions, SortOptions, PaginationOptions } from '../types/filters'
 
 export function useJobFiltering(jobs: Job[], filterOptions: FilterOptions) {
   const filteredJobs = useMemo(() => {
-    const lowerQuery = filterOptions.query.toLowerCase().trim()
     const today = getTodayString()
 
-    return jobs.filter((job) => {
+    const queryMatchedJobs = searchJobs(jobs, filterOptions.query)
+
+    return queryMatchedJobs.filter((job) => {
       const matchesStatus =
         filterOptions.statusFilter === 'All'
           ? true
           : filterOptions.statusFilter === 'Overdue Follow-ups'
             ? isOverdueFollowUp(job, today)
             : job.status === filterOptions.statusFilter
-      
-      const matchesQuery =
-        !lowerQuery ||
-        job.company.toLowerCase().includes(lowerQuery) ||
-        job.roleTitle.toLowerCase().includes(lowerQuery) ||
-        job.notes.toLowerCase().includes(lowerQuery)
-      
+
       const matchesDateRange =
         (!filterOptions.dateRangeStart || job.applicationDate >= filterOptions.dateRangeStart) &&
         (!filterOptions.dateRangeEnd || job.applicationDate <= filterOptions.dateRangeEnd)
@@ -41,7 +37,7 @@ export function useJobFiltering(jobs: Job[], filterOptions: FilterOptions) {
         !filterOptions.contactPersonFilter || 
         job.contactPerson.toLowerCase().includes(filterOptions.contactPersonFilter.toLowerCase())
 
-      return matchesStatus && matchesQuery && matchesDateRange && matchesSalaryRange && matchesContactPerson
+      return matchesStatus && matchesDateRange && matchesSalaryRange && matchesContactPerson
     })
   }, [jobs, filterOptions.query, filterOptions.statusFilter, filterOptions.dateRangeStart, filterOptions.dateRangeEnd, filterOptions.salaryRangeMin, filterOptions.salaryRangeMax, filterOptions.contactPersonFilter])
 

@@ -29,6 +29,7 @@ import { getTodayString } from './utils/dateUtils'
 import { countOverdueTasks, getThisWeekTasks, getTodayTasks, groupTasksByDueDate } from './features/tasks/taskFilters'
 import * as jobService from './services/jobService'
 import { useSavedViews } from './features/savedViews/useSavedViews'
+import { useDebouncedValue } from './hooks/useDebouncedValue'
 
 function AppContent() {
   const [jobs, setJobs] = useState<Job[]>([])
@@ -44,9 +45,13 @@ function AppContent() {
   const { notifications, addNotification, removeNotification } = useNotifications()
   const { saveStatus } = useJobPersistence(jobs, setJobs, addNotification)
   const { draft, editingId, updateDraft, resetForm, startEdit, submitForm } = useJobForm()
+  const debouncedQuery = useDebouncedValue(filters.state.query, 300)
 
   // Data filtering and transformation
-  const { filteredJobs, overdueCount } = useJobFiltering(jobs, filters.state)
+  const { filteredJobs, overdueCount } = useJobFiltering(jobs, {
+    ...filters.state,
+    query: debouncedQuery,
+  })
   const sortedTableJobs = useJobSorting(filteredJobs, { sortColumn: 'applicationDate', sortDirection: 'desc' })
   const { totalPages: tempTotalPages } = useJobPagination(sortedTableJobs, {
     currentPage: 1,
@@ -177,6 +182,7 @@ function AppContent() {
   const applySavedView = (id: string) => {
     if (!id) {
       setActiveSavedViewId('')
+      filters.updateQuery('')
       return
     }
 
@@ -284,6 +290,7 @@ function AppContent() {
     currentPage,
     totalPages,
     pageSize,
+    searchQuery: debouncedQuery,
     handleSort,
     toggleJobSelection,
     toggleSelectAllVisible,
@@ -332,6 +339,8 @@ function AppContent() {
       dispatchFilter={filters.dispatch}
       toggleAdvancedFilters={filters.toggleAdvancedFilters}
       clearAdvancedFilters={filters.clearAdvancedFilters}
+      searchMatchesCount={filteredJobs.length}
+      totalJobsCount={jobs.length}
       savedViews={savedViews.map((saved) => ({ id: saved.id, name: saved.name }))}
       activeSavedViewId={activeSavedViewId}
       applySavedView={applySavedView}

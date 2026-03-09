@@ -1,6 +1,7 @@
 import type { Job } from '../../domain'
 import { ScoreCell } from '../../components/ScoreCell'
 import { StatusCell } from '../../components/StatusCell'
+import { HighlightedText } from '../../components/HighlightedText'
 import { formatDate, isOverdueFollowUp } from '../../utils/dateUtils'
 import { useTableViewContext } from './TableViewContext'
 
@@ -10,7 +11,7 @@ interface TableRowProps {
 }
 
 export function TableRow({ job, today }: TableRowProps) {
-  const { selectedIds, onToggleSelection, onQuickMove, onEdit, onRemove, onView } = useTableViewContext()
+  const { selectedIds, searchQuery, onToggleSelection, onQuickMove, onEdit, onRemove, onView } = useTableViewContext()
 
   return (
     <tr key={job.id} className={isOverdueFollowUp(job, today) ? 'row-overdue' : ''} onClick={() => onView(job)}>
@@ -22,15 +23,19 @@ export function TableRow({ job, today }: TableRowProps) {
           onChange={() => onToggleSelection(job.id)}
         />
       </td>
-      <td>{job.company}</td>
-      <td>{job.roleTitle}</td>
+      <td>
+        <HighlightedText text={job.company} query={searchQuery} />
+      </td>
+      <td>
+        <HighlightedText text={job.roleTitle} query={searchQuery} />
+      </td>
       <StatusCell value={job.status} onChange={onQuickMove} jobId={job.id} className="quick-status" />
       <td style={{ textAlign: 'center' }}>
         <ScoreCell job={job} />
       </td>
       <td>{formatDate(job.applicationDate)}</td>
       <td>
-        {job.nextAction || '-'}
+        <HighlightedText text={job.nextAction || '-'} query={searchQuery} />
         {job.nextActionDueDate ? ` (${formatDate(job.nextActionDueDate)})` : ''}
         {isOverdueFollowUp(job, today) && <span className="overdue-flag">Overdue</span>}
       </td>

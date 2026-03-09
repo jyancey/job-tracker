@@ -13,6 +13,7 @@ export interface TableViewContextValue {
   currentPage: number
   totalPages: number
   pageSize: number
+  searchQuery: string
   selectAllCheckboxRef: RefObject<HTMLInputElement | null>
   onSort: (column: SortColumn) => void
   onToggleSelection: (id: string) => void

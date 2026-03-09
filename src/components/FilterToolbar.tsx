@@ -30,6 +30,8 @@ interface FilterToolbarProps {
   onDispatch: (action: FilterAction) => void
   onToggleAdvanced: () => void
   onClearAdvanced: () => void
+  searchMatchesCount: number
+  totalJobsCount: number
   savedViews: Array<{ id: string; name: string }>
   activeSavedViewId: string
   onApplySavedView: (id: string) => void
@@ -43,6 +45,8 @@ export function FilterToolbar({
   onDispatch,
   onToggleAdvanced,
   onClearAdvanced,
+  searchMatchesCount,
+  totalJobsCount,
   savedViews,
   activeSavedViewId,
   onApplySavedView,
@@ -53,6 +57,22 @@ export function FilterToolbar({
   return (
     <>
       <div className="quick-filters">
+        <input
+          aria-label="Search jobs"
+          placeholder="Search company, role, notes, contact..."
+          value={state.query}
+          onChange={(event) => onDispatch({ type: 'query', value: event.target.value })}
+        />
+        <span className="search-match-count">{searchMatchesCount}/{totalJobsCount} matches</span>
+        {state.query && (
+          <button
+            type="button"
+            className="small ghost"
+            onClick={() => onDispatch({ type: 'query', value: '' })}
+          >
+            Clear Search
+          </button>
+        )}
         <StatusSelect
           value={state.statusFilter}
           onChange={(value) => onDispatch({ type: 'status', value: value as StatusFilter })}
@@ -111,11 +131,6 @@ export function FilterToolbar({
 
       {state.showAdvancedFilters && (
         <div className="advanced-filters">
-          <input
-            placeholder="Search company, role, or notes"
-            value={state.query}
-            onChange={(event) => onDispatch({ type: 'query', value: event.target.value })}
-          />
           <input
             type="date"
             placeholder="From"
