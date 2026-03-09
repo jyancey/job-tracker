@@ -10,6 +10,10 @@ export const JOB_STATUSES = [
 
 export type JobStatus = (typeof JOB_STATUSES)[number]
 
+export const JOB_PRIORITIES = ['High', 'Medium', 'Low'] as const
+
+export type JobPriority = (typeof JOB_PRIORITIES)[number]
+
 export interface Job {
   id: string
   company: string
@@ -23,6 +27,7 @@ export interface Job {
   contactPerson: string
   nextAction: string
   nextActionDueDate: string
+  priority?: JobPriority
   createdAt: string
   updatedAt: string
   // Job description for AI analysis
@@ -54,6 +59,7 @@ export const EMPTY_JOB_DRAFT: JobDraft = {
   contactPerson: '',
   nextAction: '',
   nextActionDueDate: '',
+  priority: 'Medium',
   jobDescription: '',
   jobDescriptionSource: undefined,
   scoreFit: undefined,
@@ -72,6 +78,7 @@ export function createJobFromDraft(draft: JobDraft): Job {
   return {
     id: crypto.randomUUID(),
     ...draft,
+    priority: draft.priority ?? 'Medium',
     createdAt: now,
     updatedAt: now,
   }

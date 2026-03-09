@@ -29,7 +29,14 @@ export function useJobPersistence(
         return
       }
 
-      setJobs(result.jobs.sort(jobService.sortByApplicationDateDesc))
+      setJobs(
+        result.jobs
+          .map((job) => ({
+            ...job,
+            priority: job.priority ?? 'Medium',
+          }))
+          .sort(jobService.sortByApplicationDateDesc),
+      )
       setIsStorageHydrated(result.didLoad)
 
       if (!result.didLoad) {

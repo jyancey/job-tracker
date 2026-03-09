@@ -484,11 +484,11 @@ src/exportImport.ts    (~50 lines: orchestrates the above)
   - [x] Stuck job badge and threshold details in modal (Quick Win #3)
 
 **Week 2:**
-- [ ] A2: Today/This Week Action Views
-  - [ ] Add priority field to Job type
-  - [ ] Build task views and filters
-  - [ ] Implement snooze and complete actions
-  - [ ] Add tests
+- [x] A2: Today/This Week Action Views (✅ COMPLETED March 8, 2026)
+  - [x] Add priority field to Job type
+  - [x] Build task views and filters
+  - [x] Implement snooze and complete actions
+  - [x] Add tests
 
 **Week 3:**
 - [ ] A3: Saved Filter Presets
@@ -501,7 +501,7 @@ src/exportImport.ts    (~50 lines: orchestrates the above)
 
 **Deliverable:** v2.6.0 release with:
 - Analytics Dashboard (✅ complete with drill-down, stuck job modals, CSV export, trend sparklines)
-- Task management views (A2)
+- Task management views (✅ Today + This Week + priority + snooze/complete)
 - Saved filter presets (A3)
 - Full-text search (A4)
 

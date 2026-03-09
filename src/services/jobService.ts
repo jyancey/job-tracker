@@ -1,4 +1,4 @@
-import { createJobFromDraft, type Job, type JobDraft, type JobStatus } from '../domain'
+import { createJobFromDraft, type Job, type JobDraft, type JobPriority, type JobStatus } from '../domain'
 
 /**
  * Sort jobs by application date (newest first)
@@ -67,4 +67,72 @@ export function updateJobStatus(jobs: Job[], jobId: string, newStatus: JobStatus
  */
 export function findJobById(jobs: Job[], jobId: string): Job | undefined {
   return jobs.find((job) => job.id === jobId)
+}
+
+/**
+ * Mark a job's next action as complete by clearing action text and due date.
+ */
+export function completeJobAction(jobs: Job[], jobId: string): Job[] {
+  return jobs.map((job) =>
+    job.id === jobId
+      ? {
+          ...job,
+          nextAction: '',
+          nextActionDueDate: '',
+          updatedAt: new Date().toISOString(),
+        }
+      : job,
+  )
+}
+
+/**
+ * Snooze a job's next action due date by a given number of days.
+ */
+export function snoozeJobAction(jobs: Job[], jobId: string, days: number, today = new Date()): Job[] {
+  return jobs.map((job) => {
+    if (job.id !== jobId) {
+      return job
+    }
+
+    const baseDate = job.nextActionDueDate ? new Date(`${job.nextActionDueDate}T00:00:00`) : today
+    baseDate.setDate(baseDate.getDate() + days)
+    const nextDueDate = baseDate.toISOString().slice(0, 10)
+
+    return {
+      ...job,
+      nextActionDueDate: nextDueDate,
+      updatedAt: new Date().toISOString(),
+    }
+  })
+}
+
+/**
+ * Update only task fields from task-focused views.
+ */
+export function updateJobTaskAction(jobs: Job[], jobId: string, nextAction: string, nextActionDueDate: string): Job[] {
+  return jobs.map((job) =>
+    job.id === jobId
+      ? {
+          ...job,
+          nextAction,
+          nextActionDueDate,
+          updatedAt: new Date().toISOString(),
+        }
+      : job,
+  )
+}
+
+/**
+ * Update a job priority.
+ */
+export function updateJobPriority(jobs: Job[], jobId: string, priority: JobPriority): Job[] {
+  return jobs.map((job) =>
+    job.id === jobId
+      ? {
+          ...job,
+          priority,
+          updatedAt: new Date().toISOString(),
+        }
+      : job,
+  )
 }

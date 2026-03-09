@@ -11,16 +11,21 @@ export function importFromJson(jsonString: string): Job[] {
       return []
     }
 
-    return parsed.filter(
-      (item): item is Job =>
-        typeof item === 'object' &&
-        item !== null &&
-        typeof item.id === 'string' &&
-        typeof item.company === 'string' &&
-        typeof item.roleTitle === 'string' &&
-        typeof item.applicationDate === 'string' &&
-        typeof item.status === 'string',
-    )
+    return parsed
+      .filter(
+        (item): item is Job =>
+          typeof item === 'object' &&
+          item !== null &&
+          typeof item.id === 'string' &&
+          typeof item.company === 'string' &&
+          typeof item.roleTitle === 'string' &&
+          typeof item.applicationDate === 'string' &&
+          typeof item.status === 'string',
+      )
+      .map((item) => ({
+        ...item,
+        priority: item.priority ?? 'Medium',
+      }))
   } catch {
     return []
   }

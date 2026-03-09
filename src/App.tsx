@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
-import type { Job } from './domain'
+import type { Job, JobPriority } from './domain'
 import {
   useJobFiltering,
   useJobSorting,
@@ -25,6 +25,9 @@ import { useImportExport } from './hooks/useImportExport'
 import type { StatusFilter } from './types/filters'
 import { AppShellView } from './views/AppShellView'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { getTodayString } from './utils/dateUtils'
+import { countOverdueTasks, getThisWeekTasks, getTodayTasks, groupTasksByDueDate } from './features/tasks/taskFilters'
+import * as jobService from './services/jobService'
 
 function AppContent() {
   const [jobs, setJobs] = useState<Job[]>([])
@@ -90,6 +93,12 @@ function AppContent() {
 
   // Grouping for other views
   const { byStatus, dueByDate } = useJobGrouping(jobs)
+  const today = getTodayString()
+
+  const todayTasks = useMemo(() => getTodayTasks(jobs, today), [jobs, today])
+  const thisWeekTasks = useMemo(() => getThisWeekTasks(jobs, today), [jobs, today])
+  const thisWeekGroupedTasks = useMemo(() => groupTasksByDueDate(thisWeekTasks), [thisWeekTasks])
+  const taskOverdueCount = useMemo(() => countOverdueTasks(jobs, today), [jobs, today])
 
   // Table selection state
   const { visibleTableIds, selectedVisibleIds, selectedVisibleCount, allVisibleSelected } =
@@ -162,6 +171,25 @@ function AppContent() {
     view.openViewOnly(job)
   }
 
+  const handleCompleteTask = (jobId: string) => {
+    setJobs((current) => jobService.completeJobAction(current, jobId))
+    addNotification('Task marked complete', 'success')
+  }
+
+  const handleSnoozeTask = (jobId: string, days: number) => {
+    setJobs((current) => jobService.snoozeJobAction(current, jobId, days))
+    addNotification(`Task snoozed by ${days} day(s)`, 'info')
+  }
+
+  const handleTaskPriorityChange = (jobId: string, priority: JobPriority) => {
+    setJobs((current) => jobService.updateJobPriority(current, jobId, priority))
+  }
+
+  const handleQuickAddTaskAction = (jobId: string, action: string, dueDate: string) => {
+    setJobs((current) => jobService.updateJobTaskAction(current, jobId, action, dueDate))
+    addNotification('Task updated', 'success')
+  }
+
   // Build table view context
   const tableViewContextValue = useTableViewContext({
     paginatedJobs,
@@ -231,6 +259,14 @@ function AppContent() {
       handleEditJob={handleEditJob}
       handleRemoveJob={handleRemoveJob}
       dueByDate={dueByDate}
+      today={today}
+      todayTasks={todayTasks}
+      thisWeekTaskGroups={thisWeekGroupedTasks}
+      taskOverdueCount={taskOverdueCount}
+      handleCompleteTask={handleCompleteTask}
+      handleSnoozeTask={handleSnoozeTask}
+      handleTaskPriorityChange={handleTaskPriorityChange}
+      handleQuickAddTaskAction={handleQuickAddTaskAction}
     />
   )
 }

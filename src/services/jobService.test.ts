@@ -1,5 +1,16 @@
 import { describe, it, expect } from 'vitest'
-import { createJob, updateJob, deleteJob, deleteJobs, updateJobStatus, sortByApplicationDateDesc } from './jobService'
+import {
+  completeJobAction,
+  createJob,
+  deleteJob,
+  deleteJobs,
+  snoozeJobAction,
+  sortByApplicationDateDesc,
+  updateJob,
+  updateJobPriority,
+  updateJobStatus,
+  updateJobTaskAction,
+} from './jobService'
 import type { Job, JobDraft } from '../domain'
 
 describe('jobService', (): void => {
@@ -14,6 +25,7 @@ describe('jobService', (): void => {
     contactPerson: 'John Doe',
     nextAction: 'Follow up',
     nextActionDueDate: '2026-03-12',
+    priority: 'Medium',
     notes: 'Good opportunity',
   }
 
@@ -120,6 +132,30 @@ describe('jobService', (): void => {
       const jobs = [mockJob]
       const result = updateJobStatus(jobs, 'non-existent', 'Interview')
       expect(result[0].status).toBe('Applied')
+    })
+  })
+
+  describe('task operations', (): void => {
+    it('completes a job action', (): void => {
+      const result = completeJobAction([mockJob], '1')
+      expect(result[0].nextAction).toBe('')
+      expect(result[0].nextActionDueDate).toBe('')
+    })
+
+    it('snoozes a job action by days', (): void => {
+      const result = snoozeJobAction([mockJob], '1', 3)
+      expect(result[0].nextActionDueDate).toBe('2026-03-15')
+    })
+
+    it('updates task action fields', (): void => {
+      const result = updateJobTaskAction([mockJob], '1', 'Prep notes', '2026-03-20')
+      expect(result[0].nextAction).toBe('Prep notes')
+      expect(result[0].nextActionDueDate).toBe('2026-03-20')
+    })
+
+    it('updates job priority', (): void => {
+      const result = updateJobPriority([mockJob], '1', 'High')
+      expect(result[0].priority).toBe('High')
     })
   })
 

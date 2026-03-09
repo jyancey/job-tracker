@@ -35,6 +35,7 @@ export function useJobOperations({
     contactPerson: job.contactPerson,
     nextAction: job.nextAction,
     nextActionDueDate: job.nextActionDueDate,
+    priority: job.priority ?? 'Medium',
     jobDescription: job.jobDescription,
     jobDescriptionSource: job.jobDescriptionSource,
     scoreFit: job.scoreFit,

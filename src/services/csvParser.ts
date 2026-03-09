@@ -1,5 +1,5 @@
-import type { Job, JobStatus } from '../domain'
-import { JOB_STATUSES } from '../domain'
+import type { Job, JobStatus, JobPriority } from '../domain'
+import { JOB_PRIORITIES, JOB_STATUSES } from '../domain'
 
 type RawCsvRow = Record<string, string>
 
@@ -15,6 +15,7 @@ export function exportToCsv(jobs: Job[]): string {
     'Application Date',
     'Salary Range',
     'Contact Person',
+    'Priority',
     'Next Action',
     'Next Action Due',
     'Score Fit',
@@ -32,6 +33,7 @@ export function exportToCsv(jobs: Job[]): string {
     `"${job.applicationDate}"`,
     `"${job.salaryRange.replace(/"/g, '""')}"`,
     `"${job.contactPerson.replace(/"/g, '""')}"`,
+    `"${(job.priority ?? 'Medium').replace(/"/g, '""')}"`,
     `"${job.nextAction.replace(/"/g, '""')}"`,
     `"${job.nextActionDueDate}"`,
     job.scoreFit != null ? String(job.scoreFit) : '',
@@ -124,6 +126,14 @@ function coerceToJobStatus(value: string): JobStatus {
   return 'Applied'
 }
 
+function coerceToJobPriority(value: string): JobPriority {
+  const trimmed = value.trim()
+  if (JOB_PRIORITIES.includes(trimmed as JobPriority)) {
+    return trimmed as JobPriority
+  }
+  return 'Medium'
+}
+
 export function importFromCsv(csvString: string): Job[] {
   const rows = parseCsv(csvString)
   if (rows.length < 2) {
@@ -141,6 +151,8 @@ export function importFromCsv(csvString: string): Job[] {
     const applicationDate = pickValue(raw, ['applicationdate', 'applieddate', 'date'])
     const statusRaw = pickValue(raw, ['status']) || 'Applied'
     const status = coerceToJobStatus(statusRaw)
+    const priorityRaw = pickValue(raw, ['priority']) || 'Medium'
+    const priority = coerceToJobPriority(priorityRaw)
 
     if (!company || !roleTitle || !applicationDate) {
       continue
@@ -157,6 +169,7 @@ export function importFromCsv(csvString: string): Job[] {
       salaryRange: pickValue(raw, ['salaryrange']),
       notes: pickValue(raw, ['notes']),
       contactPerson: pickValue(raw, ['contactperson', 'contact']),
+      priority,
       nextAction: pickValue(raw, ['nextaction']),
       nextActionDueDate: pickValue(raw, ['nextactiondue', 'nextactionduedate']),
       createdAt: pickValue(raw, ['createdat']) || now,

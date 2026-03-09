@@ -21,11 +21,15 @@ import { AnalyticsView } from './AnalyticsView'
 import { CompareView } from './CompareView'
 import { ProfileView } from './ProfileView'
 import { SettingsView } from './SettingsView'
-import type { JobDraft, JobStatus } from '../domain'
+import { TodayView } from '../features/tasks/TodayView'
+import { ThisWeekView } from '../features/tasks/ThisWeekView'
+import type { JobDraft, JobPriority, JobStatus } from '../domain'
 
 const VIEW_LABELS: Record<View, string> = {
   dashboard: 'Dashboard',
   analytics: 'Analytics',
+  today: 'Today',
+  thisWeek: 'This Week',
   kanban: 'Kanban',
   calendar: 'Calendar',
   table: 'All Jobs',
@@ -75,6 +79,14 @@ interface AppShellViewProps {
   handleEditJob: (job: Job) => void
   handleRemoveJob: (id: string) => void
   dueByDate: [string, Job[]][]
+  today: string
+  todayTasks: Job[]
+  thisWeekTaskGroups: [string, Job[]][]
+  taskOverdueCount: number
+  handleCompleteTask: (jobId: string) => void
+  handleSnoozeTask: (jobId: string, days: number) => void
+  handleTaskPriorityChange: (jobId: string, priority: JobPriority) => void
+  handleQuickAddTaskAction: (jobId: string, action: string, dueDate: string) => void
 }
 
 export function AppShellView({
@@ -119,6 +131,14 @@ export function AppShellView({
   handleEditJob,
   handleRemoveJob,
   dueByDate,
+  today,
+  todayTasks,
+  thisWeekTaskGroups,
+  taskOverdueCount,
+  handleCompleteTask,
+  handleSnoozeTask,
+  handleTaskPriorityChange,
+  handleQuickAddTaskAction,
 }: AppShellViewProps) {
   return (
     <div className="app-shell">
@@ -243,6 +263,7 @@ export function AppShellView({
                         type="button"
                       >
                         {VIEW_LABELS[key]}
+                        {key === 'today' && taskOverdueCount > 0 ? <span className="tab-badge">{taskOverdueCount}</span> : null}
                       </button>
                     ))}
                 </div>
@@ -276,6 +297,29 @@ export function AppShellView({
               {view === 'calendar' && <CalendarView dueByDate={dueByDate} onView={openViewOnly} />}
               {view === 'dashboard' && <DashboardView byStatus={byStatus} />}
               {view === 'analytics' && <AnalyticsView jobs={jobs} onFilterByStatus={filterStatusFromAnalytics} onSelectJob={selectStuckJobFromAnalytics} />}
+              {view === 'today' && (
+                <TodayView
+                  jobs={todayTasks}
+                  today={today}
+                  overdueCount={taskOverdueCount}
+                  onComplete={handleCompleteTask}
+                  onSnooze={handleSnoozeTask}
+                  onPriorityChange={handleTaskPriorityChange}
+                  onQuickAddAction={handleQuickAddTaskAction}
+                  onOpenJob={openViewOnly}
+                />
+              )}
+              {view === 'thisWeek' && (
+                <ThisWeekView
+                  groupedJobs={thisWeekTaskGroups}
+                  today={today}
+                  onComplete={handleCompleteTask}
+                  onSnooze={handleSnoozeTask}
+                  onPriorityChange={handleTaskPriorityChange}
+                  onQuickAddAction={handleQuickAddTaskAction}
+                  onOpenJob={openViewOnly}
+                />
+              )}
             </section>
           </main>
 

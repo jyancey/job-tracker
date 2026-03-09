@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import type { JobDraft, JobStatus } from '../domain'
+import { JOB_PRIORITIES } from '../domain'
 import { StatusSelect } from './StatusSelect'
 import { scrapeJobDescription } from '../services/jobScrapingService'
 
@@ -192,6 +193,19 @@ export function JobForm({ draft, editingId, onUpdateDraft, onSubmit, onCancel }:
           value={draft.nextActionDueDate}
           onChange={(event) => onUpdateDraft('nextActionDueDate', event.target.value)}
         />
+      </label>
+      <label>
+        Priority
+        <select
+          value={draft.priority ?? 'Medium'}
+          onChange={(event) => onUpdateDraft('priority', event.target.value as JobDraft['priority'])}
+        >
+          {JOB_PRIORITIES.map((priority) => (
+            <option key={priority} value={priority}>
+              {priority}
+            </option>
+          ))}
+        </select>
       </label>
       <label className="full-width">
         Notes
