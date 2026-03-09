@@ -36,7 +36,7 @@
 - **Remaining Issues (from REFACTORING_ANALYSIS.md):**
   - App.tsx is now 233 lines (target reached; monitor for future creep)
   - storage.ts at 195 lines (mixed logging/API/fallback)
-  - TableView context exists; continue simplifying table sub-components incrementally
+  - TableView now uses context-driven subcomponents (`TableBulkActions`, `TableHeader`, `TableBody`, `TableRow`)
   - 10 components without tests (low priority UI components)
   - E2E coverage is baseline-complete; bulk ops/import-export/drag-drop paths remain to add
 
@@ -324,12 +324,21 @@
 
 ---
 
-#### B2. TableView Prop Drilling Fix (LOW EFFORT, HIGH IMPACT)
+#### B2. TableView Prop Drilling Fix (LOW EFFORT, HIGH IMPACT) (✅ Completed)
 **Priority:** P2 - Component clarity  
 **Effort:** 2-3 hours  
-**Current State:** 22 props passed to TableView
+**Current State:** Context-first table composition is in place
 
-**Solution:** React Context pattern
+**Delivered (March 8, 2026):**
+- `TableView` reduced to composition-focused layout
+- Added context-driven subcomponents:
+  - `src/views/table/TableBulkActions.tsx`
+  - `src/views/table/TableHeader.tsx`
+  - `src/views/table/TableBody.tsx`
+  - `src/views/table/TableRow.tsx`
+- Table interactions and state are consumed directly from `TableViewContext`, removing intermediate prop chains
+
+**Solution Applied:** React Context pattern
 ```typescript
 // New: src/contexts/TableContext.tsx
 export const TableContext = createContext<TableContextValue>(...)
@@ -348,7 +357,7 @@ const { onEdit, onDelete } = useTableContext()
 - Eliminates intermediate prop passing through TableRow, TableCell
 - Easier to add new table features
 
-**Estimated Tests:** 5-8 integration tests  
+**Validation:** App tests, TableViewContext tests, E2E suite, and build all passing  
 **Risk:** Very low (pure refactoring, no behavior change)
 
 ---
@@ -501,7 +510,7 @@ src/exportImport.ts    (~50 lines: orchestrates the above)
   - [x] Updated tests and validated regression suite
 - [x] B2: TableView Prop Drilling Fix
   - [x] Implemented `TableViewContext`
-  - [x] Updated child components
+  - [x] Updated child components (`TableBulkActions`, `TableHeader`, `TableBody`, `TableRow`)
 
 **Week 2:**
 - [x] B3: Split exportImport.ts
