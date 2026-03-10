@@ -114,7 +114,7 @@ export function calculateWeeklyTrends(jobs: Job[]): WeeklyTrends {
   const currentWeek = {
     newApplications: jobs.filter((j) => {
       const appDate = new Date(j.applicationDate)
-      return appDate >= oneWeekAgo && j.status !== 'Wishlist'
+      return appDate >= oneWeekAgo
     }).length,
     phoneScreens: jobs.filter((j) => {
       const updated = new Date(j.updatedAt)
@@ -133,7 +133,7 @@ export function calculateWeeklyTrends(jobs: Job[]): WeeklyTrends {
   const previousWeek = {
     newApplications: jobs.filter((j) => {
       const appDate = new Date(j.applicationDate)
-      return appDate >= twoWeeksAgo && appDate < oneWeekAgo && j.status !== 'Wishlist'
+      return appDate >= twoWeeksAgo && appDate < oneWeekAgo
     }).length,
     phoneScreens: jobs.filter((j) => {
       const updated = new Date(j.updatedAt)

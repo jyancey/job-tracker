@@ -146,20 +146,6 @@ describe('calculateWeeklyTrends', () => {
     expect(trends.currentWeek.newApplications).toBe(2)
   })
 
-  it('does not count wishlist jobs as applications', () => {
-    const now = new Date()
-    const yesterday = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString()
-
-    const jobs: Job[] = [
-      createJob({ status: 'Wishlist', applicationDate: yesterday }),
-      createJob({ status: 'Applied', applicationDate: yesterday }),
-    ]
-
-    const trends = calculateWeeklyTrends(jobs)
-
-    expect(trends.currentWeek.newApplications).toBe(1) // Only the Applied one
-  })
-
   it('separates current week from previous week', () => {
     const now = new Date()
     const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString()

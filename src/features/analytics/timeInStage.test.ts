@@ -69,24 +69,24 @@ describe('calculateTimeInStage', () => {
   it('handles empty job list', () => {
     const metrics = calculateTimeInStage([])
 
-    expect(metrics.Wishlist).toEqual({ median: 0, jobs: 0 })
     expect(metrics.Applied).toEqual({ median: 0, jobs: 0 })
     expect(metrics['Phone Screen']).toEqual({ median: 0, jobs: 0 })
+    expect(metrics.Interview).toEqual({ median: 0, jobs: 0 })
   })
 
   it('calculates median for single job at each status', () => {
     const jobs: Job[] = [
-      createJob({ status: 'Wishlist', updatedAt: daysAgo(5) }),
       createJob({ status: 'Applied', updatedAt: daysAgo(10) }),
       createJob({ status: 'Phone Screen', updatedAt: daysAgo(3) }),
+      createJob({ status: 'Interview', updatedAt: daysAgo(5) }),
     ]
 
     const metrics = calculateTimeInStage(jobs)
 
-    expect(metrics.Wishlist).toEqual({ median: 5, jobs: 1 })
     expect(metrics.Applied).toEqual({ median: 10, jobs: 1 })
     expect(metrics['Phone Screen']).toEqual({ median: 3, jobs: 1 })
-    expect(metrics.Interview).toEqual({ median: 0, jobs: 0 })
+    expect(metrics.Interview).toEqual({ median: 5, jobs: 1 })
+    expect(metrics.Offer).toEqual({ median: 0, jobs: 0 })
   })
 
   it('calculates median for multiple jobs at same status', () => {
@@ -119,7 +119,6 @@ describe('calculateTimeInStage', () => {
 
   it('handles jobs at all statuses', () => {
     const jobs: Job[] = [
-      createJob({ status: 'Wishlist', updatedAt: daysAgo(1) }),
       createJob({ status: 'Applied', updatedAt: daysAgo(2) }),
       createJob({ status: 'Phone Screen', updatedAt: daysAgo(3) }),
       createJob({ status: 'Interview', updatedAt: daysAgo(4) }),
@@ -130,7 +129,6 @@ describe('calculateTimeInStage', () => {
 
     const metrics = calculateTimeInStage(jobs)
 
-    expect(metrics.Wishlist.jobs).toBe(1)
     expect(metrics.Applied.jobs).toBe(1)
     expect(metrics['Phone Screen'].jobs).toBe(1)
     expect(metrics.Interview.jobs).toBe(1)
@@ -221,18 +219,18 @@ describe('findStuckJobs', () => {
 
   it('handles multiple statuses with different thresholds', () => {
     const jobs: Job[] = [
-      createJob({ status: 'Wishlist', updatedAt: daysAgo(35) }), // Beyond 30
       createJob({ status: 'Applied', updatedAt: daysAgo(20) }), // Beyond 14
       createJob({ status: 'Interview', updatedAt: daysAgo(10) }), // Beyond 7
       createJob({ status: 'Phone Screen', updatedAt: daysAgo(5) }), // Within 10
+      createJob({ status: 'Offer', updatedAt: daysAgo(9) }), // Beyond 7
     ]
 
     const stuck = findStuckJobs(jobs)
 
     expect(stuck).toHaveLength(3)
-    expect(stuck.map((s) => s.job.status)).toContain('Wishlist')
     expect(stuck.map((s) => s.job.status)).toContain('Applied')
     expect(stuck.map((s) => s.job.status)).toContain('Interview')
+    expect(stuck.map((s) => s.job.status)).toContain('Offer')
   })
 })
 
@@ -264,20 +262,19 @@ describe('countStuckJobsByStatus', () => {
 
   it('handles all jobs stuck at same status', () => {
     const jobs: Job[] = [
-      createJob({ status: 'Wishlist', updatedAt: daysAgo(40) }),
-      createJob({ status: 'Wishlist', updatedAt: daysAgo(50) }),
-      createJob({ status: 'Wishlist', updatedAt: daysAgo(60) }),
+      createJob({ status: 'Applied', updatedAt: daysAgo(40) }),
+      createJob({ status: 'Applied', updatedAt: daysAgo(50) }),
+      createJob({ status: 'Applied', updatedAt: daysAgo(60) }),
     ]
 
     const counts = countStuckJobsByStatus(jobs)
 
-    expect(counts.Wishlist).toBe(3)
+    expect(counts.Applied).toBe(3)
   })
 })
 
 describe('DEFAULT_STUCK_THRESHOLDS', () => {
   it('has thresholds for active statuses', () => {
-    expect(DEFAULT_STUCK_THRESHOLDS.Wishlist).toBe(30)
     expect(DEFAULT_STUCK_THRESHOLDS.Applied).toBe(14)
     expect(DEFAULT_STUCK_THRESHOLDS['Phone Screen']).toBe(10)
     expect(DEFAULT_STUCK_THRESHOLDS.Interview).toBe(7)

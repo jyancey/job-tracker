@@ -4,7 +4,6 @@ import type { Job, JobStatus } from '../../domain'
  * Time spent in each stage (in days)
  */
 export interface TimeInStageMetrics {
-  Wishlist: { median: number; jobs: number }
   Applied: { median: number; jobs: number }
   'Phone Screen': { median: number; jobs: number }
   Interview: { median: number; jobs: number }
@@ -26,7 +25,6 @@ export interface StuckJob {
  * Configuration for stuck job thresholds (in days)
  */
 export interface StuckThresholds {
-  Wishlist?: number
   Applied?: number
   'Phone Screen'?: number
   Interview?: number
@@ -36,7 +34,6 @@ export interface StuckThresholds {
 }
 
 export const DEFAULT_STUCK_THRESHOLDS: StuckThresholds = {
-  Wishlist: 30,
   Applied: 14,
   'Phone Screen': 10,
   Interview: 7,
@@ -86,7 +83,6 @@ export function calculateDaysInCurrentStatus(job: Job): number {
  */
 export function calculateTimeInStage(jobs: Job[]): TimeInStageMetrics {
   const statusGroups: { [key in JobStatus]: number[] } = {
-    Wishlist: [],
     Applied: [],
     'Phone Screen': [],
     Interview: [],
