@@ -1,8 +1,8 @@
 # Job Tracker - Architecture Overview
 
 **Version:** v2.6.0  
-**Last Updated:** March 8, 2026  
-**Status:** Production-Ready with 646 Tests
+**Last Updated:** March 9, 2026  
+**Status:** Production-Ready with 657 Tests
 
 ---
 
@@ -16,7 +16,7 @@
 │                                                             │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │                    Presentation Layer                │   │
-│  │  Views: TableView, CalendarView, DashboardView, etc. │   │
+│  │  Views: AnalyticsView, TableView, CalendarView, etc. │   │
 │  │  Components: JobForm, FilterToolbar, KanbanBoard, ...│   │
 │  └──────────────────────────────────────────────────────┘   │
 │                          ↓                                  │
@@ -64,7 +64,8 @@ job-tracker/
 │   ├── views/                           # Page-level components
 │   │   ├── TableView.tsx                # Jobs table with bulk ops
 │   │   ├── CalendarView.tsx             # Calendar view by due date
-│   │   ├── DashboardView.tsx            # Analytics & metrics
+│   │   ├── AnalyticsView.tsx            # Primary analytics and pipeline metrics
+│   │   ├── DashboardView.tsx            # Legacy/compatibility metrics view
 │   │   ├── CompareView.tsx              # Side-by-side job comparison
 │   │   ├── ProfileView.tsx              # User profile & settings
 │   │   └── *.test.tsx                   # View tests (14+ test files)
@@ -402,7 +403,7 @@ localStorage / API Fallback
 | **Integration** | E2E workflow tests | 5+ | ⚠️ Baseline |
 | **Backend** | API tests | 2 | ✅ Complete |
 
-**Total:** 646 tests across 72 files, 100% passing
+**Total:** 657 tests across 73 files, 100% passing
 
 ### Test Pyramid
 

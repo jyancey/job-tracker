@@ -1,6 +1,6 @@
 # Job Tracker
 
-A local-first, privacy-focused job application tracking dashboard built with React, TypeScript, and SQLite.
+A local-first, privacy-focused job application tracker built with React, TypeScript, and SQLite.
 
 Track your search like a pipeline, not a spreadsheet. Manage opportunities, follow-ups, and monitor momentum from one workspace—all without leaving your browser.
 
@@ -12,7 +12,8 @@ Track your search like a pipeline, not a spreadsheet. Manage opportunities, foll
 - **Smart Filtering** — Status, date range, salary range, and contact person filters
 - **Sortable Columns** — Click headers to sort by company, role, status, dates
 - **Bulk Operations** — Select multiple jobs, delete across filters with visibility controls
-- **Multiple Views** — Dashboard (default), Table, Kanban board, and Calendar
+- **Multiple Views** — Analytics (default), Table, Kanban board, Calendar, Today, and This Week
+- **AI Re-Analyze** — Re-run AI scoring directly from the job detail modal when you want a refreshed analysis
 - **Import/Export** — JSON, CSV export; JSON import with merge strategies (append/upsert/replace)
 - **Pagination** — Configurable page sizes (5/10/20) for large datasets
 - **Overdue Tracking** — Quick metric shortcut to find jobs requiring follow-up
@@ -73,7 +74,7 @@ src/
   ├── hooks/                 # Custom state and behavior hooks
   ├── services/              # Service layer (jobService)
   ├── utils/                 # Date, accessibility, drag/drop, formatting helpers
-  ├── views/                 # View-level components (DashboardView)
+  ├── views/                 # View-level components (AnalyticsView, TableView, CalendarView, etc.)
   ├── types/                 # Shared TypeScript types
   └── test/setup.ts          # Vitest setup
 
@@ -96,9 +97,9 @@ npm run test:run
 npm run test:run -- --coverage  # (requires coverage provider)
 ```
 
-**Current Status (v2.5.x):**
-- 20 test files
-- 208 passing tests
+**Current Status (v2.6.x):**
+- 73 test files
+- 657 passing tests
 - Covers app workflows, hooks, backend API/store modules, services, and utility modules
 
 ### Building
@@ -167,6 +168,12 @@ Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dis
 1. Fill out the "Add Job" form (Company, Role, Status, etc.)
 2. Click **Add Job** to add to pipeline
 3. Metric cards update instantly
+
+### Re-Analyzing a Job
+
+1. Open a job from table/kanban/calendar
+2. In the job modal, click **Re-Analyze**
+3. AI scoring runs again in the background and refreshes the score fields
 
 ### Smart Filtering
 
