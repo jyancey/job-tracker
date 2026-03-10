@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">77.77% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>14/18</span>
+                <span class='fraction'>18/18</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">25% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>1/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">75% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>3/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">82.35% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>14/17</span>
+                <span class='fraction'>17/17</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line medium'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -104,38 +104,38 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">128x</span>
-<span class="cline-any cline-yes">13x</span>
-<span class="cline-any cline-yes">13x</span>
-<span class="cline-any cline-yes">91x</span>
+<span class="cline-any cline-yes">180x</span>
+<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-yes">132x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">13x</span>
-<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-yes">37x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-yes">22x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">128x</span>
-<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-yes">180x</span>
+<span class="cline-any cline-yes">22x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">13x</span>
-<span class="cline-any cline-yes">18x</span>
-<span class="cline-any cline-yes">18x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-yes">37x</span>
+<span class="cline-any cline-yes">30x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">128x</span>
+<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">180x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useMemo } from 'react'
 import { JOB_STATUSES, type Job, type JobStatus } from '../domain'
@@ -158,18 +158,18 @@ export function useJobGrouping(jobs: Job[]) {
     const grouped = new Map&lt;string, Job[]&gt;()
 &nbsp;
     for (const job of jobs) {
-      <span class="missing-if-branch" title="else path not taken" >E</span>if (!job.nextActionDueDate) {
+      if (!job.nextActionDueDate) {
         continue
       }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >      if (!grouped.has(job.nextActionDueDate)) {</span>
-<span class="cstat-no" title="statement not covered" >        grouped.set(job.nextActionDueDate, [])</span>
+      if (!grouped.has(job.nextActionDueDate)) {
+        grouped.set(job.nextActionDueDate, [])
       }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >      grouped.get(job.nextActionDueDate)?.push(job)</span>
+      grouped.get(job.nextActionDueDate)?.push(job)
     }
 &nbsp;
-    return [...grouped.entries()].sort(<span class="fstat-no" title="function not covered" >([</span>a], [b]) =&gt; <span class="cstat-no" title="statement not covered" >a.localeCompare(b))</span>
+    return [...grouped.entries()].sort(([a], [b]) =&gt; a.localeCompare(b))
   }, [jobs])
 &nbsp;
   return { byStatus, dueByDate }
@@ -181,7 +181,7 @@ export function useJobGrouping(jobs: Job[]) {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-05T18:31:46.667Z
+                at 2026-03-10T02:42:17.739Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
