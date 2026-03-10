@@ -59,7 +59,7 @@ export function TableHeader() {
           currentDirection={sortDirection}
           onSort={onSort}
         />
-        <th>Actions</th>
+        <th className="actions-column">Actions</th>
       </tr>
     </thead>
   )

@@ -820,12 +820,29 @@ tbody tr:hover {
   display: flex;
   gap: 0.35rem;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .action-row button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  min-width: 3.5rem;
   padding: 0.3rem 0.6rem;
   font-size: 0.8rem;
+}
+
+th.actions-column,
+td.actions-column {
+  width: 220px;
+  min-width: 220px;
+  max-width: 220px;
   white-space: nowrap;
+  text-align: right;
+  overflow: visible;
 }
 
 .kanban-grid {

@@ -39,36 +39,38 @@ export function TableRow({ job, today }: TableRowProps) {
         {job.nextActionDueDate ? ` (${formatDate(job.nextActionDueDate)})` : ''}
         {isOverdueFollowUp(job, today) && <span className="overdue-flag">Overdue</span>}
       </td>
-      <td className="action-row">
-        <button
-          type="button"
-          className="ghost"
-          onClick={(event) => {
-            event.stopPropagation()
-            onView(job)
-          }}
-        >
-          View
-        </button>
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation()
-            onEdit(job)
-          }}
-        >
-          Edit
-        </button>
-        <button
-          type="button"
-          className="ghost"
-          onClick={(event) => {
-            event.stopPropagation()
-            onRemove(job.id)
-          }}
-        >
-          Delete
-        </button>
+      <td className="actions-column">
+        <div className="action-row">
+          <button
+            type="button"
+            className="ghost"
+            onClick={(event) => {
+              event.stopPropagation()
+              onView(job)
+            }}
+          >
+            View
+          </button>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation()
+              onEdit(job)
+            }}
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            className="ghost"
+            onClick={(event) => {
+              event.stopPropagation()
+              onRemove(job.id)
+            }}
+          >
+            Delete
+          </button>
+        </div>
       </td>
     </tr>
   )
