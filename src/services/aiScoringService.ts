@@ -1,8 +1,9 @@
-import type { AIConfig, AIScoreRequest, AIScoreResult, AIProvider, UserProfile } from '../types/ai'
-
 /**
  * AI Scoring Service - Analyzes job descriptions and generates quality scores
  */
+
+import type { AIConfig, AIScoreRequest, AIScoreResult, AIProvider, UserProfile } from '../types/ai'
+
 
 const SCORING_PROMPT = `You are an expert career advisor analyzing job opportunities. Given a job description and a candidate's profile, provide objective quality scores across 5 dimensions on a 0-5 scale:
 

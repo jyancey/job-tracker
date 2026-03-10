@@ -59,6 +59,7 @@ export function useJobForm(): UseJobFormResult {
       aiScoredAt: job.aiScoredAt,
       aiModel: job.aiModel,
       aiReasoning: job.aiReasoning,
+      aiScoringInProgress: job.aiScoringInProgress,
     })
     setEditingId(job.id)
   }

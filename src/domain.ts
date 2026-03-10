@@ -43,6 +43,7 @@ export interface Job {
   aiScoredAt?: string
   aiModel?: string
   aiReasoning?: string
+  aiScoringInProgress?: boolean
 }
 
 export type JobDraft = Omit<Job, 'id' | 'createdAt' | 'updatedAt'>
@@ -70,6 +71,7 @@ export const EMPTY_JOB_DRAFT: JobDraft = {
   aiScoredAt: undefined,
   aiModel: undefined,
   aiReasoning: undefined,
+  aiScoringInProgress: undefined,
 }
 
 export function createJobFromDraft(draft: JobDraft): Job {

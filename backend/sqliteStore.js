@@ -19,6 +19,7 @@ const JOB_COLUMNS = [
   'contactPerson',
   'nextAction',
   'nextActionDueDate',
+  'priority',
   'createdAt',
   'updatedAt',
   'jobDescription',
@@ -31,6 +32,7 @@ const JOB_COLUMNS = [
   'aiScoredAt',
   'aiModel',
   'aiReasoning',
+  'aiScoringInProgress',
 ]
 
 function normalizeText(value) {
@@ -43,6 +45,13 @@ function normalizeNumber(value) {
   }
   const num = Number(value)
   return Number.isFinite(num) ? num : null
+}
+
+function normalizeBooleanToInteger(value) {
+  if (value == null) {
+    return null
+  }
+  return value ? 1 : 0
 }
 
 function normalizeJob(input) {
@@ -59,6 +68,7 @@ function normalizeJob(input) {
     contactPerson: normalizeText(input.contactPerson),
     nextAction: normalizeText(input.nextAction),
     nextActionDueDate: normalizeText(input.nextActionDueDate),
+    priority: normalizeText(input.priority),
     createdAt: normalizeText(input.createdAt),
     updatedAt: normalizeText(input.updatedAt),
     jobDescription: normalizeText(input.jobDescription),
@@ -71,6 +81,15 @@ function normalizeJob(input) {
     aiScoredAt: normalizeText(input.aiScoredAt),
     aiModel: normalizeText(input.aiModel),
     aiReasoning: normalizeText(input.aiReasoning),
+    aiScoringInProgress: normalizeBooleanToInteger(input.aiScoringInProgress),
+  }
+}
+
+function hydrateJob(row) {
+  return {
+    ...row,
+    aiScoringInProgress:
+      row.aiScoringInProgress == null ? undefined : Boolean(row.aiScoringInProgress),
   }
 }
 
@@ -89,6 +108,7 @@ function ensureJobsSchema(db) {
       contactPerson TEXT NOT NULL,
       nextAction TEXT NOT NULL,
       nextActionDueDate TEXT NOT NULL,
+      priority TEXT,
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL
     )
@@ -128,6 +148,12 @@ function ensureJobsSchema(db) {
   if (!columnNames.includes('aiReasoning')) {
     db.exec('ALTER TABLE jobs ADD COLUMN aiReasoning TEXT')
   }
+  if (!columnNames.includes('priority')) {
+    db.exec('ALTER TABLE jobs ADD COLUMN priority TEXT')
+  }
+  if (!columnNames.includes('aiScoringInProgress')) {
+    db.exec('ALTER TABLE jobs ADD COLUMN aiScoringInProgress INTEGER')
+  }
 }
 
 export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAULT_DB_PATH) {
@@ -148,17 +174,17 @@ export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAU
     INSERT INTO jobs (
       id, company, roleTitle, applicationDate, status,
       jobUrl, atsUrl, salaryRange, notes, contactPerson,
-      nextAction, nextActionDueDate, createdAt, updatedAt,
+      nextAction, nextActionDueDate, priority, createdAt, updatedAt,
       jobDescription, jobDescriptionSource,
       scoreFit, scoreCompensation, scoreLocation, scoreGrowth, scoreConfidence,
-      aiScoredAt, aiModel, aiReasoning
+      aiScoredAt, aiModel, aiReasoning, aiScoringInProgress
     ) VALUES (
       @id, @company, @roleTitle, @applicationDate, @status,
       @jobUrl, @atsUrl, @salaryRange, @notes, @contactPerson,
-      @nextAction, @nextActionDueDate, @createdAt, @updatedAt,
+      @nextAction, @nextActionDueDate, @priority, @createdAt, @updatedAt,
       @jobDescription, @jobDescriptionSource,
       @scoreFit, @scoreCompensation, @scoreLocation, @scoreGrowth, @scoreConfidence,
-      @aiScoredAt, @aiModel, @aiReasoning
+      @aiScoredAt, @aiModel, @aiReasoning, @aiScoringInProgress
     )
   `)
 
@@ -173,7 +199,7 @@ export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAU
   return {
     dbPath,
     listJobs() {
-      return listStatement.all()
+      return listStatement.all().map(hydrateJob)
     },
     replaceAllJobs(jobs) {
       replaceAllStatement(Array.isArray(jobs) ? jobs : [])

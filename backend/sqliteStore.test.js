@@ -62,6 +62,55 @@ describe('sqliteStore', () => {
     expect(retrieved[0].status).toBe('Applied')
   })
 
+  test('stores and retrieves AI scoring and description fields', () => {
+    const now = '2026-03-04T00:00:00.000Z'
+    const job = {
+      id: 'ai-job-1',
+      company: 'AI Corp',
+      roleTitle: 'ML Engineer',
+      applicationDate: now,
+      status: 'Interview',
+      jobUrl: 'https://example.com/ml',
+      atsUrl: 'https://ats.example.com/ml',
+      salaryRange: '$150k - $180k',
+      notes: 'Strong match',
+      contactPerson: 'Dana',
+      nextAction: 'Schedule panel',
+      nextActionDueDate: now,
+      priority: 'High',
+      createdAt: now,
+      updatedAt: now,
+      jobDescription: 'Build and deploy machine learning systems.',
+      jobDescriptionSource: 'paste',
+      scoreFit: 4.5,
+      scoreCompensation: 4.2,
+      scoreLocation: 3.8,
+      scoreGrowth: 4.6,
+      scoreConfidence: 4.1,
+      aiScoredAt: now,
+      aiModel: 'gpt-4o-mini',
+      aiReasoning: 'Excellent role fit and growth potential.',
+      aiScoringInProgress: true,
+    }
+
+    store.replaceAllJobs([job])
+    const retrieved = store.listJobs()
+
+    expect(retrieved).toHaveLength(1)
+    expect(retrieved[0].jobDescription).toBe(job.jobDescription)
+    expect(retrieved[0].jobDescriptionSource).toBe(job.jobDescriptionSource)
+    expect(retrieved[0].scoreFit).toBe(job.scoreFit)
+    expect(retrieved[0].scoreCompensation).toBe(job.scoreCompensation)
+    expect(retrieved[0].scoreLocation).toBe(job.scoreLocation)
+    expect(retrieved[0].scoreGrowth).toBe(job.scoreGrowth)
+    expect(retrieved[0].scoreConfidence).toBe(job.scoreConfidence)
+    expect(retrieved[0].aiScoredAt).toBe(job.aiScoredAt)
+    expect(retrieved[0].aiModel).toBe(job.aiModel)
+    expect(retrieved[0].aiReasoning).toBe(job.aiReasoning)
+    expect(retrieved[0].priority).toBe(job.priority)
+    expect(retrieved[0].aiScoringInProgress).toBe(true)
+  })
+
   test('stores and retrieves multiple jobs in application date DESC order', () => {
     const job1 = {
       id: 'job-1',

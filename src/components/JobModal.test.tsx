@@ -126,4 +126,13 @@ describe('JobModal', () => {
     expect(screen.getByText('Tech Startup')).toBeInTheDocument()
     expect(screen.getByText('Interview')).toBeInTheDocument()
   })
+
+  it('shows AI processing state when scoring is in progress', () => {
+    const job = createJob({ aiScoringInProgress: true })
+
+    render(<JobModal job={job} onClose={vi.fn()} />)
+
+    expect(screen.getByText('Processing...')).toBeInTheDocument()
+    expect(screen.getByText('Scoring is running in the background')).toBeInTheDocument()
+  })
 })

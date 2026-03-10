@@ -49,6 +49,23 @@ describe('ScoreCell', () => {
     expect(screen.getByText('—')).toBeTruthy()
   })
 
+  it('shows loading indicator while AI scoring is in progress', () => {
+    const job = createJob({
+      aiScoringInProgress: true,
+      scoreFit: 4.0,
+      scoreCompensation: 4.0,
+      scoreLocation: 4.0,
+      scoreGrowth: 4.0,
+      scoreConfidence: 4.0,
+    })
+
+    const { container } = render(<ScoreCell job={job} />)
+
+    const pending = container.querySelector('.score-pending')
+    expect(pending?.textContent).toBe('AI scoring...')
+    expect(container.querySelector('.score')).toBeNull()
+  })
+
   it('applies score-low class for scores below 2', () => {
     const job = createJob({
       scoreFit: 1.5,

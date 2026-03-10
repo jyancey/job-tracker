@@ -46,6 +46,7 @@ export function useJobOperations({
     aiScoredAt: job.aiScoredAt,
     aiModel: job.aiModel,
     aiReasoning: job.aiReasoning,
+    aiScoringInProgress: job.aiScoringInProgress,
   })
 
   const handleEditJob = useCallback(
@@ -101,6 +102,19 @@ export function useJobOperations({
         return
       }
 
+      setJobs((current) => {
+        const existing = jobService.findJobById(current, jobId)
+        if (!existing) {
+          return current
+        }
+
+        return jobService.updateJob(current, jobId, {
+          ...toJobDraft(existing),
+          aiScoringInProgress: true,
+        })
+      })
+      addNotification('AI scoring in progress...', 'info')
+
       setTimeout(() => {
         try {
           scoreJobWithAI(
@@ -131,12 +145,24 @@ export function useJobOperations({
                     aiScoredAt: result.analyzedAt,
                     aiModel: result.model,
                     aiReasoning: result.reasoning,
+                    aiScoringInProgress: false,
                   })
                 })
                 addNotification('AI scoring completed successfully', 'success')
               }
             })
             .catch((err) => {
+              setJobs((current) => {
+                const existing = jobService.findJobById(current, jobId)
+                if (!existing) {
+                  return current
+                }
+
+                return jobService.updateJob(current, jobId, {
+                  ...toJobDraft(existing),
+                  aiScoringInProgress: false,
+                })
+              })
               addNotification(`AI scoring failed: ${err.message}`, 'error')
             })
         } catch {

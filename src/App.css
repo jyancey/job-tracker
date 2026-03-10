@@ -341,6 +341,12 @@ fieldset legend {
   font-size: 0.85rem;
 }
 
+.score-pending {
+  color: #1f6feb;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 /* Compare View */
 .compare-view {
   background: #ffffff;

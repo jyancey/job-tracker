@@ -7,6 +7,14 @@ interface ScoreCellProps {
 }
 
 export function ScoreCell({ job, weights = DEFAULT_SCORE_WEIGHTS }: ScoreCellProps) {
+  if (job.aiScoringInProgress) {
+    return (
+      <span className="score-pending" title="AI scoring is currently running">
+        AI scoring...
+      </span>
+    )
+  }
+
   const score = calculateJobScore(job, weights)
 
   if (score === null) {

@@ -26,6 +26,14 @@ export function useJobSubmission({ editingId, submitForm, resetForm, setJobs, tr
         return
       }
 
+      const hasExistingScore =
+        normalizedDraft.scoreFit != null ||
+        normalizedDraft.scoreCompensation != null ||
+        normalizedDraft.scoreLocation != null ||
+        normalizedDraft.scoreGrowth != null ||
+        normalizedDraft.scoreConfidence != null ||
+        Boolean(normalizedDraft.aiScoredAt)
+
       let newJobId: string | null = editingId || null
 
       if (editingId) {
@@ -39,6 +47,10 @@ export function useJobSubmission({ editingId, submitForm, resetForm, setJobs, tr
       }
 
       resetForm()
+
+      if (hasExistingScore) {
+        return
+      }
 
       triggerAiScoring(
         normalizedDraft.jobDescription ?? '',

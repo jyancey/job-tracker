@@ -2,10 +2,14 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import type { Job, JobStatus } from '../domain'
 import { useJobOperations } from './useJobOperations'
+import * as jobService from '../services/jobService'
+import { scoreJobWithAI } from '../services/aiScoringService'
+import { loadAIConfig } from '../storage/aiStorage'
 
 // Mock dependencies
 vi.mock('../services/jobService', () => ({
   deleteJob: vi.fn((jobs: Job[], id: string) => jobs.filter((j: Job) => j.id !== id)),
+  findJobById: vi.fn((jobs: Job[], id: string) => jobs.find((j: Job) => j.id === id)),
   updateJobStatus: vi.fn((jobs: Job[], id: string, status: JobStatus) =>
     jobs.map((j: Job) => (j.id === id ? { ...j, status } : j)),
   ),
@@ -250,7 +254,6 @@ describe('useJobOperations', () => {
         'Tech Corp',
         '$100k-$120k',
         'job-1',
-        {},
         setJobs,
       )
     })
@@ -277,7 +280,6 @@ describe('useJobOperations', () => {
         'Tech Corp',
         '$100k-$120k',
         '',
-        {},
         setJobs,
       )
     })
@@ -305,7 +307,6 @@ describe('useJobOperations', () => {
         'Tech Corp',
         '$100k-$120k',
         'job-1',
-        {},
         setJobs,
       )
     })
@@ -333,7 +334,6 @@ describe('useJobOperations', () => {
         'Tech Corp',
         '$100k-$120k',
         'job-1',
-        {},
         setJobs,
       )
     })
@@ -393,5 +393,60 @@ describe('useJobOperations', () => {
     })
 
     expect(setJobs).toHaveBeenCalledTimes(2)
+  })
+
+  it('triggerAiScoring marks job pending then clears pending on success', async () => {
+    vi.useFakeTimers()
+    vi.mocked(loadAIConfig).mockReturnValue({
+      provider: 'openai',
+      apiKey: 'test-key',
+      baseUrl: '',
+      model: 'gpt-4',
+    })
+
+    const addNotification = vi.fn()
+    let jobs: Job[] = [createJob({ id: 'job-1' })]
+    const setJobs = vi.fn((updater: (jobs: Job[]) => Job[]) => {
+      jobs = updater(jobs)
+    })
+
+    const { result } = renderHook(() =>
+      useJobOperations({
+        editingId: null,
+        resetForm: vi.fn(),
+        viewingJob: null,
+        closeViewOnly: vi.fn(),
+        addNotification,
+      }),
+    )
+
+    act(() => {
+      result.current.triggerAiScoring('Detailed description', 'Engineer', 'Tech Corp', '$100k-$120k', 'job-1', setJobs)
+    })
+
+    expect(addNotification).toHaveBeenCalledWith('AI scoring in progress...', 'info')
+    expect(jobService.updateJob).toHaveBeenCalledWith(
+      expect.any(Array),
+      'job-1',
+      expect.objectContaining({ aiScoringInProgress: true }),
+    )
+
+    act(() => {
+      vi.runAllTimers()
+    })
+
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(scoreJobWithAI).toHaveBeenCalled()
+    expect(addNotification).toHaveBeenCalledWith('AI scoring completed successfully', 'success')
+
+    expect(jobService.updateJob).toHaveBeenCalledWith(
+      expect.any(Array),
+      'job-1',
+      expect.objectContaining({ aiScoringInProgress: false }),
+    )
+
+    vi.useRealTimers()
   })
 })

@@ -103,6 +103,16 @@ export function JobModal({ job, onClose }: JobModalProps) {
               </small>
             </article>
           )}
+
+          {job.aiScoringInProgress && (
+            <article>
+              <span>AI Analysis</span>
+              <strong>Processing...</strong>
+              <small style={{ color: '#1f6feb', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+                Scoring is running in the background
+              </small>
+            </article>
+          )}
         </div>
 
         <div className="job-modal-links">
