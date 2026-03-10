@@ -229,16 +229,16 @@ export function AppShellView({
                   </p>
                 </div>
                 <div className="hero-metrics">
-                  <article>
+                  <article className="metric-simple">
                     <span>Total Jobs</span>
                     <strong>{jobs.length}</strong>
                   </article>
-                  <article>
-                    <span>Open Pipeline</span>
+                  <article className="metric-simple">
+                    <span>In Pipeline</span>
                     <strong>{jobs.filter((job) => !['Rejected', 'Withdrawn'].includes(job.status)).length}</strong>
                   </article>
-                  <article>
-                    <span>Overdue Follow-ups</span>
+                  <article className="metric-with-action">
+                    <span>Overdue</span>
                     <strong>{overdueCount}</strong>
                     <button type="button" className="ghost small metric-action" onClick={showOverdueOnly}>
                       View list

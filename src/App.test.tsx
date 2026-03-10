@@ -125,7 +125,7 @@ describe('App', () => {
     expect(screen.getByText('Acme Labs')).toBeInTheDocument()
     expect(screen.getByText('Product Designer')).toBeInTheDocument()
     expect(metricValue('Total Jobs')).toBe('1')
-    expect(metricValue('Open Pipeline')).toBe('1')
+    expect(metricValue('In Pipeline')).toBe('1')
   })
 
   it('filters, edits, and deletes jobs', async () => {
