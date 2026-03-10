@@ -21,24 +21,33 @@ async function addJob(input: {
   nextAction?: string
 }): Promise<void> {
   const user = userEvent.setup()
-  await user.clear(screen.getByLabelText(/company \*/i))
-  await user.type(screen.getByLabelText(/company \*/i), input.company)
+  await user.click(screen.getByRole('button', { name: /^add job$/i }))
 
-  await user.clear(screen.getByLabelText(/role title \*/i))
-  await user.type(screen.getByLabelText(/role title \*/i), input.role)
+  const modal = await screen.findByRole('heading', { name: /^add job$/i })
+  const formScope = modal.closest('.job-form-modal')
+  if (!formScope) {
+    throw new Error('Missing job form modal')
+  }
 
-  await user.clear(screen.getByLabelText(/application date \*/i))
-  await user.type(screen.getByLabelText(/application date \*/i), input.date)
+  const scoped = within(formScope)
+  await user.clear(scoped.getByLabelText(/company \*/i))
+  await user.type(scoped.getByLabelText(/company \*/i), input.company)
+
+  await user.clear(scoped.getByLabelText(/role title \*/i))
+  await user.type(scoped.getByLabelText(/role title \*/i), input.role)
+
+  await user.clear(scoped.getByLabelText(/application date \*/i))
+  await user.type(scoped.getByLabelText(/application date \*/i), input.date)
 
   if (input.status) {
-    await user.selectOptions(screen.getByLabelText(/^status$/i), input.status)
+    await user.selectOptions(scoped.getByLabelText(/^status$/i), input.status)
   }
 
   if (input.nextAction) {
-    await user.type(screen.getByLabelText(/next action$/i), input.nextAction)
+    await user.type(scoped.getByLabelText(/next action$/i), input.nextAction)
   }
 
-  await user.click(screen.getByRole('button', { name: /add job/i }))
+  await user.click(scoped.getByRole('button', { name: /^add job$/i }))
 }
 
 function metricValue(label: string): string {
@@ -149,9 +158,15 @@ describe('App', () => {
     }
 
     await user.click(within(brightpathRow).getByRole('button', { name: 'Edit' }))
-    await user.clear(screen.getByLabelText(/company \*/i))
-    await user.type(screen.getByLabelText(/company \*/i), 'Brightpath Labs')
-    await user.click(screen.getByRole('button', { name: /save changes/i }))
+    const editTitle = await screen.findByRole('heading', { name: /^edit job$/i })
+    const editModal = editTitle.closest('.job-form-modal')
+    if (!editModal) {
+      throw new Error('Missing edit job modal')
+    }
+    const editScope = within(editModal)
+    await user.clear(editScope.getByLabelText(/company \*/i))
+    await user.type(editScope.getByLabelText(/company \*/i), 'Brightpath Labs')
+    await user.click(editScope.getByRole('button', { name: /save changes/i }))
 
     expect(screen.getByText('Brightpath Labs')).toBeInTheDocument()
 

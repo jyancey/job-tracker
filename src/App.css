@@ -43,7 +43,7 @@
 
 .top-grid {
   display: grid;
-  grid-template-columns: 1.35fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
   align-items: start;
 }
@@ -1144,6 +1144,23 @@ tbody tr:hover {
   gap: 0.5rem;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.job-form-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 35, 40, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  z-index: 1001;
+}
+
+.job-form-modal {
+  width: min(980px, 100%);
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 0 16px 32px rgba(31, 35, 40, 0.2);
 }
 
 button.small {

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import type { ChangeEvent, FormEvent, RefObject } from 'react'
 import type { Job } from '../domain'
 import type { View } from '../hooks/useViewState'
@@ -154,6 +155,33 @@ export function AppShellView({
   handleTaskPriorityChange,
   handleQuickAddTaskAction,
 }: AppShellViewProps) {
+  const [isJobFormOpen, setIsJobFormOpen] = useState(false)
+
+  useEffect(() => {
+    if (editingId) {
+      setIsJobFormOpen(true)
+    }
+  }, [editingId])
+
+  const openAddJobModal = () => {
+    resetForm()
+    setIsJobFormOpen(true)
+  }
+
+  const closeJobFormModal = () => {
+    resetForm()
+    setIsJobFormOpen(false)
+  }
+
+  const canSubmitJobForm = Boolean(draft.company.trim() && draft.roleTitle.trim() && draft.applicationDate)
+
+  const handleJobFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    handleSubmitJob(event)
+    if (canSubmitJobForm) {
+      setIsJobFormOpen(false)
+    }
+  }
+
   return (
     <div className="app-shell">
       <div className="version-badge" title={`Version ${APP_VERSION} on ${GIT_BRANCH}`}>
@@ -176,6 +204,9 @@ export function AppShellView({
           <section className="top-grid">
             <header className="hero">
               <div className="hero-actions" role="group" aria-label="Profile and settings actions">
+                <button type="button" className="small" onClick={openAddJobModal} title="Open add job form">
+                  Add Job
+                </button>
                 <button type="button" className="small ghost" onClick={() => updateView('profile')} title="Open profile">
                   Profile
                 </button>
@@ -217,11 +248,25 @@ export function AppShellView({
               </div>
             </header>
 
-            <section className="panel form-panel">
-              <div className="form-header">
-                <div>
-                  <h2>{editingId ? 'Edit Job' : 'Add Job'}</h2>
-                  {saveStatus === 'pending' && <span className="save-status">Saving...</span>}
+          </section>
+
+          <main className="content-grid">
+            <section className="panel views-panel">
+              <div className="toolbar">
+                <div className="view-tabs">
+                  {(Object.keys(VIEW_LABELS) as View[])
+                    .filter((key) => key !== 'profile' && key !== 'settings')
+                    .map((key) => (
+                      <button
+                        key={key}
+                        className={view === key ? 'active' : ''}
+                        onClick={() => updateView(key)}
+                        type="button"
+                      >
+                        {VIEW_LABELS[key]}
+                        {key === 'today' && taskOverdueCount > 0 ? <span className="tab-badge">{taskOverdueCount}</span> : null}
+                      </button>
+                    ))}
                 </div>
                 <div className="form-actions-top">
                   <button type="button" className="small" onClick={() => handleExport('json')}>
@@ -251,35 +296,6 @@ export function AppShellView({
                       Undo
                     </button>
                   )}
-                </div>
-              </div>
-              <JobForm
-                draft={draft}
-                editingId={editingId}
-                onUpdateDraft={updateDraft}
-                onSubmit={handleSubmitJob}
-                onCancel={resetForm}
-              />
-            </section>
-          </section>
-
-          <main className="content-grid">
-            <section className="panel views-panel">
-              <div className="toolbar">
-                <div className="view-tabs">
-                  {(Object.keys(VIEW_LABELS) as View[])
-                    .filter((key) => key !== 'profile' && key !== 'settings')
-                    .map((key) => (
-                      <button
-                        key={key}
-                        className={view === key ? 'active' : ''}
-                        onClick={() => updateView(key)}
-                        type="button"
-                      >
-                        {VIEW_LABELS[key]}
-                        {key === 'today' && taskOverdueCount > 0 ? <span className="tab-badge">{taskOverdueCount}</span> : null}
-                      </button>
-                    ))}
                 </div>
                 <FilterToolbar
                   state={filtersState}
@@ -343,6 +359,29 @@ export function AppShellView({
               )}
             </section>
           </main>
+
+          {isJobFormOpen && (
+            <div className="job-form-modal-backdrop" onClick={closeJobFormModal}>
+              <section className="job-form-modal panel" onClick={(event) => event.stopPropagation()}>
+                <div className="form-header">
+                  <div>
+                    <h2>{editingId ? 'Edit Job' : 'Add Job'}</h2>
+                    {saveStatus === 'pending' && <span className="save-status">Saving...</span>}
+                  </div>
+                  <button type="button" className="small ghost" onClick={closeJobFormModal}>
+                    Close
+                  </button>
+                </div>
+                <JobForm
+                  draft={draft}
+                  editingId={editingId}
+                  onUpdateDraft={updateDraft}
+                  onSubmit={handleJobFormSubmit}
+                  onCancel={closeJobFormModal}
+                />
+              </section>
+            </div>
+          )}
 
           {viewingJob && <JobModal job={viewingJob} onClose={closeViewOnly} />}
         </>
