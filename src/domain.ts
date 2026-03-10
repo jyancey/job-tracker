@@ -1,5 +1,4 @@
 export const JOB_STATUSES = [
-  'Wishlist',
   'Applied',
   'Phone Screen',
   'Interview',

@@ -215,7 +215,7 @@ describe('useJobOperations', () => {
 
   it('handleQuickMove works with all valid status values', () => {
     const setJobs = vi.fn()
-    const statuses: JobStatus[] = ['Wishlist', 'Applied', 'Phone Screen', 'Interview', 'Offer', 'Rejected', 'Withdrawn']
+    const statuses: JobStatus[] = ['Applied', 'Phone Screen', 'Interview', 'Offer', 'Rejected', 'Withdrawn']
     const { result } = renderHook(() =>
       useJobOperations({
         editingId: null,

@@ -170,7 +170,7 @@ Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dis
 
 ### Smart Filtering
 
-- **Status Filter** — Quick drop-down for All statuses, Overdue Follow-ups, Wishlist, Applied, Phone Screen, Interview, Offer, Rejected, Withdrawn
+- **Status Filter** — Quick drop-down for All statuses, Overdue Follow-ups, Applied, Phone Screen, Interview, Offer, Rejected, Withdrawn
 - **Advanced Filters** — Click "More Filters" to refine by:
   - Application date range
   - Salary range

@@ -57,8 +57,7 @@ describe('AnalyticsView', () => {
 
   it('displays status distribution', () => {
     const jobs = [
-      createJob({ status: 'Wishlist' }),
-      createJob({ status: 'Wishlist' }),
+      createJob({ status: 'Applied' }),
       createJob({ status: 'Applied' }),
       createJob({ status: 'Phone Screen' }),
       createJob({ status: 'Interview' }),
@@ -66,7 +65,6 @@ describe('AnalyticsView', () => {
 
     render(<AnalyticsView jobs={jobs} />)
     
-    expect(screen.getAllByText('Wishlist')[0]).toBeInTheDocument()
     expect(screen.getAllByText('Applied')[0]).toBeInTheDocument()
     expect(screen.getAllByText('Phone Screens')[0]).toBeInTheDocument()
     expect(screen.getAllByText('Interviews')[0]).toBeInTheDocument()
@@ -74,13 +72,11 @@ describe('AnalyticsView', () => {
 
   it('shows conversion rate cards', () => {
     const jobs = [
-      createJob({ status: 'Wishlist' }),
       createJob({ status: 'Applied' }),
     ]
 
     render(<AnalyticsView jobs={jobs} />)
     
-    expect(screen.getAllByText('Wishlist → Applied')[0]).toBeInTheDocument()
     expect(screen.getAllByText('Applied → Phone Screen')[0]).toBeInTheDocument()
     expect(screen.getAllByText('Phone Screen → Interview')[0]).toBeInTheDocument()
     expect(screen.getAllByText('Interview → Offer')[0]).toBeInTheDocument()
@@ -153,7 +149,7 @@ describe('AnalyticsView', () => {
 
     const { container } = render(<AnalyticsView jobs={[createJob({ status: 'Applied' })]} onFilterByStatus={onFilterByStatus} />)
 
-    const appliedCard = container.querySelector('.stats-grid .stat-card.interactive-card:nth-child(3)')
+    const appliedCard = container.querySelector('.stats-grid .stat-card.interactive-card:nth-child(2)')
     expect(appliedCard).not.toBeNull()
 
     await user.click(appliedCard as HTMLElement)
@@ -167,7 +163,7 @@ describe('AnalyticsView', () => {
 
     const { container } = render(<AnalyticsView jobs={[createJob({ status: 'Interview' })]} onFilterByStatus={onFilterByStatus} />)
 
-    const offerConversionCard = container.querySelector('.conversion-grid .conversion-card.interactive-card:nth-child(4)')
+    const offerConversionCard = container.querySelector('.conversion-grid .conversion-card.interactive-card:nth-child(3)')
     expect(offerConversionCard).not.toBeNull()
 
     await user.click(offerConversionCard as HTMLElement)

@@ -5,12 +5,6 @@ import type { Job, JobStatus } from '../../domain'
  * Conversion metrics between pipeline stages
  */
 export interface ConversionMetrics {
-  // Wishlist -> Applied
-  wishlistToApplied: {
-    total: number
-    converted: number
-    rate: number // 0-100
-  }
   // Applied -> Phone Screen
   appliedToPhoneScreen: {
     total: number
@@ -60,7 +54,6 @@ export interface WeeklyTrends {
  */
 export interface StatusDistribution {
   [key: string]: number
-  Wishlist: number
   Applied: number
   'Phone Screen': number
   Interview: number
@@ -82,9 +75,6 @@ export function calculateConversionMetrics(jobs: Job[]): ConversionMetrics {
     }).length
   }
 
-  // All jobs are included in the top-of-funnel baseline.
-  const wishlistCount = jobs.length
-
   const appliedCount = countAtOrPast('Applied')
   const phoneScreenCount = countAtOrPast('Phone Screen')
   const interviewCount = countAtOrPast('Interview')
@@ -95,11 +85,6 @@ export function calculateConversionMetrics(jobs: Job[]): ConversionMetrics {
   }
 
   return {
-    wishlistToApplied: {
-      total: wishlistCount,
-      converted: appliedCount,
-      rate: calculateRate(appliedCount, wishlistCount),
-    },
     appliedToPhoneScreen: {
       total: appliedCount,
       converted: phoneScreenCount,

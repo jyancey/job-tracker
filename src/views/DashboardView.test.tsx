@@ -38,7 +38,6 @@ describe('DashboardView', () => {
 
   it('renders counts for each status', () => {
     const byStatus = new Map<JobStatus, Job[]>([
-      ['Wishlist', [createJob('1', 'Wishlist')]],
       ['Applied', [createJob('2', 'Applied'), createJob('3', 'Applied')]],
       ['Phone Screen', []],
       ['Interview', [createJob('4', 'Interview')]],

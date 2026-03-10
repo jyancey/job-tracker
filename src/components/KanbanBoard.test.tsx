@@ -104,8 +104,8 @@ describe('KanbanBoard', () => {
     )
 
     const columns = container.querySelectorAll('.kanban-column')
-    // Should have 7 columns for each job status
-    expect(columns.length).toBe(7)
+    // Should have 6 columns for each job status
+    expect(columns.length).toBe(6)
   })
 
   it('accepts optional onView callback', () => {

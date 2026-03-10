@@ -85,7 +85,7 @@ describe('StatusCell', () => {
   it('allows selecting all valid job statuses', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
-    const statuses: JobStatus[] = ['Wishlist', 'Applied', 'Phone Screen', 'Interview', 'Offer', 'Rejected', 'Withdrawn']
+    const statuses: JobStatus[] = ['Applied', 'Phone Screen', 'Interview', 'Offer', 'Rejected', 'Withdrawn']
 
     for (const status of statuses) {
       const { unmount, container } = render(

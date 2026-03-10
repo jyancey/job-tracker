@@ -32,7 +32,6 @@ describe('calculateConversionMetrics', () => {
   it('handles empty job list', () => {
     const metrics = calculateConversionMetrics([])
 
-    expect(metrics.wishlistToApplied).toEqual({ total: 0, converted: 0, rate: 0 })
     expect(metrics.appliedToPhoneScreen).toEqual({ total: 0, converted: 0, rate: 0 })
     expect(metrics.phoneScreenToInterview).toEqual({ total: 0, converted: 0, rate: 0 })
     expect(metrics.interviewToOffer).toEqual({ total: 0, converted: 0, rate: 0 })
@@ -40,7 +39,6 @@ describe('calculateConversionMetrics', () => {
 
   it('calculates basic conversion funnel', () => {
     const jobs: Job[] = [
-      createJob({ status: 'Wishlist' }),
       createJob({ status: 'Applied' }),
       createJob({ status: 'Applied' }),
       createJob({ status: 'Phone Screen' }),
@@ -49,11 +47,6 @@ describe('calculateConversionMetrics', () => {
     ]
 
     const metrics = calculateConversionMetrics(jobs)
-
-    // 6 total jobs, 5 reached Applied or beyond (excluding 1 Wishlist)
-    expect(metrics.wishlistToApplied.total).toBe(6)
-    expect(metrics.wishlistToApplied.converted).toBe(5)
-    expect(metrics.wishlistToApplied.rate).toBe(83) // 5/6 = 83%
 
     // 5 reached Applied, 3 reached Phone Screen or beyond
     expect(metrics.appliedToPhoneScreen.total).toBe(5)
@@ -95,7 +88,7 @@ describe('calculateConversionMetrics', () => {
 
     const metrics = calculateConversionMetrics(jobs)
 
-    expect(metrics.wishlistToApplied.converted).toBe(3)
+    expect(metrics.appliedToPhoneScreen.total).toBe(3)
     expect(metrics.appliedToPhoneScreen.converted).toBe(0)
     expect(metrics.appliedToPhoneScreen.rate).toBe(0)
   })
@@ -108,7 +101,6 @@ describe('calculateConversionMetrics', () => {
 
     const metrics = calculateConversionMetrics(jobs)
 
-    expect(metrics.wishlistToApplied.rate).toBe(100)
     expect(metrics.appliedToPhoneScreen.rate).toBe(100)
     expect(metrics.phoneScreenToInterview.rate).toBe(100)
     expect(metrics.interviewToOffer.rate).toBe(100)

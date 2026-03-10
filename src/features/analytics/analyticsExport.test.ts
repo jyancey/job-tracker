@@ -35,30 +35,26 @@ describe('analyticsExport', () => {
 
   it('exports analytics with jobs to CSV', () => {
     const jobs = [
-      createJob({ status: 'Wishlist' }),
       createJob({ status: 'Applied' }),
       createJob({ status: 'Interview' }),
     ]
 
     const csv = exportAnalyticsToCSV(jobs)
     
-    expect(csv).toContain('Total Jobs: 3')
+    expect(csv).toContain('Total Jobs: 2')
     expect(csv).toContain('Status Distribution')
-    expect(csv).toContain('Wishlist,1')
     expect(csv).toContain('Applied,1')
     expect(csv).toContain('Interview,1')
   })
 
   it('includes conversion rates in CSV', () => {
     const jobs = [
-      createJob({ status: 'Wishlist' }),
       createJob({ status: 'Applied' }),
     ]
 
     const csv = exportAnalyticsToCSV(jobs)
     
     expect(csv).toContain('Conversion Rates')
-    expect(csv).toContain('Wishlist → Applied')
     expect(csv).toContain('Applied → Phone Screen')
   })
 

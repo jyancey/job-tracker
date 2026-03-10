@@ -69,7 +69,7 @@ function storedJob(input: {
   company: string
   roleTitle: string
   applicationDate: string
-  status: 'Wishlist' | 'Applied' | 'Phone Screen' | 'Interview' | 'Offer' | 'Rejected' | 'Withdrawn'
+  status: 'Applied' | 'Phone Screen' | 'Interview' | 'Offer' | 'Rejected' | 'Withdrawn'
 }): Record<string, string> {
   const now = '2026-03-01T00:00:00.000Z'
   return {

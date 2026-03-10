@@ -1,4 +1,4 @@
-const VALID_STATUSES = ['Wishlist', 'Applied', 'Phone Screen', 'Interview', 'Offer', 'Rejected', 'Withdrawn']
+const VALID_STATUSES = ['Applied', 'Phone Screen', 'Interview', 'Offer', 'Rejected', 'Withdrawn']
 
 const REQUIRED_FIELDS = [
   'id',

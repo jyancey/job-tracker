@@ -37,9 +37,6 @@ export function exportAnalyticsToCSV(jobs: Job[]): string {
   rows.push('Conversion Rates')
   rows.push('Stage Transition,Conversion Rate,Converted,Total')
   rows.push(
-    `Wishlist → Applied,${conversionMetrics.wishlistToApplied.rate}%,${conversionMetrics.wishlistToApplied.converted},${conversionMetrics.wishlistToApplied.total}`
-  )
-  rows.push(
     `Applied → Phone Screen,${conversionMetrics.appliedToPhoneScreen.rate}%,${conversionMetrics.appliedToPhoneScreen.converted},${conversionMetrics.appliedToPhoneScreen.total}`
   )
   rows.push(

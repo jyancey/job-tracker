@@ -18,9 +18,8 @@ describe('StatusSelect', () => {
 
   it('shows all job statuses as options', () => {
     const onChange = vi.fn()
-    render(<StatusSelect value="Wishlist" onChange={onChange} placeholder={false} />)
+    render(<StatusSelect value="Applied" onChange={onChange} placeholder={false} />)
 
-    expect(screen.getByRole('option', { name: 'Wishlist' })).toBeInTheDocument()
     expect(screen.getByRole('option', { name: 'Applied' })).toBeInTheDocument()
     expect(screen.getByRole('option', { name: 'Phone Screen' })).toBeInTheDocument()
     expect(screen.getByRole('option', { name: 'Interview' })).toBeInTheDocument()
