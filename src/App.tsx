@@ -364,6 +364,7 @@ function AppContent() {
       handleSnoozeTask={handleSnoozeTask}
       handleTaskPriorityChange={handleTaskPriorityChange}
       handleQuickAddTaskAction={handleQuickAddTaskAction}
+      triggerAiScoring={triggerAiScoring}
     />
   )
 }

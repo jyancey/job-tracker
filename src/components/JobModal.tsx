@@ -5,9 +5,18 @@ import { calculateDaysInCurrentStatus, DEFAULT_STUCK_THRESHOLDS } from '../featu
 interface JobModalProps {
   job: Job | null
   onClose: () => void
+  onReAnalyze: (
+    jobDescription: string,
+    roleTitle: string,
+    company: string,
+    salaryRange: string,
+    jobId: string,
+    setJobs: (updater: (jobs: Job[]) => Job[]) => void
+  ) => void
+  setJobs: (updater: (jobs: Job[]) => Job[]) => void
 }
 
-export function JobModal({ job, onClose }: JobModalProps) {
+export function JobModal({ job, onClose, onReAnalyze, setJobs }: JobModalProps) {
   if (!job) {
     return null
   }
@@ -32,9 +41,22 @@ export function JobModal({ job, onClose }: JobModalProps) {
             </div>
             <p>{job.company}</p>
           </div>
-          <button type="button" className="ghost" onClick={onClose}>
-            Close
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {job.jobDescription && (
+              <button
+                type="button"
+                className="small"
+                onClick={() => onReAnalyze(job.jobDescription || '', job.roleTitle, job.company, job.salaryRange, job.id, setJobs)}
+                disabled={job.aiScoringInProgress}
+                title="Trigger AI analysis to re-score this job"
+              >
+                Re-Analyze
+              </button>
+            )}
+            <button type="button" className="ghost" onClick={onClose}>
+              Close
+            </button>
+          </div>
         </header>
 
         {isStuck && (
@@ -97,8 +119,8 @@ export function JobModal({ job, onClose }: JobModalProps) {
           {job.aiScoredAt && (
             <article>
               <span>AI Analysis</span>
-              <strong>{formatDate(job.aiScoredAt)}</strong>
-              <small style={{ color: '#586069', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+              <strong>{formatDate(job.aiScoredAt.slice(0, 10))}</strong>
+              <small style={{ color: '#586069', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>
                 via {job.aiModel || 'AI'}
               </small>
             </article>

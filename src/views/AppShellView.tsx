@@ -94,6 +94,14 @@ interface AppShellViewProps {
   handleSnoozeTask: (jobId: string, days: number) => void
   handleTaskPriorityChange: (jobId: string, priority: JobPriority) => void
   handleQuickAddTaskAction: (jobId: string, action: string, dueDate: string) => void
+  triggerAiScoring: (
+    jobDescription: string,
+    roleTitle: string,
+    company: string,
+    salaryRange: string,
+    jobId: string,
+    setJobs: (updater: (jobs: Job[]) => Job[]) => void
+  ) => void
 }
 
 export function AppShellView({
@@ -154,6 +162,7 @@ export function AppShellView({
   handleSnoozeTask,
   handleTaskPriorityChange,
   handleQuickAddTaskAction,
+  triggerAiScoring,
 }: AppShellViewProps) {
   const [isJobFormOpen, setIsJobFormOpen] = useState(false)
 
@@ -383,7 +392,7 @@ export function AppShellView({
             </div>
           )}
 
-          {viewingJob && <JobModal job={viewingJob} onClose={closeViewOnly} />}
+          {viewingJob && <JobModal job={viewingJob} onClose={closeViewOnly} onReAnalyze={triggerAiScoring} setJobs={setJobs} />}
         </>
       )}
     </div>
