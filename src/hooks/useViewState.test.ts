@@ -23,10 +23,10 @@ function createJob(id = 'job-1'): Job {
 }
 
 describe('useViewState', () => {
-  it('defaults to dashboard view', () => {
+  it('defaults to analytics view', () => {
     const { result } = renderHook(() => useViewState())
 
-    expect(result.current.view).toBe('dashboard')
+    expect(result.current.view).toBe('analytics')
     expect(result.current.viewingJob).toBeNull()
   })
 
@@ -37,7 +37,7 @@ describe('useViewState', () => {
   })
 
   it('updates view through updateView', () => {
-    const { result } = renderHook(() => useViewState('dashboard'))
+    const { result } = renderHook(() => useViewState('analytics'))
 
     act(() => {
       result.current.updateView('kanban')
@@ -47,8 +47,8 @@ describe('useViewState', () => {
   })
 
   it('supports switching across all views', () => {
-    const { result } = renderHook(() => useViewState('dashboard'))
-    const views: View[] = ['table', 'kanban', 'calendar', 'dashboard', 'analytics', 'today', 'thisWeek', 'profile', 'settings']
+    const { result } = renderHook(() => useViewState('analytics'))
+    const views: View[] = ['table', 'kanban', 'calendar', 'analytics', 'today', 'thisWeek', 'profile', 'settings']
 
     for (const view of views) {
       act(() => {

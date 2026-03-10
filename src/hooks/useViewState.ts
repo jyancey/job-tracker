@@ -5,7 +5,6 @@ export type View =
   | 'table'
   | 'kanban'
   | 'calendar'
-  | 'dashboard'
   | 'analytics'
   | 'today'
   | 'thisWeek'
@@ -24,7 +23,7 @@ export type View =
  * - closeViewOnly: Close job detail modal
  */
 
-export function useViewState(initialView: View = 'dashboard') {
+export function useViewState(initialView: View = 'analytics') {
   const [view, setView] = useState<View>(initialView)
   const [viewingJob, setViewingJob] = useState<Job | null>(null)
 

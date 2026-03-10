@@ -16,7 +16,6 @@ import { KanbanBoard } from '../components/KanbanBoard'
 import { TableViewProvider } from './table/TableViewContext'
 import { TableView } from './TableView'
 import { CalendarView } from './CalendarView'
-import { DashboardView } from './DashboardView'
 import { AnalyticsView } from './AnalyticsView'
 import { CompareView } from './CompareView'
 import { ProfileView } from './ProfileView'
@@ -26,7 +25,6 @@ import { ThisWeekView } from '../features/tasks/ThisWeekView'
 import type { JobDraft, JobPriority, JobStatus } from '../domain'
 
 const VIEW_LABELS: Record<View, string> = {
-  dashboard: 'Dashboard',
   analytics: 'Analytics',
   today: 'Today',
   thisWeek: 'This Week',
@@ -319,7 +317,6 @@ export function AppShellView({
               )}
 
               {view === 'calendar' && <CalendarView dueByDate={dueByDate} onView={openViewOnly} />}
-              {view === 'dashboard' && <DashboardView byStatus={byStatus} />}
               {view === 'analytics' && <AnalyticsView jobs={jobs} onFilterByStatus={filterStatusFromAnalytics} onSelectJob={selectStuckJobFromAnalytics} />}
               {view === 'today' && (
                 <TodayView
