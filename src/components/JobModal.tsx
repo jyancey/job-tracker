@@ -150,6 +150,13 @@ export function JobModal({ job, onClose, onReAnalyze, setJobs }: JobModalProps) 
           )}
         </div>
 
+        {job.jobDescription?.trim() && (
+          <div className="job-modal-notes">
+            <h4>Job Description</h4>
+            <p>{job.jobDescription}</p>
+          </div>
+        )}
+
         <div className="job-modal-notes">
           <h4>Notes</h4>
           <p>{job.notes || 'No notes added.'}</p>

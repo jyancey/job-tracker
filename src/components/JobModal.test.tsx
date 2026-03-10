@@ -139,6 +139,44 @@ describe('JobModal', () => {
     expect(screen.getByText('Interview')).toBeInTheDocument()
   })
 
+  it('renders the job description when present', () => {
+    const job = createJob({
+      jobDescription: 'Lead frontend architecture across design systems and performance-sensitive pages.',
+    })
+
+    render(<JobModal job={job} onClose={vi.fn()} onReAnalyze={onReAnalyze} setJobs={setJobs} />)
+
+    expect(screen.getByRole('heading', { name: 'Job Description' })).toBeInTheDocument()
+    expect(screen.getByText('Lead frontend architecture across design systems and performance-sensitive pages.')).toBeInTheDocument()
+  })
+
+  it('does not render job description section when description is empty', () => {
+    const job = createJob({ jobDescription: '' })
+
+    render(<JobModal job={job} onClose={vi.fn()} onReAnalyze={onReAnalyze} setJobs={setJobs} />)
+
+    expect(screen.queryByRole('heading', { name: 'Job Description' })).not.toBeInTheDocument()
+  })
+
+  it('does not render job description section when description is whitespace only', () => {
+    const job = createJob({ jobDescription: '   \n   ' })
+
+    render(<JobModal job={job} onClose={vi.fn()} onReAnalyze={onReAnalyze} setJobs={setJobs} />)
+
+    expect(screen.queryByRole('heading', { name: 'Job Description' })).not.toBeInTheDocument()
+  })
+
+  it('preserves multiline job descriptions', () => {
+    const description = 'Responsibilities:\n- Build APIs\n- Write tests\n\nRequirements:\n- 3+ years experience'
+    const job = createJob({ jobDescription: description })
+
+    const { container } = render(<JobModal job={job} onClose={vi.fn()} onReAnalyze={onReAnalyze} setJobs={setJobs} />)
+
+    expect(screen.getByRole('heading', { name: 'Job Description' })).toBeInTheDocument()
+    const descriptionParagraph = container.querySelector('.job-modal-notes p')
+    expect(descriptionParagraph?.textContent).toBe(description)
+  })
+
   it('shows AI processing state when scoring is in progress', () => {
     const job = createJob({ aiScoringInProgress: true })
 
