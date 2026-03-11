@@ -2,20 +2,38 @@
 
 **Release Date Target:** April 30, 2026 (8 weeks from v2.6.0)  
 **Release Tagline:** "Polish & Refactored: Clean Architecture + Comprehensive Testing"  
-**Status:** Planning Phase
+**Status:** NO-GO as of March 10, 2026 (validation green, architecture scope incomplete)
 
 ---
 
 ## Overview
 
-v2.7.0 focuses on **architectural improvements** and **code quality enhancement**. Building on v2.6.0's comprehensive Phase 3 testing (646 tests), this release refactors core App.tsx complexity, eliminates prop drilling, and organizes the service layer—all with test confidence.
+v2.7.0 focuses on **architectural improvements** and **code quality enhancement**. Building on v2.6.0's comprehensive Phase 3 testing, this release is intended to refactor core App.tsx complexity, eliminate prop drilling, and organize the service layer with test confidence.
 
 **Key Stats:**
 - **Estimated Effort:** 75-85 hours (3.5-4 weeks full-time)
-- **Test Coverage Target:** 680+ tests (current 646 + new tests)
-- **Code Quality:** Reduce App.tsx from 475 → 250 lines
+- **Validated Baseline (2026-03-10):** 660 passing tests, production build green
+- **Code Quality Target:** Reduce App.tsx from 380 → ~250 lines
 - **Architectural Changes:** 3 major refactors + service layer organization
 - **Risk Level:** LOW (high test coverage provides safety)
+
+## Current Readiness Snapshot
+
+**Decision:** NO-GO for v2.7.0 release tag on March 10, 2026.
+
+**What is validated:**
+- Full test suite passes: 660/660
+- Production build succeeds
+- ErrorBoundary exists and is tested
+- Table view context exists and is tested
+- Recent UI/documentation polish is stable
+
+**What still blocks release under the current v2.7.0 scope:**
+- App.tsx is still 380 lines, above the planned decomposition target
+- Planned hooks `useAppState`, `useSelectionState`, and `usePageReset` do not exist yet
+- Service-layer refactor is only partially complete (`csvParser.ts` and `jobMerger.ts` exist; `jsonExport.ts`, `storageService.ts`, `apiClient.ts`, and `importExportService.ts` do not)
+- 680+ test target has not been reached
+- Release notes and final review steps are not done
 
 ---
 
@@ -988,8 +1006,8 @@ Each phase must meet these criteria before proceeding:
 ### Phase 5 Gate (go/no-go for Phase 6)
 - [ ] All 4 hooks extracted and tested
 - [ ] App.tsx reduced to ~250 lines
-- [ ] 646+ tests still passing
-- [ ] Zero visual/functional regressions
+- [x] 646+ tests still passing
+- [x] Zero visual/functional regressions
 - [ ] Code review approval
 
 ### Phase 6 Gate (go/no-go for Phase 7)
@@ -1000,7 +1018,7 @@ Each phase must meet these criteria before proceeding:
 - [ ] Code review approval
 
 ### Phase 7 Gate (go/no-go for Release)
-- [ ] Error Boundary working
+- [x] Error Boundary working
 - [ ] Type system improved
 - [ ] Documentation updated
 - [ ] Performance baselines documented
@@ -1020,12 +1038,12 @@ The following must be updated for v2.7.0 release:
 - [ ] src/components/README.md - Update component structure
 
 ### User Documentation
-- [ ] README.md - Update architecture section
-- [ ] NEXT_STEPS.md - Update with v2.7.0 notes
+- [x] README.md - Refresh current app/test status and UI labels
+- [x] NEXT_STEPS.md - Update with v2.7.0 readiness notes
 - [ ] docs/COMPREHENSIVE_ROADMAP.md - Update v2.7.0 section
 
 ### Internal Documentation
-- [ ] ARCHITECTURE.md - Create describing new structure
+- [x] ARCHITECTURE.md - Refresh current status and limitations
 - [ ] TESTING.md - Document testing patterns used in Phase 3-4
 - [ ] docs/REFACTORING_STATUS.md - Mark completed items
 
@@ -1034,26 +1052,26 @@ The following must be updated for v2.7.0 release:
 ## Success Metrics
 
 ### Code Quality
-- ✅ App.tsx reduced from 475 → 250 lines (47% reduction)
-- ✅ TableView props reduced from 22 → ~10 (55% reduction)
-- ✅ cyclomatic complexity reduced across refactored modules
-- ✅ Test/code ratio improved (680+ tests for ~3,500 LOC)
+- ❌ App.tsx target not met yet (current: 380 lines)
+- ⚠️ TableView prop/context cleanup only partially complete
+- ⚠️ cyclomatic complexity reductions are still in progress
+- ❌ 680+ test/code target not met yet (current: 660 tests)
 
 ### Test Coverage
-- ✅ 680+ tests passing (current 646 + ~34 new)
+- ❌ 680+ tests passing (current: 660)
 - ✅ 73+ test files (current 72 + new files)
 - ✅ 100% test pass rate
 - ✅ Integration tests for major workflows
 
 ### Performance
-- ✅ Bundle size stable (<200KB gzipped)
-- ✅ No performance regressions on large job lists
-- ✅ Performance baselines documented for v2.8.0
+- ✅ Bundle size stable (<200KB gzipped app bundle)
+- ✅ No build regressions observed during readiness pass
+- ❌ Performance baselines documented for v2.8.0
 
 ### User Experience
-- ✅ No user-facing changes (architectural refactor)
+- ⚠️ Minor user-facing polish has landed during release prep
 - ✅ Error boundary catches and recovers from crashes
-- ✅ Smoother interactions (slight performance gains from refactoring)
+- ⚠️ Performance gains from planned refactors not yet verified
 
 ---
 
@@ -1105,9 +1123,9 @@ The following must be updated for v2.7.0 release:
 
 ---
 
-**Report Generated:** March 8, 2026  
+**Report Generated:** March 10, 2026  
 **Expected Release Date:** April 30, 2026  
-**Status:** Planning Phase  
+**Status:** NO-GO pending remaining architecture and release tasks  
 **Approval:** Pending
 
 ---

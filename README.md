@@ -99,7 +99,7 @@ npm run test:run -- --coverage  # (requires coverage provider)
 
 **Current Status (v2.6.x):**
 - 73 test files
-- 657 passing tests
+- 660 passing tests
 - Covers app workflows, hooks, backend API/store modules, services, and utility modules
 
 ### Building
@@ -178,11 +178,11 @@ Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dis
 ### Smart Filtering
 
 - **Status Filter** — Quick drop-down for All statuses, Overdue Follow-ups, Applied, Phone Screen, Interview, Offer, Rejected, Withdrawn
-- **Advanced Filters** — Click "More Filters" to refine by:
+- **Advanced Filters** — Click "Filters" to refine by:
   - Application date range
   - Salary range
   - Contact person name
-- **Overdue Follow-ups** — Click "View list" metric button to see jobs past their due date
+- **Overdue Follow-ups** — Click "View" in the overdue metric card to see jobs past their due date
 
 ### Bulk Operations
 
@@ -256,5 +256,5 @@ Report issues, suggest features, or contribute pull requests on the project repo
 
 ---
 
-**Last Updated:** March 8, 2026  
+**Last Updated:** March 10, 2026  
 **Current Release Tag:** v2.6.0

@@ -1,8 +1,8 @@
 # Job Tracker - Architecture Overview
 
-**Version:** v2.6.0  
-**Last Updated:** March 9, 2026  
-**Status:** Production-Ready with 657 Tests
+**Version:** v2.6.0 (main branch in v2.7.0 release prep)  
+**Last Updated:** March 10, 2026  
+**Status:** Production-Ready with 660 Tests; v2.7.0 currently NO-GO
 
 ---
 
@@ -593,16 +593,16 @@ src/components/ErrorBoundary.tsx
 ## Known Limitations & Future Improvements
 
 ### Current Limitations
-- ⚠️ App.tsx still ~250 lines (large but manageable, post-v2.7.0 refactoring)
+- ⚠️ App.tsx is still ~380 lines; planned v2.7.0 decomposition is not complete
 - ⚠️ 10 components without tests (low-priority UI components)
 - ⚠️ E2E test coverage only covers happy paths
 - ⚠️ No performance optimization done yet (belt on bundle size is small)
 
 ### v2.7.0 Improvements
-- ✅ App.tsx decomposed into 4 focused hooks
-- ✅ TableView prop drilling eliminated via Context
-- ✅ Service layer finalized and organized
-- ✅ Remaining component tests added
+- ✅ ErrorBoundary component added and tested
+- ✅ TableViewContext extracted and covered by tests
+- ⚠️ App.tsx decomposition into planned hooks is still pending
+- ⚠️ Service layer finalization is only partially complete
 
 ### v2.8.0+ Opportunities
 - 🔮 Performance optimization (memoization, code splitting)

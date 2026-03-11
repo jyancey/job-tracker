@@ -957,36 +957,39 @@ The following items remain deferred for future releases:
 ### v2.7.0 (2-3 weeks) - Alpha/Beta Phase
 **Goal:** Refactor architecture for scalability without changing user-facing features
 
+**Readiness Check (2026-03-10):** Full suite and build are green, but this release is still **NO-GO** under the original v2.7.0 scope because the App.tsx decomposition and service-layer reorganization are incomplete.
+
 **Week 1:**
-- [x] C1: App State Management Hooks
-  - [x] useAppState.ts extraction
-  - [x] useSelectionState.ts extraction
-  - [x] usePageReset.ts extraction
-  - [x] Tests for new hooks
+- [ ] C1: App State Management Hooks
+  - [ ] useAppState.ts extraction
+  - [ ] useSelectionState.ts extraction
+  - [ ] usePageReset.ts extraction
+  - [ ] Tests for new hooks
 
 - [ ] C3: Service Layer Organization
-  - [ ] csvParser.ts creation
+  - [x] csvParser.ts creation
   - [ ] jsonExport.ts creation
-  - [ ] jobMerger.ts creation
+  - [x] jobMerger.ts creation
   - [ ] storageService.ts refactoring
 
 **Week 2:**
 - [ ] C2: React Context Implementation
-  - [ ] TableContext creation
+  - [x] TableViewContext creation
   - [ ] TableView component refactoring
   - [ ] Child component updates
-  - [ ] Context tests
+  - [x] Context tests
 
 - [ ] C5: Component Test Coverage
-  - [ ] Add remaining component tests
+  - [x] High-priority remaining component/hook tests added
+  - [ ] Reach 680+ test target
   - [ ] Kanban component reorganization
   - [ ] Toast/feedback component reorganization
 
 **Week 3:**
 - [ ] C4: Error Boundary
-  - [ ] ErrorBoundary component creation
+  - [x] ErrorBoundary component creation
   - [ ] Error logging integration
-  - [ ] Error boundary tests
+  - [x] Error boundary tests
   - [ ] Error documentation
 
 - [ ] Documentation
@@ -994,7 +997,7 @@ The following items remain deferred for future releases:
   - [ ] Migration guide for developers
   - [ ] V2.7.0 release notes
 
-**Deliverable:** v2.7.0 with improved architecture, 680+ tests, zero user-facing changes
+**Deliverable:** v2.7.0 with improved architecture, 680+ tests, and completed release notes/review gate
 
 ### v2.7.1-v2.7.x (Ongoing) - Maintenance Phase
 - Bug fixes based on user feedback
