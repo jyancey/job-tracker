@@ -97,9 +97,9 @@ npm run test:run
 npm run test:run -- --coverage  # (requires coverage provider)
 ```
 
-**Current Status (v2.6.x):**
-- 73 test files
-- 660 passing tests
+**Current Status (v2.7.0):**
+- 78 test files
+- 681 passing tests
 - Covers app workflows, hooks, backend API/store modules, services, and utility modules
 
 ### Building
@@ -256,5 +256,5 @@ Report issues, suggest features, or contribute pull requests on the project repo
 
 ---
 
-**Last Updated:** March 10, 2026  
-**Current Release Tag:** v2.6.0
+**Last Updated:** March 11, 2026  
+**Current Release Tag:** v2.7.0
