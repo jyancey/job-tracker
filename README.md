@@ -1,5 +1,14 @@
 # Job Tracker
 
+![](http://localhost:3000/john/.profile/badges/release.svg)
+![](http://localhost:3000/john/.profile/badges/stars.svg)
+![](http://localhost:3000/john/.profile/badges/issues.svg)
+![](http://localhost:3000/john/.profile/badges/issues/open.svg)
+![](http://localhost:3000/john/.profile/badges/issues/closed.svg)
+![](http://localhost:3000/john/.profile/badges/pulls.svg)
+![](http://localhost:3000/john/.profile/badges/pulls/open.svg)
+![](http://localhost:3000/john/.profile/badges/pulls/closed.svg)
+
 A local-first, privacy-focused job application tracker built with React, TypeScript, and SQLite.
 
 Track your search like a pipeline, not a spreadsheet. Manage opportunities, follow-ups, and monitor momentum from one workspace—all without leaving your browser.
