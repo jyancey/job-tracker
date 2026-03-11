@@ -37,7 +37,7 @@ const VIEW_LABELS: Record<View, string> = {
   settings: 'Settings',
 }
 
-interface AppShellViewProps {
+export interface AppShellViewProps {
   view: View
   updateView: (view: View) => void
   viewingJob: Job | null
