@@ -1,7 +1,7 @@
 # Job Tracker
 
 [![](http://localhost:3000/john/job-tracker/badges/release.svg)](http://localhost:3000/john/job-tracker/releases)
-[![](http://localhost:3000/john/job-tracker/badges/stars.svg)]
+![](http://localhost:3000/john/job-tracker/badges/stars.svg)
 [![](http://localhost:3000/john/job-tracker/badges/issues.svg)](http://localhost:3000/john/job-tracker/issues)
 [![](http://localhost:3000/john/job-tracker/badges/pulls.svg)](http://localhost:3000/john/job-tracker/pulls)
 
