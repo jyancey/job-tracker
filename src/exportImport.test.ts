@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Job } from './domain'
-import { importFromCsv, importJobsFromFile, mergeImportedJobs } from './exportImport'
+import { importFromCsv, importJobsFromFile, mergeImportedJobs } from './services/importExportService'
 
 function job(id: string, company = `Company ${id}`): Job {
   return {

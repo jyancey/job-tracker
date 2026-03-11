@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import type { ImportMode } from '../exportImport'
+import type { ImportMode } from '../services/importExportService'
 
 /**
  * Custom hook to manage import/export state and operations

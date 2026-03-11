@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Job } from './domain'
-import { loadJobs, saveJobs } from './storage'
+import { loadJobs, saveJobs } from './services/storageService'
 
 const FALLBACK_JOBS_KEY = 'job-tracker.jobs.fallback'
 
@@ -23,7 +23,7 @@ function sampleJob(): Job {
   }
 }
 
-describe('storage', () => {
+describe('storageService', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
     localStorage.clear()
