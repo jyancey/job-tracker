@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import { KanbanColumn } from './KanbanColumn'
 import type { Job, JobStatus } from '../domain'
@@ -62,7 +62,7 @@ describe('KanbanColumn', () => {
   })
 
   it('renders empty state when no jobs', () => {
-    const { container } = render(
+    render(
       <KanbanColumn
         status="Wishlist"
         jobs={[]}
@@ -93,29 +93,8 @@ describe('KanbanColumn', () => {
     expect(column?.classList.contains('drag-over')).toBe(false)
   })
 
-  it('passes onEdit callback to KanbanCard components', async () => {
+  it('passes onEdit callback to KanbanCard components', () => {
     const job = createJob()
-    const onEdit = vi.fn()
-
-    const { container } = render(
-      <KanbanColumn
-        status="Applied"
-        jobs={[job]}
-        onStatusChange={vi.fn()}
-        onEdit={onEdit}
-        onDelete={vi.fn()}
-      />,
-    )
-
-    const editButton = within(container.querySelector('.kanban-actions')!).getByRole('button', { name: 'Edit' })
-    
-    // Edit button should exist - callback verification happens through integration
-    expect(editButton).toBeTruthy()
-  })
-
-  it('passes onDelete callback to KanbanCard components', async () => {
-    const job = createJob()
-    const onDelete = vi.fn()
 
     const { container } = render(
       <KanbanColumn
@@ -123,12 +102,43 @@ describe('KanbanColumn', () => {
         jobs={[job]}
         onStatusChange={vi.fn()}
         onEdit={vi.fn()}
-        onDelete={onDelete}
+        onDelete={vi.fn()}
       />,
     )
 
-    const deleteButton = within(container.querySelector('.kanban-actions')!).getByRole('button', { name: 'Delete' })
-    
+    const actions = container.querySelector('.kanban-actions')
+    expect(actions).toBeTruthy()
+    if (!actions) {
+      throw new Error('Expected kanban actions container')
+    }
+
+    const editButton = within(actions).getByRole('button', { name: 'Edit' })
+
+    // Edit button should exist - callback verification happens through integration
+    expect(editButton).toBeTruthy()
+  })
+
+  it('passes onDelete callback to KanbanCard components', () => {
+    const job = createJob()
+
+    const { container } = render(
+      <KanbanColumn
+        status="Applied"
+        jobs={[job]}
+        onStatusChange={vi.fn()}
+        onEdit={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+    )
+
+    const actions = container.querySelector('.kanban-actions')
+    expect(actions).toBeTruthy()
+    if (!actions) {
+      throw new Error('Expected kanban actions container')
+    }
+
+    const deleteButton = within(actions).getByRole('button', { name: 'Delete' })
+
     // Delete button should exist - callback verification happens through integration
     expect(deleteButton).toBeTruthy()
   })

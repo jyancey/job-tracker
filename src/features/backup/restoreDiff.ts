@@ -5,8 +5,8 @@ export type ChangeType = 'added' | 'removed' | 'updated' | 'unchanged'
 
 export interface FieldChange {
   field: string
-  oldValue: any
-  newValue: any
+  oldValue: Job[keyof Job]
+  newValue: Job[keyof Job]
 }
 
 export interface JobDiff {
@@ -202,7 +202,7 @@ export function formatFieldName(field: string): string {
     .trim()
 }
 
-export function formatFieldValue(value: any): string {
+export function formatFieldValue(value: Job[keyof Job] | null | undefined): string {
   if (value === null || value === undefined || value === '') {
     return '(empty)'
   }

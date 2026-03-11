@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { ChangeEvent, FormEvent, RefObject } from 'react'
 import type { Job } from '../domain'
 import type { View } from '../hooks/useViewState'
@@ -165,22 +165,17 @@ export function AppShellView({
   handleQuickAddTaskAction,
   triggerAiScoring,
 }: AppShellViewProps) {
-  const [isJobFormOpen, setIsJobFormOpen] = useState(false)
-
-  useEffect(() => {
-    if (editingId) {
-      setIsJobFormOpen(true)
-    }
-  }, [editingId])
+  const [isJobFormManuallyOpen, setIsJobFormManuallyOpen] = useState(false)
+  const isJobFormOpen = isJobFormManuallyOpen || Boolean(editingId)
 
   const openAddJobModal = () => {
     resetForm()
-    setIsJobFormOpen(true)
+    setIsJobFormManuallyOpen(true)
   }
 
   const closeJobFormModal = () => {
     resetForm()
-    setIsJobFormOpen(false)
+    setIsJobFormManuallyOpen(false)
   }
 
   const canSubmitJobForm = Boolean(draft.company.trim() && draft.roleTitle.trim() && draft.applicationDate)
@@ -188,7 +183,7 @@ export function AppShellView({
   const handleJobFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     handleSubmitJob(event)
     if (canSubmitJobForm) {
-      setIsJobFormOpen(false)
+      setIsJobFormManuallyOpen(false)
     }
   }
 

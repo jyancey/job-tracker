@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { KanbanBoard } from './KanbanBoard'
 import type { Job, JobStatus } from '../domain'
 
@@ -9,7 +9,7 @@ function createJob(id: string, status: string = 'Applied'): Job {
     company: `Company ${id}`,
     roleTitle: 'Engineer',
     applicationDate: '2026-03-01',
-    status: status as any,
+    status: status as JobStatus,
     jobUrl: '',
     atsUrl: '',
     salaryRange: '',

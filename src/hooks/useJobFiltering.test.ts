@@ -95,7 +95,6 @@ describe('useJobFiltering', () => {
   })
 
   it('counts overdue follow-ups correctly', () => {
-    const today = new Date().toISOString().split('T')[0]
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
     const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]
 

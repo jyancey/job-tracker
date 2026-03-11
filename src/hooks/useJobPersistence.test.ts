@@ -1,8 +1,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { renderHook, waitFor } from '@testing-library/react'
 import type { Job, JobStatus } from '../domain'
 import { useJobPersistence } from './useJobPersistence'
-import * as jobService from '../services/jobService'
 
 // Mock storage
 vi.mock('../services/storageService', () => ({

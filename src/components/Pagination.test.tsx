@@ -234,7 +234,6 @@ describe('Pagination', () => {
   })
 
   it('prevents Previous button from going below page 1', async () => {
-    const user = userEvent.setup()
     const onPageChange = vi.fn()
 
     const { container } = render(
@@ -257,7 +256,6 @@ describe('Pagination', () => {
   })
 
   it('prevents Next button from exceeding totalPages', async () => {
-    const user = userEvent.setup()
     const onPageChange = vi.fn()
 
     const { container } = render(

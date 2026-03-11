@@ -31,10 +31,6 @@ export function useAutoBackup(jobs: Job[], enabled: boolean = true): void {
     lastCheckRef.current = state.lastBackupAt
 
     // Check and create backup if needed
-    const result = checkAndCreateAutoBackup(jobs)
-    
-    if (result) {
-      console.log(`Auto-backup created: ${result.backupHistory[0]?.filename}`)
-    }
+    checkAndCreateAutoBackup(jobs)
   }, [jobs, enabled])
 }

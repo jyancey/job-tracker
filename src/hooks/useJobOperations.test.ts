@@ -108,8 +108,6 @@ describe('useJobOperations', () => {
   it('handleRemoveJob deletes job and clears editing when editing same job', () => {
     const setJobs = vi.fn()
     const resetForm = vi.fn()
-    const job1 = createJob({ id: 'job-1' })
-    const job2 = createJob({ id: 'job-2' })
 
     const { result } = renderHook(() =>
       useJobOperations({
@@ -355,7 +353,7 @@ describe('useJobOperations', () => {
       }),
     )
 
-    const { result: result2 } = renderHook(() =>
+    renderHook(() =>
       useJobOperations({
         editingId: 'job-2',
         resetForm: resetForm2,

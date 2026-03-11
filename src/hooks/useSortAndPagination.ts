@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import type { SortColumn, SortDirection } from './useJobFiltering'
 
 interface UseSortAndPaginationProps {
@@ -16,10 +16,7 @@ export function useSortAndPagination({ totalPages }: UseSortAndPaginationProps) 
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
-  // Auto-reset page if currentPage exceeds totalPages
-  useEffect(() => {
-    setCurrentPage((current) => Math.min(current, totalPages))
-  }, [totalPages])
+  const safeCurrentPage = totalPages > 0 ? Math.min(currentPage, totalPages) : 1
 
   const handleSort = useCallback((column: SortColumn) => {
     setSortColumn((prevColumn) => {
@@ -38,7 +35,7 @@ export function useSortAndPagination({ totalPages }: UseSortAndPaginationProps) 
   return {
     sortColumn,
     sortDirection,
-    currentPage,
+    currentPage: safeCurrentPage,
     pageSize,
     setSortColumn,
     setSortDirection,

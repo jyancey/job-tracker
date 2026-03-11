@@ -53,7 +53,13 @@ describe('KanbanCard', () => {
       />,
     )
 
-    const editButton = within(container.querySelector('.kanban-actions')!).getByRole('button', { name: 'Edit' })
+    const actions = container.querySelector('.kanban-actions')
+    expect(actions).toBeTruthy()
+    if (!actions) {
+      throw new Error('Expected kanban actions container')
+    }
+
+    const editButton = within(actions).getByRole('button', { name: 'Edit' })
     await user.click(editButton)
 
     expect(onEdit).toHaveBeenCalledWith(job)
@@ -74,7 +80,13 @@ describe('KanbanCard', () => {
       />,
     )
 
-    const deleteButton = within(container.querySelector('.kanban-actions')!).getByRole('button', { name: 'Delete' })
+    const actions = container.querySelector('.kanban-actions')
+    expect(actions).toBeTruthy()
+    if (!actions) {
+      throw new Error('Expected kanban actions container')
+    }
+
+    const deleteButton = within(actions).getByRole('button', { name: 'Delete' })
     await user.click(deleteButton)
 
     expect(onDelete).toHaveBeenCalledWith(job.id)

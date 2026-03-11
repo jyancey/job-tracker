@@ -74,11 +74,7 @@ function persistSavedViews(views: SavedView[]): void {
  *   delete, and rename them.
  */
 export function useSavedViews() {
-  const [savedViews, setSavedViews] = useState<SavedView[]>([])
-
-  useEffect(() => {
-    setSavedViews(loadSavedViewsFromStorage())
-  }, [])
+  const [savedViews, setSavedViews] = useState<SavedView[]>(() => loadSavedViewsFromStorage())
 
   useEffect(() => {
     persistSavedViews(savedViews)

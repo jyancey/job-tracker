@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { SortableHeader } from './SortableHeader'
-import type { SortColumn, SortDirection } from '../hooks/useJobFiltering'
+import type { SortColumn } from '../hooks/useJobFiltering'
 
 describe('SortableHeader', () => {
   it('renders header with label', () => {
@@ -108,7 +108,11 @@ describe('SortableHeader', () => {
     )
 
     const button = container.querySelector('button')
-    button && (await user.click(button))
+    if (!button) {
+      throw new Error('Expected sort button')
+    }
+
+    await user.click(button)
 
     expect(onSort).toHaveBeenCalledWith('company')
     expect(onSort).toHaveBeenCalledTimes(1)
@@ -138,7 +142,11 @@ describe('SortableHeader', () => {
       )
 
       const button = container.querySelector('button')
-      button && (await user.click(button))
+      if (!button) {
+        throw new Error('Expected sort button')
+      }
+
+      await user.click(button)
 
       expect(onSort).toHaveBeenCalledWith(col)
 
@@ -190,7 +198,11 @@ describe('SortableHeader', () => {
     )
 
     const button = container.querySelector('button')
-    button && (await user.click(button))
+    if (!button) {
+      throw new Error('Expected sort button')
+    }
+
+    await user.click(button)
     expect(onSort).toHaveBeenCalledWith('company')
 
     // Simulate direction toggle by re-rendering with new direction

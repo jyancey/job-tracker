@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import { describe, beforeEach, afterEach, expect, it, vi } from 'vitest'
+import { describe, beforeEach, expect, it, vi } from 'vitest'
 import { useAutoBackup } from './useAutoBackup'
 import * as backupModule from '../features/backup'
 import type { Job } from '../domain'

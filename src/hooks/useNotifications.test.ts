@@ -1,7 +1,6 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useNotifications } from './useNotifications'
-import { createNotification } from '../notifications'
 
 describe('useNotifications', () => {
   it('initializes with empty notifications array', () => {
