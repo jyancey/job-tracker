@@ -1,13 +1,13 @@
 # Job Tracker
 
-![](http://localhost:3000/john/.profile/badges/release.svg)
-![](http://localhost:3000/john/.profile/badges/stars.svg)
-![](http://localhost:3000/john/.profile/badges/issues.svg)
-![](http://localhost:3000/john/.profile/badges/issues/open.svg)
-![](http://localhost:3000/john/.profile/badges/issues/closed.svg)
-![](http://localhost:3000/john/.profile/badges/pulls.svg)
-![](http://localhost:3000/john/.profile/badges/pulls/open.svg)
-![](http://localhost:3000/john/.profile/badges/pulls/closed.svg)
+![](http://localhost:3000/john/job-tracker/badges/release.svg)
+![](http://localhost:3000/john/job-tracker/badges/stars.svg)
+![](http://localhost:3000/john/job-tracker/badges/issues.svg)
+![](http://localhost:3000/john/job-tracker/badges/issues/open.svg)
+![](http://localhost:3000/john/job-tracker/badges/issues/closed.svg)
+![](http://localhost:3000/john/job-tracker/badges/pulls.svg)
+![](http://localhost:3000/john/job-tracker/badges/pulls/open.svg)
+![](http://localhost:3000/john/job-tracker/badges/pulls/closed.svg)
 
 A local-first, privacy-focused job application tracker built with React, TypeScript, and SQLite.
 
