@@ -18,6 +18,17 @@ function getSearchText(job: Job): string {
     .toLowerCase()
 }
 
+/**
+ * Filter a list of jobs by a search query.
+ *
+ * Matches against a normalized concatenation of company, role, notes, contact,
+ * next action, salary range, and status. All query tokens must match
+ * (AND-based, case-insensitive, whitespace-tokenized).
+ *
+ * @param jobs - The full list of jobs to search.
+ * @param query - The search string. Returns all jobs unchanged when empty.
+ * @returns The subset of jobs matching every token in the query.
+ */
 export function searchJobs(jobs: Job[], query: string): Job[] {
   const normalizedQuery = normalize(query)
   if (!normalizedQuery) {

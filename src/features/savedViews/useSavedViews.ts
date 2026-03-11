@@ -4,13 +4,24 @@ import type { SortColumn, SortDirection } from '../../types/filters'
 
 const SAVED_VIEWS_STORAGE_KEY = 'jobTracker.savedViews.v1'
 
+/**
+ * A persisted filter, sort, and display preset that can be applied to quickly
+ * restore a specific table configuration.
+ */
 export interface SavedView {
+  /** Unique identifier for this saved view. */
   id: string
+  /** User-assigned display name. */
   name: string
+  /** The filter state captured in this view. */
   filters: FilterState
+  /** The column the table is sorted by when this view is applied. */
   sortColumn: SortColumn
+  /** The sort direction when this view is applied. */
   sortDirection: SortDirection
+  /** ISO timestamp for when this view was first created. */
   createdAt: string
+  /** ISO timestamp for when this view was last updated. */
   updatedAt: string
 }
 
@@ -56,6 +67,12 @@ function persistSavedViews(views: SavedView[]): void {
   localStorage.setItem(SAVED_VIEWS_STORAGE_KEY, JSON.stringify(views))
 }
 
+/**
+ * Manage the user's saved view presets, persisting them to localStorage.
+ *
+ * @returns The current list of saved views and actions to create, update,
+ *   delete, and rename them.
+ */
 export function useSavedViews() {
   const [savedViews, setSavedViews] = useState<SavedView[]>([])
 

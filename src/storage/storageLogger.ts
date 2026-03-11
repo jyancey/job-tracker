@@ -46,6 +46,12 @@ export function logStorageInfo(message: string, details?: Record<string, unknown
   console.warn(`[storage] ${message}`)
 }
 
+/**
+ * Log a storage error event.
+ *
+ * @param message - A short description of the failure.
+ * @param error - The error value to record alongside the message.
+ */
 export function logStorageError(message: string, error: unknown): void {
   appendStorageLog('error', message, {
     error: error instanceof Error ? error.message : String(error),
@@ -58,19 +64,32 @@ export function logStorageError(message: string, error: unknown): void {
   console.error(`[storage] ${message}`, error)
 }
 
+/**
+ * Enable or disable verbose storage debug logging to the browser console.
+ *
+ * @param enabled - When `true`, storage events are echoed to `console.warn`/`console.error`.
+ */
 export function setStorageDebugLogging(enabled: boolean): void {
   localStorage.setItem(STORAGE_DEBUG_KEY, String(enabled))
   logStorageInfo('debug logging enabled')
 }
 
+/** Return the current storage log buffer as a plain-text string. */
 export function getStorageLogText(): string {
   return localStorage.getItem(STORAGE_LOG_BUFFER_KEY) ?? ''
 }
 
+/** Clear all stored log entries from localStorage. */
 export function clearStorageLogs(): void {
   localStorage.removeItem(STORAGE_LOG_BUFFER_KEY)
 }
 
+/**
+ * Trigger a browser download of the current storage log buffer.
+ *
+ * @param filename - Filename for the downloaded log file.
+ *   Defaults to `'job-tracker-storage.log'`.
+ */
 export function downloadStorageLogs(filename = 'job-tracker-storage.log'): void {
   const content = getStorageLogText()
   if (!content || typeof document === 'undefined') {

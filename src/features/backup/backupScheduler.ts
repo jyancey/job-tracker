@@ -1,24 +1,47 @@
 import type { Job } from '../../domain'
 import { createBackupSnapshot, serializeBackup, backupFilename } from './backupService'
 
+/**
+ * How frequently automatic backups should be created.
+ * `'disabled'` turns off auto-backup entirely.
+ */
 export type BackupInterval = 'disabled' | 'daily' | 'weekly' | 'monthly'
 
+/**
+ * User-configurable backup schedule and storage settings.
+ */
 export interface BackupConfig {
+  /** How often automatic backups should be triggered. */
   interval: BackupInterval
+  /** Maximum number of past backups to retain. Older entries are pruned. */
   keepLastN: number
+  /** When `true`, auto-backups are also persisted to localStorage. */
   autoSaveToStorage: boolean
 }
 
+/**
+ * Metadata record for a single completed backup entry in the history list.
+ */
 export interface BackupMetadata {
+  /** The filename used when this backup was created or downloaded. */
   filename: string
+  /** ISO timestamp for when this backup was created. */
   createdAt: string
+  /** Number of jobs captured in this backup. */
   jobCount: number
+  /** Size of the backup content in bytes. */
   size: number
 }
 
+/**
+ * Persisted auto-backup state, stored in localStorage between sessions.
+ */
 export interface AutoBackupState {
+  /** ISO timestamp for the most recent backup, or `null` if none has run yet. */
   lastBackupAt: string | null
+  /** The current backup configuration. */
   config: BackupConfig
+  /** Ordered list of past backup metadata records, newest first. */
   backupHistory: BackupMetadata[]
 }
 
@@ -32,6 +55,11 @@ const STORAGE_KEY_CONFIG = 'job-tracker-backup-config'
 const STORAGE_KEY_STATE = 'job-tracker-backup-state'
 const STORAGE_KEY_BACKUP_PREFIX = 'job-tracker-auto-backup-'
 
+/**
+ * Load the backup configuration from localStorage.
+ *
+ * Falls back to the default configuration if none is stored or if parsing fails.
+ */
 export function loadBackupConfig(): BackupConfig {
   try {
     const stored = localStorage.getItem(STORAGE_KEY_CONFIG)
@@ -49,6 +77,11 @@ export function loadBackupConfig(): BackupConfig {
   return DEFAULT_CONFIG
 }
 
+/**
+ * Persist the backup configuration to localStorage.
+ *
+ * @param config - The configuration to save.
+ */
 export function saveBackupConfig(config: BackupConfig): void {
   try {
     localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(config))
@@ -57,6 +90,11 @@ export function saveBackupConfig(config: BackupConfig): void {
   }
 }
 
+/**
+ * Load the current auto-backup state from localStorage.
+ *
+ * Falls back to a safe default state if none is stored or if parsing fails.
+ */
 export function loadBackupState(): AutoBackupState {
   try {
     const stored = localStorage.getItem(STORAGE_KEY_STATE)
@@ -78,6 +116,11 @@ export function loadBackupState(): AutoBackupState {
   }
 }
 
+/**
+ * Persist the current auto-backup state to localStorage.
+ *
+ * @param state - The state to save.
+ */
 export function saveBackupState(state: AutoBackupState): void {
   try {
     localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(state))
@@ -112,6 +155,14 @@ export function shouldCreateBackup(lastBackupAt: string | null, interval: Backup
   }
 }
 
+/**
+ * Create an auto-backup snapshot, optionally persist it to localStorage,
+ * and return the updated auto-backup state with pruned history.
+ *
+ * @param jobs - The current job list to back up.
+ * @param state - The current auto-backup state, including config and history.
+ * @returns The updated auto-backup state after this backup run.
+ */
 export function createAutoBackup(jobs: Job[], state: AutoBackupState): AutoBackupState {
   const snapshot = createBackupSnapshot(jobs)
   const serialized = serializeBackup(snapshot)
@@ -161,6 +212,24 @@ export function createAutoBackup(jobs: Job[], state: AutoBackupState): AutoBacku
   }
 }
 
+/**
+ * Check whether a backup is due and, if so, create one and save the updated state.
+ *
+ * Convenience wrapper combining {@link shouldCreateBackup}, {@link createAutoBackup},
+ * and {@link saveBackupState}.
+ *
+ * @param jobs - The current job list.
+ * @returns The updated auto-backup state if a backup was created, or `null` if none was needed.
+ */
+/**
+ * Check whether a backup is due and, if so, create one and save the updated state.
+ *
+ * Convenience wrapper combining {@link shouldCreateBackup}, {@link createAutoBackup},
+ * and {@link saveBackupState}.
+ *
+ * @param jobs - The current job list.
+ * @returns The updated auto-backup state if a backup was created, or `null` if none was needed.
+ */
 export function checkAndCreateAutoBackup(jobs: Job[]): AutoBackupState | null {
   const state = loadBackupState()
 
@@ -173,6 +242,12 @@ export function checkAndCreateAutoBackup(jobs: Job[]): AutoBackupState | null {
   return null
 }
 
+/**
+ * Retrieve a stored auto-backup by its creation timestamp.
+ *
+ * @param createdAt - The ISO timestamp used as the storage key.
+ * @returns The raw backup content string, or `null` if not found.
+ */
 export function getStoredBackup(createdAt: string): string | null {
   try {
     const key = STORAGE_KEY_BACKUP_PREFIX + createdAt
@@ -182,6 +257,11 @@ export function getStoredBackup(createdAt: string): string | null {
   }
 }
 
+/**
+ * Delete a stored auto-backup from localStorage by its creation timestamp.
+ *
+ * @param createdAt - The ISO timestamp used as the storage key.
+ */
 export function deleteStoredBackup(createdAt: string): void {
   try {
     const key = STORAGE_KEY_BACKUP_PREFIX + createdAt
@@ -191,6 +271,12 @@ export function deleteStoredBackup(createdAt: string): void {
   }
 }
 
+/**
+ * Trigger a browser download of a stored backup file.
+ *
+ * @param metadata - Metadata for the backup to download. Uses `createdAt` to look up the content.
+ * @throws When the backup content is no longer present in storage.
+ */
 export function downloadBackup(metadata: BackupMetadata): void {
   const content = getStoredBackup(metadata.createdAt)
   if (!content) {
