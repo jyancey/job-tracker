@@ -1,8 +1,8 @@
 # Job Tracker - Comprehensive Roadmap
 
-**Last Updated:** March 8, 2026  
-**Current Version:** v2.6.0  
-**Status:** Phase 3 Complete with 646 tests across 72 files
+**Last Updated:** March 11, 2026  
+**Current Version:** v2.7.0  
+**Status:** v2.7.0 Released with 681 tests across 78 files
 
 ---
 
@@ -375,21 +375,21 @@ Overall Growth: +329 tests (+104% increase)
 
 ---
 
-## Future Roadmap (v2.7.0+)
+## Future Roadmap (v2.8.0+)
 
-### v2.7.0 (Polish + Documentation)
-**Focus:** UX Polish, Documentation, Performance  
-**Estimated Release:** Q2 2026
+### v2.7.0 (Released)
+**Focus:** Architecture hardening, test expansion, release readiness  
+**Release Date:** March 11, 2026
 
-**Planned Work:**
-- [ ] UI/UX polish pass (styling, animation, responsiveness)
-- [ ] Accessibility audit and improvements (WCAG 2.1 AA)
-- [ ] Performance optimization (code splitting, lazy loading)
-- [ ] Comprehensive user documentation
-- [ ] Video tutorials for core workflows
-- [ ] Release notes generator automation
+**Delivered Work:**
+- [x] App decomposition and orchestration extraction
+- [x] Service-layer reorganization and direct service imports
+- [x] Compatibility wrapper removal after migration
+- [x] UI polish and modal regression fixes
+- [x] 680+ automated test target exceeded
+- [x] Release docs/checklists and release notes completed
 
-**Testing:** Add remaining edge case tests, E2E smoke tests
+**Validation:** 681 passing tests across 78 files; production build green
 
 ### v2.8.0 (Advanced Features)
 **Focus:** Collaboration, AI Integration, Insights  
@@ -422,8 +422,8 @@ Overall Growth: +329 tests (+104% increase)
 
 | Metric | Achieved |
 |--------|----------|
-| Total Test Cases | 646 |
-| Test Files | 72 |
+| Total Test Cases | 681 |
+| Test Files | 78 |
 | Test Pass Rate | 100% |
 | Feature Batches Completed | 5 |
 | Major Features (A1-A5) | 5 |

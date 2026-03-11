@@ -1,7 +1,7 @@
 # Job Tracker - Next Steps
-**Updated:** March 8, 2026  
-**Current Version:** v2.6.0 (released)  
-**Test Suite Status:** ✅ 646 tests passing across 72 test files
+**Updated:** March 11, 2026  
+**Current Version:** v2.7.0 (released)  
+**Test Suite Status:** ✅ 681 tests passing across 78 test files
 
 ---
 
@@ -12,7 +12,7 @@
 - **Phase 2:** Workflow Components - Forms, drag-drop, tables, Kanban (117 tests)
 - **Phase 3:** Hooks, Services, Views, Utilities - All batches complete (121 tests)
 - **Phase 4:** Additional Coverage - Import/Export, Dashboard, Component tests (48 new tests)
-- **Total Coverage:** 646 passing tests, 72 test files, ~87% statement coverage
+- **Total Coverage:** 681 passing tests, 78 test files, ~87% statement coverage
 - **Status:** All Phase 1-4 testing objectives met. Test infrastructure is solid.
 
 ### E2E Coverage (✅ Baseline Complete)
@@ -29,7 +29,7 @@
 - **Completed Refactoring:**
   - Extracted multiple custom hooks from App.tsx (including actions/compare/table context composition)
   - Separated domain logic (domain.ts)
-  - Isolated storage layer (storage.ts, sqliteStore.js)
+  - Isolated storage layer (`src/services/storageService.ts`, sqliteStore.js)
   - Split frontend storage concerns into focused modules (`jobsApi`, `storageLogger`, `fallbackStorage`)
   - Created service modules (jobService, aiScoringService, resumeParsingService)
   - Split export/import responsibilities into focused modules (`csvParser`, `jsonTransfer`, `jobMerger`)
@@ -37,8 +37,8 @@
   - Extracted `AppShellView` to separate render/routing from orchestration
 
 - **Remaining Issues (from REFACTORING_ANALYSIS.md):**
-  - App.tsx is now 233 lines (target reached; monitor for future creep)
-  - storage.ts now orchestrates dedicated modules (logging/API/fallback split complete)
+  - App.tsx is now 19 lines (target exceeded)
+  - Legacy wrappers removed after migration (`src/storage.ts`, `src/exportImport.ts`)
   - TableView now uses context-driven subcomponents (`TableBulkActions`, `TableHeader`, `TableBody`, `TableRow`)
   - 10 components without tests (low priority UI components)
   - E2E coverage is baseline-complete; bulk ops/import-export/drag-drop paths remain to add
@@ -948,56 +948,56 @@ The following items remain deferred for future releases:
 
 **ADR-004: Context API for Deeply Nested State**
 - Decision: Use React Context for table and app-wide state
-- Status: APPROVED (to be implemented in v2.7.0 as C2)
+- Status: ACCEPTED AND IMPLEMENTED IN v2.7.0
 
 ---
 
 ## Recommended Execution Plan
 
-### v2.7.0 (2-3 weeks) - Alpha/Beta Phase
+### v2.7.0 (Completed)
 **Goal:** Refactor architecture for scalability without changing user-facing features
 
-**Readiness Check (2026-03-10):** Full suite and build are green, but this release is still **NO-GO** under the original v2.7.0 scope because the App.tsx decomposition and service-layer reorganization are incomplete.
+**Release Check (2026-03-11):** Full suite and build green, architecture scope complete, release approved and published.
 
 **Week 1:**
-- [ ] C1: App State Management Hooks
-  - [ ] useAppState.ts extraction
-  - [ ] useSelectionState.ts extraction
-  - [ ] usePageReset.ts extraction
-  - [ ] Tests for new hooks
+- [x] C1: App State Management Hooks
+  - [x] useAppState.ts extraction
+  - [x] useSelectionState.ts extraction
+  - [x] usePageReset.ts extraction
+  - [x] Tests for new hooks
 
-- [ ] C3: Service Layer Organization
+- [x] C3: Service Layer Organization
   - [x] csvParser.ts creation
-  - [ ] jsonExport.ts creation
+  - [x] jsonExport.ts creation
   - [x] jobMerger.ts creation
-  - [ ] storageService.ts refactoring
+  - [x] storageService.ts refactoring
 
 **Week 2:**
-- [ ] C2: React Context Implementation
+- [x] C2: React Context Implementation
   - [x] TableViewContext creation
-  - [ ] TableView component refactoring
-  - [ ] Child component updates
+  - [x] TableView component refactoring
+  - [x] Child component updates
   - [x] Context tests
 
-- [ ] C5: Component Test Coverage
+- [x] C5: Component Test Coverage
   - [x] High-priority remaining component/hook tests added
-  - [ ] Reach 680+ test target
-  - [ ] Kanban component reorganization
-  - [ ] Toast/feedback component reorganization
+  - [x] Reach 680+ test target
+  - [x] Kanban component reorganization
+  - [x] Toast/feedback component reorganization
 
 **Week 3:**
-- [ ] C4: Error Boundary
+- [x] C4: Error Boundary
   - [x] ErrorBoundary component creation
-  - [ ] Error logging integration
+  - [x] Error logging integration
   - [x] Error boundary tests
-  - [ ] Error documentation
+  - [x] Error documentation
 
-- [ ] Documentation
-  - [ ] Update ARCHITECTURE.md with new structure
-  - [ ] Migration guide for developers
-  - [ ] V2.7.0 release notes
+- [x] Documentation
+  - [x] Update ARCHITECTURE.md with new structure
+  - [x] Migration guide for developers
+  - [x] V2.7.0 release notes
 
-**Deliverable:** v2.7.0 with improved architecture, 680+ tests, and completed release notes/review gate
+**Deliverable:** v2.7.0 released with improved architecture, 681 tests, and completed release notes/review gate
 
 ### v2.7.1-v2.7.x (Ongoing) - Maintenance Phase
 - Bug fixes based on user feedback
@@ -1005,7 +1005,7 @@ The following items remain deferred for future releases:
 - Documentation improvements
 - E2E test expansion
 
-### v2.8.0 (Quarterly) - Advanced Features
+### v2.8.0 (Quarterly) - Advanced Features (Active Planning)
 - Performance optimization (D3)
 - Mobile responsiveness (D2)
 - Advanced filtering (D1)
@@ -1036,5 +1036,7 @@ The following items remain deferred for future releases:
 
 ---
 
-**Document Status:** Pre-release planning for v2.7.0 (architecture hardening)  
-**Next Review Date:** After v2.7.0 beta release
+**Document Status:** v2.7.0 complete; planning for v2.8.0  
+**Next Review Date:** v2.8.0 planning review
+
+**Planning Document:** [V2_8_0_RELEASE_PLAN.md](./V2_8_0_RELEASE_PLAN.md)

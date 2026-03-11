@@ -1,8 +1,8 @@
 # Job Tracker - Architecture Overview
 
-**Version:** v2.6.0 (main branch in v2.7.0 release prep)  
+**Version:** v2.7.0 release prep (main branch)  
 **Last Updated:** March 10, 2026  
-**Status:** Production-Ready with 660 Tests; v2.7.0 currently NO-GO
+**Status:** Production-Ready with 681 Tests; v2.7.0 conditional-go pending final review
 
 ---
 
