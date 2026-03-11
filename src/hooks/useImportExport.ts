@@ -6,7 +6,7 @@ import {
   importJobsFromFile,
   mergeImportedJobs,
   type ImportMode,
-} from '../exportImport'
+} from '../services/importExportService'
 import { downloadFile } from '../utils/downloadUtils'
 import * as jobService from '../services/jobService'
 

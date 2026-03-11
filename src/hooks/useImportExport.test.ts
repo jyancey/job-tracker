@@ -3,7 +3,7 @@ import { renderHook, act } from '@testing-library/react'
 import type { Job } from '../domain'
 import { useImportExport } from './useImportExport'
 
-vi.mock('../exportImport', () => ({
+vi.mock('../services/importExportService', () => ({
   exportToCsv: vi.fn(() => 'a,b\n1,2'),
   exportToJson: vi.fn(() => '[{"id":"1"}]'),
   importJobsFromFile: vi.fn(() => []),
@@ -23,8 +23,9 @@ import {
   exportToJson,
   importJobsFromFile,
   mergeImportedJobs,
-} from '../exportImport'
+} from '../services/importExportService'
 import { downloadFile } from '../utils/downloadUtils'
+
 
 function createJob(id: string): Job {
   return {

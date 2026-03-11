@@ -2,10 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
-import { loadJobs, saveJobs } from './storage'
+import { loadJobs, saveJobs } from './services/storageService'
 
-vi.mock('./storage', () => ({
-  downloadStorageLogs: vi.fn(),
+vi.mock('./services/storageService', () => ({
   loadJobs: vi.fn(),
   saveJobs: vi.fn(),
 }))

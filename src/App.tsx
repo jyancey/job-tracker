@@ -1,23 +1,20 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo } from 'react'
 import './App.css'
-import type { Job, JobPriority } from './domain'
+import type { Job } from './domain'
 import {
   useJobFiltering,
   useJobSorting,
   useJobPagination,
 } from './hooks/useJobFiltering'
 import { useFilterState } from './hooks/useFilterState'
-import { useJobSelection } from './hooks/useJobSelection'
 import { useViewState } from './hooks/useViewState'
 import { useUndoStack } from './hooks/useUndoStack'
 import { useJobGrouping } from './hooks/useJobGrouping'
 import { useJobForm } from './hooks/useJobForm'
 import { useNotifications } from './hooks/useNotifications'
-import { useJobPersistence } from './hooks/useJobPersistence'
 import { useJobSubmission } from './hooks/useJobSubmission'
 import { useCompareJobs } from './hooks/useCompareJobs'
 import { useAppActions } from './hooks/useAppActions'
-import { useTableSelectionState } from './hooks/useTableSelectionState'
 import { useSortAndPagination } from './hooks/useSortAndPagination'
 import { useTableViewContext } from './hooks/useTableViewContext'
 import { useJobOperations } from './hooks/useJobOperations'
@@ -27,23 +24,22 @@ import { AppShellView } from './views/AppShellView'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { getTodayString } from './utils/dateUtils'
 import { countOverdueTasks, getThisWeekTasks, getTodayTasks, groupTasksByDueDate } from './features/tasks/taskFilters'
-import * as jobService from './services/jobService'
 import { useSavedViews } from './features/savedViews/useSavedViews'
 import { useDebouncedValue } from './hooks/useDebouncedValue'
+import { useAppState } from './hooks/useAppState'
+import { useSelectionState } from './hooks/useSelectionState'
+import { usePageReset } from './hooks/usePageReset'
+import { useSavedViewActions } from './hooks/useSavedViewActions'
+import { useTaskActions } from './hooks/useTaskActions'
 
 function AppContent() {
-  const [jobs, setJobs] = useState<Job[]>([])
-  const [activeSavedViewId, setActiveSavedViewId] = useState('')
-  const selectAllCheckboxRef = useRef<HTMLInputElement>(null)
-
   // State management hooks
   const filters = useFilterState()
   const { savedViews, saveView, deleteView, renameView } = useSavedViews()
-  const selection = useJobSelection()
   const view = useViewState()
   const undo = useUndoStack()
   const { notifications, addNotification, removeNotification } = useNotifications()
-  const { saveStatus } = useJobPersistence(jobs, setJobs, addNotification)
+  const { jobs, setJobs, activeSavedViewId, setActiveSavedViewId, saveStatus } = useAppState(addNotification)
   const { draft, editingId, updateDraft, resetForm, startEdit, submitForm } = useJobForm()
   const debouncedQuery = useDebouncedValue(filters.state.query, 300)
 
@@ -82,6 +78,16 @@ function AppContent() {
     addNotification,
   })
 
+  // Table selection state
+  const {
+    selection,
+    selectAllCheckboxRef,
+    visibleTableIds,
+    selectedVisibleIds,
+    selectedVisibleCount,
+    allVisibleSelected,
+  } = useSelectionState(paginatedJobs)
+
   // Import/Export operations
   const {
     importFileRef,
@@ -108,23 +114,8 @@ function AppContent() {
   const thisWeekGroupedTasks = useMemo(() => groupTasksByDueDate(thisWeekTasks), [thisWeekTasks])
   const taskOverdueCount = useMemo(() => countOverdueTasks(jobs, today), [jobs, today])
 
-  // Table selection state
-  const { visibleTableIds, selectedVisibleIds, selectedVisibleCount, allVisibleSelected } =
-    useTableSelectionState(paginatedJobs, selection.selectedIds, selectAllCheckboxRef)
-
   // Reset page on filter changes
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [
-    filters.state.query,
-    filters.state.statusFilter,
-    filters.state.dateRangeStart,
-    filters.state.dateRangeEnd,
-    filters.state.salaryRangeMin,
-    filters.state.salaryRangeMax,
-    filters.state.contactPersonFilter,
-    setCurrentPage,
-  ])
+  usePageReset(filters.state, setCurrentPage)
 
   const { handleSubmitJob } = useJobSubmission({
     editingId,
@@ -179,104 +170,34 @@ function AppContent() {
     view.openViewOnly(job)
   }
 
-  const applySavedView = (id: string) => {
-    if (!id) {
-      setActiveSavedViewId('')
-      filters.updateQuery('')
-      return
-    }
+  const { applySavedView, saveCurrentView, renameSavedView, deleteSavedView } = useSavedViewActions({
+    activeSavedViewId,
+    setActiveSavedViewId,
+    savedViews,
+    saveView,
+    deleteView,
+    renameView,
+    filtersState: filters.state,
+    updateFilter: filters.updateFilter,
+    updateQuery: filters.updateQuery,
+    sortColumn,
+    sortDirection,
+    setSortColumn,
+    setSortDirection,
+    setCurrentPage,
+    updateView: view.updateView,
+    addNotification,
+  })
 
-    const preset = savedViews.find((viewPreset) => viewPreset.id === id)
-    if (!preset) {
-      return
-    }
-
-    filters.updateFilter(preset.filters)
-    setSortColumn(preset.sortColumn)
-    setSortDirection(preset.sortDirection)
-    setCurrentPage(1)
-    view.updateView('table')
-    setActiveSavedViewId(id)
-    addNotification(`Applied saved view: ${preset.name}`, 'info')
-  }
-
-  const saveCurrentView = () => {
-    const defaultName = activeSavedViewId
-      ? savedViews.find((viewPreset) => viewPreset.id === activeSavedViewId)?.name ?? 'Saved View'
-      : `Saved View ${savedViews.length + 1}`
-    const name = window.prompt('Save current filters as:', defaultName)?.trim()
-    if (!name) {
-      return
-    }
-
-    const savedId = saveView({
-      id: activeSavedViewId || undefined,
-      name,
-      filters: filters.state,
-      sortColumn,
-      sortDirection,
-    })
-    setActiveSavedViewId(savedId)
-    addNotification('Saved current view', 'success')
-  }
-
-  const renameSavedView = () => {
-    if (!activeSavedViewId) {
-      return
-    }
-
-    const current = savedViews.find((viewPreset) => viewPreset.id === activeSavedViewId)
-    if (!current) {
-      return
-    }
-
-    const nextName = window.prompt('Rename saved view:', current.name)?.trim()
-    if (!nextName) {
-      return
-    }
-
-    renameView(activeSavedViewId, nextName)
-    addNotification('Saved view renamed', 'success')
-  }
-
-  const deleteSavedView = () => {
-    if (!activeSavedViewId) {
-      return
-    }
-
-    const current = savedViews.find((viewPreset) => viewPreset.id === activeSavedViewId)
-    if (!current) {
-      return
-    }
-
-    const confirmed = window.confirm(`Delete saved view \"${current.name}\"?`)
-    if (!confirmed) {
-      return
-    }
-
-    deleteView(activeSavedViewId)
-    setActiveSavedViewId('')
-    addNotification('Saved view deleted', 'info')
-  }
-
-  const handleCompleteTask = (jobId: string) => {
-    setJobs((current) => jobService.completeJobAction(current, jobId))
-    addNotification('Task marked complete', 'success')
-  }
-
-  const handleSnoozeTask = (jobId: string, days: number) => {
-    setJobs((current) => jobService.snoozeJobAction(current, jobId, days))
-    addNotification(`Task snoozed by ${days} day(s)`, 'info')
-  }
-
-  const handleTaskPriorityChange = (jobId: string, priority: JobPriority) => {
-    setJobs((current) => jobService.updateJobPriority(current, jobId, priority))
-  }
-
-  const handleQuickAddTaskAction = (jobId: string, action: string, dueDate: string) => {
-    setJobs((current) => jobService.updateJobTaskAction(current, jobId, action, dueDate))
-    addNotification('Task updated', 'success')
-  }
+  const {
+    handleCompleteTask,
+    handleSnoozeTask,
+    handleTaskPriorityChange,
+    handleQuickAddTaskAction,
+  } = useTaskActions({
+    setJobs,
+    addNotification,
+  })
 
   // Build table view context
   const tableViewContextValue = useTableViewContext({

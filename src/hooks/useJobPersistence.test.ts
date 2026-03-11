@@ -5,12 +5,12 @@ import { useJobPersistence } from './useJobPersistence'
 import * as jobService from '../services/jobService'
 
 // Mock storage
-vi.mock('../storage', () => ({
+vi.mock('../services/storageService', () => ({
   loadJobs: vi.fn(),
   saveJobs: vi.fn(),
 }))
 
-import { loadJobs, saveJobs } from '../storage'
+import { loadJobs, saveJobs } from '../services/storageService'
 
 const mockedLoadJobs = vi.mocked(loadJobs)
 const mockedSaveJobs = vi.mocked(saveJobs)

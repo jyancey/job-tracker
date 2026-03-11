@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import type { Job } from '../domain'
-import { loadJobs, saveJobs } from '../storage'
+import { loadJobs, saveJobs } from '../services/storageService'
 import * as jobService from '../services/jobService'
 
 /**

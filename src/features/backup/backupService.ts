@@ -1,5 +1,5 @@
 import type { Job } from '../../domain'
-import { mergeImportedJobs, type ImportMode, importFromJson } from '../../exportImport'
+import { mergeImportedJobs, type ImportMode, importFromJson } from '../../services/importExportService'
 
 export interface BackupSnapshot {
   kind: 'job-tracker-backup'
