@@ -51,7 +51,14 @@ async function addJob(input: {
 }
 
 function metricValue(label: string): string {
-  const card = screen.getByText(label).closest('article')
+  const target = label.replace(/\s+/g, '').toUpperCase()
+  const card = screen
+    .getByText((_, element) => {
+      if (!element) return false
+      const normalized = element.textContent?.replace(/\s+/g, '').toUpperCase() ?? ''
+      return normalized === target
+    })
+    .closest('article')
   if (!card) {
     throw new Error(`Missing metric card: ${label}`)
   }
@@ -124,8 +131,8 @@ describe('App', () => {
 
     expect(screen.getByText('Acme Labs')).toBeInTheDocument()
     expect(screen.getByText('Product Designer')).toBeInTheDocument()
-    expect(metricValue('Total Jobs')).toBe('1')
-    expect(metricValue('In Pipeline')).toBe('1')
+    expect(metricValue('TOTAL JOBS')).toBe('1')
+    expect(metricValue('JOBS IN PIPELINE')).toBe('1')
   })
 
   it('filters, edits, and deletes jobs', async () => {
@@ -177,7 +184,7 @@ describe('App', () => {
 
     await user.click(within(updatedRow).getByRole('button', { name: 'Delete' }))
     expect(screen.queryByText('Brightpath Labs')).not.toBeInTheDocument()
-    expect(metricValue('Total Jobs')).toBe('1')
+    expect(metricValue('TOTAL JOBS')).toBe('1')
   })
 
   it('supports pagination controls in table view', async () => {

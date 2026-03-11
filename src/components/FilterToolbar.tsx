@@ -85,7 +85,7 @@ export function FilterToolbar({
           className="small ghost"
           onClick={onToggleAdvanced}
         >
-          {state.showAdvancedFilters ? 'Hide Filters' : 'More Filters'}
+          {state.showAdvancedFilters ? 'Hide Filters' : 'Filters'}
         </button>
         {state.statusFilter === 'Overdue Follow-ups' && (
           <button
@@ -109,7 +109,7 @@ export function FilterToolbar({
           ))}
         </select>
         <button type="button" className="small ghost" onClick={onSaveCurrentView}>
-          Save View
+          Save
         </button>
         <button
           type="button"
@@ -125,7 +125,7 @@ export function FilterToolbar({
           onClick={onDeleteSavedView}
           disabled={!activeSavedViewId}
         >
-          Delete View
+          Delete
         </button>
       </div>
 

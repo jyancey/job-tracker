@@ -24,6 +24,7 @@ import { SettingsView } from './SettingsView'
 import { TodayView } from '../features/tasks/TodayView'
 import { ThisWeekView } from '../features/tasks/ThisWeekView'
 import type { JobDraft, JobPriority, JobStatus } from '../domain'
+import logoUrl from '../assets/job-tracker-logo.svg'
 
 const VIEW_LABELS: Record<View, string> = {
   analytics: 'Analytics',
@@ -230,6 +231,9 @@ export function AppShellView({
               </div>
               <div className="hero-bottom">
                 <div className="hero-content">
+                  <div className="hero-brand" aria-label="App logo">
+                    <img src={logoUrl} alt="Job Tracker logo" width={56} height={56} />
+                  </div>
                   <p className="eyebrow">Job Tracker</p>
                   <h1>Track your search like a pipeline, not a spreadsheet.</h1>
                   <p>
@@ -239,18 +243,30 @@ export function AppShellView({
                 </div>
                 <div className="hero-metrics">
                   <article className="metric-simple">
-                    <span>Total Jobs</span>
+                    <span>
+                      TOTAL
+                      <br />
+                      JOBS
+                    </span>
                     <strong>{jobs.length}</strong>
                   </article>
                   <article className="metric-simple">
-                    <span>In Pipeline</span>
+                    <span>
+                      JOBS IN
+                      <br />
+                      PIPELINE
+                    </span>
                     <strong>{jobs.filter((job) => !['Rejected', 'Withdrawn'].includes(job.status)).length}</strong>
                   </article>
                   <article className="metric-with-action">
-                    <span>Overdue</span>
+                    <span>
+                      OVERDUE
+                      <br />
+                      TASKS
+                    </span>
                     <strong>{overdueCount}</strong>
                     <button type="button" className="ghost small metric-action" onClick={showOverdueOnly}>
-                      View list
+                      View
                     </button>
                   </article>
                 </div>

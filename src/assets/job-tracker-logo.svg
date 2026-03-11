@@ -1,0 +1,10 @@
+<svg width="84" height="84" viewBox="0 0 84 84" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Job Tracker Logo</title>
+  <desc id="desc">Rounded square mark with a check and timeline bars.</desc>
+  <rect x="4" y="4" width="76" height="76" rx="18" fill="#0F2A3F"/>
+  <rect x="16" y="16" width="52" height="52" rx="12" fill="#F1F6FA"/>
+  <rect x="25" y="27" width="26" height="6" rx="3" fill="#0F2A3F"/>
+  <rect x="25" y="39" width="20" height="6" rx="3" fill="#0F2A3F"/>
+  <rect x="25" y="51" width="14" height="6" rx="3" fill="#0F2A3F"/>
+  <path d="M50 49L55 54L64 43" stroke="#D44C2E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

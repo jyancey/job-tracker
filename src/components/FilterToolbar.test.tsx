@@ -41,7 +41,7 @@ describe('FilterToolbar', () => {
     cleanup()
   })
 
-  it('calls onToggleAdvanced when More Filters is clicked', async () => {
+  it('calls onToggleAdvanced when Filters is clicked', async () => {
     const user = userEvent.setup()
     const onToggleAdvanced = vi.fn()
 
@@ -57,7 +57,7 @@ describe('FilterToolbar', () => {
       />,
     )
 
-    await user.click(screen.getByRole('button', { name: 'More Filters' }))
+    await user.click(screen.getByRole('button', { name: 'Filters' }))
 
     expect(onToggleAdvanced).toHaveBeenCalledTimes(1)
   })
@@ -167,7 +167,7 @@ describe('FilterToolbar', () => {
     await user.selectOptions(screen.getByLabelText('Saved views'), 'view-1')
     expect(onApplySavedView).toHaveBeenCalledWith('view-1')
 
-    await user.click(screen.getByRole('button', { name: 'Save View' }))
+    await user.click(screen.getByRole('button', { name: 'Save' }))
     expect(onSaveCurrentView).toHaveBeenCalledTimes(1)
 
     expect(screen.getByText('3/10 matches')).toBeInTheDocument()
