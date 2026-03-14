@@ -1,53 +1,41 @@
 # Job Tracker - Architecture Overview
 
-**Version:** v2.7.0 release prep (main branch)  
-**Last Updated:** March 10, 2026  
-**Status:** Production-Ready with 681 Tests; v2.7.0 conditional-go pending final review
+**Version:** v2.7.0 release prep (main branch) + Safari Plugin v1.0 planning
+**Last Updated:** March 14, 2026
+**Status:** Production-Ready with 681 Tests; v2.7.0 conditional-go pending final review; Safari Plugin in planning phase
 
 ---
 
-## high-Level Architecture
+## High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Frontend Application                     │
-│                      (React + TypeScript)                   │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │                    Presentation Layer                │   │
-│  │  Views: AnalyticsView, TableView, CalendarView, etc. │   │
-│  │  Components: JobForm, FilterToolbar, KanbanBoard, ...│   │
-│  └──────────────────────────────────────────────────────┘   │
-│                          ↓                                  │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │                    Hooks & State Management          │   │
-│  │  App State: useAppState, useJobFiltering             │   │
-│  │  Selection: useSelectionState, useJobSelection       │   │
-│  │  Forms: useJobForm, useJobPersistence                │   │
-│  │  Context: TableContext, ErrorBoundary                │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                          ↓                                  │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │                  Service Layer                       │   │
-│  │  jobService, importExportService, storageService     │   │
-│  │  asyncDataLayer, aiScoringService, backupService     │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                          ↓                                  │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              Domain & Type Layer                     │   │
-│  │  Job, JobDraft, JobStatus, domain constants          │   │
-│  │  Type definitions and validation                     │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                          ↓                                  │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              Storage & Persistence                   │   │
-│  │  localStorage, fallbackStorage, jobsApi.js           │   │
-│  │  sqliteStore (Node backend alternative)              │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────┐                     ┌─────────────────────────────────┐
+│   macOS Safari Plugin         │                     │   Frontend Application          │
+│   (v1.0 planning)             │                     │   (React + TypeScript)          │
+├──────────────────────────────┤                     ├─────────────────────────────────┤
+│ Popup / Sidebar / Settings   │                     │ Presentation Layer              │
+│ ↓                             │                     │ Views, Components                │
+│ Content Script (Pre-fill)    │                     │ ↓                               │
+│ ↓                             │                     │ Hooks & State (usePluginQueue) │
+│ Service Worker               │                     │ ↓                               │
+│ (Queue, Messaging)           │                     │ Service Layer                   │
+│ ↓                             │                     │ ↓                               │
+│ browser.storage.local        │◄──localStorage──►   │ Storage & Persistence           │
+│ (PluginQueueItem[])          │   (sync)            │                                 │
+└──────────────────────────────┘                     └─────────────────────────────────┘
+         │                                                    ▲
+         │ (optional HTTP POST)                              │
+         │ /api/jobs/from-plugin                            │
+         ▼                                                    │
+┌──────────────────────────────┐                    (manual import or auto-sync)
+│   Optional Backend API        │
+│   - Job creation              │
+│   - Rate limiting             │
+│   - Workspace scoping         │
+└──────────────────────────────┘
 ```
+
+**Data Flow:** Safari Plugin captures job details → stores in browser.storage.local → job-tracker observes localStorage changes → imports jobs via usePluginQueue hook → displays in app
 
 ---
 
@@ -462,6 +450,43 @@ searchJobs Function
     └─→ CSS class application
 ```
 
+### Safari Plugin Capture Workflow (v1.0)
+
+**New in v1.0:** Safari Plugin enables direct job capture from any webpage, eliminating fragile web scraping.
+
+```
+User clicks Safari Plugin on job posting
+    ↓
+Content Script extracts page metadata
+    ↓
+Popup pre-fills company, title, salary (if detected)
+    ↓
+User fills form and clicks "Save & Close"
+    ↓
+Popup sends CAPTURE_JOB message to Service Worker
+    ↓
+Service Worker creates PluginQueueItem (with UUID, timestamp)
+    ↓
+Persists to browser.storage.local key: `job-tracker-plugin-queue`
+    ↓
+[If job-tracker is open] → localStorage change event fires
+[If backend API configured] → Service Worker POSTs to /api/jobs/from-plugin
+    ↓
+job-tracker observes storage change via usePluginQueue hook
+    ↓
+Converts JobCapture → Job (validates, assigns defaults)
+    ↓
+jobService.createJob() adds to jobs array
+    ↓
+useJobPersistence persists to localStorage/API
+    ↓
+UI updates to show new job
+    ↓
+Queue cleared from plugin storage
+```
+
+**Integration Point:** `src/hooks/usePluginQueue.ts` — monitors `job-tracker-plugin-queue` for changes
+
 ---
 
 ## Dependency Management
@@ -495,6 +520,86 @@ searchJobs Function
 - Implement memoization where profiling indicates need
 - Consider code splitting for large job lists (1000+)
 - Optimize re-renders with React DevTools Profiler
+
+---
+
+## Safari Plugin Integration (v1.0 planning)
+
+### Overview
+
+The Safari Plugin (v1.0, Q2 2026) enables users to capture job details directly from web browsers without relying on fragile web scraping. The plugin stores captures in a shared localStorage queue that job-tracker imports automatically.
+
+### Architecture
+
+- **Plugin Repository:** Separate repo or `safari-plugin/` subdirectory
+- **Plugin Storage:** `browser.storage.local` (plugin namespace, ~10MB quota)
+- **Queue Key:** `job-tracker-plugin-queue` (shared between plugin and app)
+- **Optional Backend Sync:** `POST /api/jobs/from-plugin` (if backend API configured)
+
+**Full Details:** See [SAFARI_PLUGIN_ARCHITECTURE.md](./SAFARI_PLUGIN_ARCHITECTURE.md)
+
+### Integration Points
+
+1. **New Hook: `usePluginQueue`** (`src/hooks/usePluginQueue.ts`)
+   - Monitors localStorage for `job-tracker-plugin-queue` changes
+   - Auto-imports captured jobs on app load
+   - Shows toast notification on successful import
+   - Clears queue after import
+
+2. **Existing Services** (No changes required)
+   - `jobService.createJob()` handles job creation from captures
+   - `storageService` persists imported jobs
+   - `domain.ts` validates job schema
+
+3. **Optional Backend Endpoint** (`POST /api/jobs/from-plugin`)
+   - Stores plugin capture in backend (if API key configured)
+   - Rate limiting and workspace scoping
+   - Returns created `jobId` or validation error
+
+### Data Model
+
+**JobCapture** (from plugin):
+```typescript
+{
+  company: string           // Required
+  title: string             // Required
+  url: string               // Required (valid URL)
+  notes?: string            // Optional
+  salary?: string           // Optional (extracted if available)
+  sourcePageTitle?: string  // Page title where captured
+  capturedAt: number        // Timestamp (ms)
+}
+```
+
+**PluginQueueItem** (internal):
+```typescript
+{
+  id: string                      // UUID
+  job: JobCapture                 // The captured data
+  syncStatus: 'pending' | 'synced' | 'failed'
+  syncAttempts: number
+  lastSyncError?: string
+}
+```
+
+### Workflow
+
+1. User captures job in Safari Plugin (quick form or sidebar)
+2. Plugin service worker adds `PluginQueueItem` to queue in `browser.storage.local`
+3. localStorage change event fires → `usePluginQueue` hook detects change
+4. Hook converts `JobCapture` → `Job` and calls `jobService.createJob()`
+5. Job appears in app UI
+6. Queue is cleared from plugin storage
+7. *Optional:* If backend API configured, service worker POSTs to backend separately
+
+### Supported Job Sites (MVP)
+
+- LinkedIn (95%+ pre-fill accuracy)
+- Indeed (90%+ pre-fill accuracy)
+- Glassdoor (85%+ pre-fill accuracy)
+- Generic fallback (manual entry)
+
+See [SAFARI_PLUGIN_RELEASE_PLAN.md](./SAFARI_PLUGIN_RELEASE_PLAN.md) for full scope and timeline.
 
 ---
 
@@ -575,14 +680,58 @@ src/components/ErrorBoundary.tsx
 2. Add corresponding .test.ts
 3. Test coverage ≥80%
 
+### Integrating Browser Plugins
+
+To add browser plugin support (Safari, Chrome, Firefox):
+
+1. **Create plugin repository or subdirectory:**
+   ```
+   safari-plugin/  (or separate repo)
+   ├── src/                    # Core TypeScript
+   ├── Resources/              # Manifest & UI
+   ├── tests/                  # Tests
+   ├── docs/                   # Plugin-specific docs
+   └── package.json
+   ```
+
+2. **Define message protocol:**
+   - Create shared types in `src/types/plugin.ts` (or export from plugin repo)
+   - Document all message types (CAPTURE_JOB, SYNC, GET_SETTINGS, etc.)
+
+3. **Add plugin integration hook in job-tracker:**
+   ```
+   src/hooks/usePluginQueue.ts
+     - Monitor dedicated localStorage key
+     - Convert PluginQueueItem → Job
+     - Call jobService.createJob()
+   ```
+
+4. **Optional: Add backend endpoint:**
+   ```
+   POST /api/jobs/from-plugin
+     - Accept JobCapture + workspaceId
+     - Authenticate with API key
+     - Rate limit per user/key
+   ```
+
+5. **Document in:**
+   - Plugin repo: DEVELOPMENT.md (architecture, how to extend to new sites)
+   - job-tracker repo: ARCHITECTURE.md (integration points)
+   - Both repos: README.md (cross-link)
+
+**Example:** See [Safari Plugin Architecture](./SAFARI_PLUGIN_ARCHITECTURE.md) for complete reference implementation.
+
 ---
 
 ## Documentation
 
 ### Code Documentation
 - [COMPREHENSIVE_ROADMAP.md](./COMPREHENSIVE_ROADMAP.md) - Feature history & roadmap
-- [V2_7_0_RELEASE_PLAN.md](./V2_7_0_RELEASE_PLAN.md) - Next release details
+- [V2_7_0_RELEASE_PLAN.md](./V2_7_0_RELEASE_PLAN.md) - v2.7.0 release details
+- [V2_8_0_RELEASE_PLAN.md](./V2_8_0_RELEASE_PLAN.md) - v2.8.0 release details (workspace separation)
 - [REFACTORING_ANALYSIS.md](./REFACTORING_ANALYSIS.md) - Code quality opportunities
+- [SAFARI_PLUGIN_ARCHITECTURE.md](./SAFARI_PLUGIN_ARCHITECTURE.md) - Safari Plugin design (v1.0 planning)
+- [SAFARI_PLUGIN_RELEASE_PLAN.md](./SAFARI_PLUGIN_RELEASE_PLAN.md) - Safari Plugin release timeline
 - Individual file READMEs (src/services/README.md, etc. - in progress)
 
 ### User Documentation
@@ -604,13 +753,19 @@ src/components/ErrorBoundary.tsx
 - ⚠️ App.tsx decomposition into planned hooks is still pending
 - ⚠️ Service layer finalization is only partially complete
 
-### v2.8.0+ Opportunities
+### v2.8.0 Improvements (In Progress)
 - 🔮 Performance optimization (memoization, code splitting)
+- 🔮 Accessibility audit and remediation (WCAG 2.1 AA)
+- 🔮 Multi-workspace support (separate job tracks per workspace)
+- 🔮 Advanced filtering and workflow enhancements
+
+### v1.0+ Opportunities (Safari Plugin & Beyond)
+- 🔮 Safari Plugin browser extension (v1.0, Q2 2026)
+- 🔮 Chrome/Firefox plugin variants (v1.1+)
 - 🔮 Mobile-responsive design enhancements
 - 🔮 Dark mode
-- 🔮 Multi-workspace support
-- 🔮 Team collaboration features
-- 🔮 Advanced AI integration
+- 🔮 Team collaboration features (post-auth)
+- 🔮 Advanced AI integration (interview prep, resume matching)
 
 ---
 
@@ -633,10 +788,26 @@ src/components/ErrorBoundary.tsx
 ---
 
 ### ADR-003: Service Layer for Business Logic
-**Decision:** Isolate business logic in service modules  
-**Rationale:** Testability, reusability, separation of concerns  
-**Trade-offs:** Extra layer of indirection  
+**Decision:** Isolate business logic in service modules
+**Rationale:** Testability, reusability, separation of concerns
+**Trade-offs:** Extra layer of indirection
 **Status:** ACCEPTED (reduces coupling)
+
+---
+
+### ADR-004: Browser Plugin Integration via Shared localStorage
+**Decision:** Accept job captures from browser plugins via shared localStorage queue
+**Rationale:** Works without authentication, enables offline capture, simple to implement
+**Trade-offs:** Plugins and app must run on same machine (for v1.0); no multi-device sync
+**Status:** ACCEPTED (v1.0 planning) — revisit for cloud sync in future versions
+
+---
+
+### ADR-005: Optional Backend API for Plugin Sync
+**Decision:** Backend API endpoint for plugin sync is optional, not required for MVP
+**Rationale:** localStorage sync is sufficient for single-machine use; backend adds complexity
+**Trade-offs:** No multi-device sync until cloud backend is added
+**Status:** ACCEPTED (v1.0) — promote to required in v2.0+ if cloud sync needed
 
 ---
 
@@ -645,14 +816,22 @@ src/components/ErrorBoundary.tsx
 ### Understanding the Codebase
 1. Start with [COMPREHENSIVE_ROADMAP.md](./COMPREHENSIVE_ROADMAP.md) to understand features
 2. Review this ARCHITECTURE.md for structure
-3. Look at specific feature module README
-4. Check tests for usage examples
+3. For Safari Plugin architecture, see [SAFARI_PLUGIN_ARCHITECTURE.md](./SAFARI_PLUGIN_ARCHITECTURE.md)
+4. Look at specific feature module README
+5. Check tests for usage examples
 
 ### Adding a Feature
 1. See "Scalability & Extension Points" above
 2. Follow established patterns (hooks, services, tests)
 3. Maintain test coverage ≥80%
 4. Update documentation
+
+### Adding a Browser Plugin
+1. See "Integrating Browser Plugins" under "Scalability & Extension Points"
+2. Review [SAFARI_PLUGIN_ARCHITECTURE.md](./SAFARI_PLUGIN_ARCHITECTURE.md) for reference implementation
+3. Define message protocol for capturing jobs
+4. Implement `usePluginQueue` hook to import queued jobs
+5. Add optional backend endpoint if needed
 
 ### Debugging an Issue
 1. Check if related hook test passes
@@ -682,7 +861,7 @@ src/components/ErrorBoundary.tsx
 
 ---
 
-**Last Updated:** March 8, 2026  
-**Version:** v2.6.0  
+**Last Updated:** March 14, 2026  
+**Version:** v3.0.0  
 **Maintained By:** Development Team
 
