@@ -7,6 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# TypeScript cache
 node_modules
 dist
 dist-ssr
@@ -29,3 +30,6 @@ src/version.ts
 *.sw?
 playwright-report/
 test-results/
+
+# Other files
+gitea-tokens.txt
