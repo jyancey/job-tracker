@@ -8,13 +8,14 @@
 
   <!-- The program to run -->
   <key>Program</key>
-  <string>/usr/local/bin/node</string>
+  <string>/usr/bin/env</string>
 
   <!-- Arguments to pass to the program -->
   <key>ProgramArguments</key>
   <array>
-    <string>/usr/local/bin/node</string>
-    <string>/path/to/job-tracker/server.js</string>
+    <string>/usr/bin/env</string>
+    <string>tsx</string>
+    <string>/path/to/job-tracker/server.ts</string>
   </array>
 
   <!-- Working directory -->

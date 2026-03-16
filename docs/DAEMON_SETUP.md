@@ -16,7 +16,7 @@ This guide explains how to set up Job Tracker to run automatically in the backgr
 npm run build
 ```
 
-This creates the `dist/` directory with the production build.
+This creates the `.next/` production build output.
 
 ### 2. Find Your Job Tracker Installation Path
 
@@ -45,12 +45,14 @@ Example (for `/Users/john/tmp`):
 
 ```xml
 <key>Program</key>
-<string>/usr/local/bin/node</string>
+<string>/usr/bin/env</string>
 
 <key>ProgramArguments</key>
 <array>
-  <string>/usr/local/bin/node</string>
-  <string>/Users/john/tmp/server.js</string>
+   <string>/usr/bin/env</string>
+   <string>npm</string>
+   <string>run</string>
+   <string>start</string>
 </array>
 
 <key>WorkingDirectory</key>
@@ -179,11 +181,11 @@ tail -f /var/log/job-tracker-error.log
 
 2. **Verify paths are correct:**
    ```bash
-   # Check if node exists at the path
-   /usr/local/bin/node --version
-   
-   # Check if server.js exists
-   ls -la /path/to/job-tracker/server.js
+   # Check if npm is available
+   npm --version
+
+   # Check if package.json exists
+   ls -la /path/to/job-tracker/package.json
    ```
 
 3. **Check logs for errors:**
@@ -246,7 +248,7 @@ If you rebuild the application:
 
 ```bash
 npm run build
-# LaunchAgent automatically serves the updated dist/ directory
+# LaunchAgent will serve the updated .next build on next start/restart
 # No restart needed!
 ```
 

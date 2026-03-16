@@ -1,19 +1,25 @@
-import { URL } from 'url'
-import { validateJobArray } from './jobValidation.js'
+import { URL } from 'node:url'
+import type { IncomingMessage, ServerResponse } from 'node:http'
+import { validateJobArray } from './jobValidation'
+import type { JobStore } from './sqliteStore'
 
 const MAX_REQUEST_BYTES = 2 * 1024 * 1024
 
-function writeJson(res, statusCode, payload) {
+interface JobsRequestBody {
+  jobs?: unknown[]
+}
+
+function writeJson(res: ServerResponse, statusCode: number, payload: unknown): void {
   res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' })
   res.end(JSON.stringify(payload))
 }
 
-function readJsonBody(req) {
+function readJsonBody(req: IncomingMessage): Promise<unknown> {
   return new Promise((resolve, reject) => {
     let size = 0
-    const chunks = []
+    const chunks: Buffer[] = []
 
-    req.on('data', (chunk) => {
+    req.on('data', (chunk: Buffer) => {
       size += chunk.length
       if (size > MAX_REQUEST_BYTES) {
         reject(new Error('Payload too large'))
@@ -36,7 +42,11 @@ function readJsonBody(req) {
   })
 }
 
-export async function handleJobsApi(req, res, store) {
+export async function handleJobsApi(
+  req: IncomingMessage,
+  res: ServerResponse,
+  store: JobStore,
+): Promise<boolean> {
   const host = req.headers.host || 'localhost'
   const pathname = new URL(req.url || '/', `http://${host}`).pathname
 
@@ -101,10 +111,9 @@ export async function handleJobsApi(req, res, store) {
 
   if (req.method === 'PUT') {
     try {
-      const body = await readJsonBody(req)
+      const body = (await readJsonBody(req)) as JobsRequestBody | null
       const jobs = Array.isArray(body?.jobs) ? body.jobs : []
 
-      // Validate job payload
       const validation = validateJobArray(jobs)
       if (!validation.valid) {
         writeJson(res, 422, {

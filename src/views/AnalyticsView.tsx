@@ -10,7 +10,6 @@ import {
 } from '../features/analytics'
 import { downloadAnalyticsCSV } from '../features/analytics/analyticsExport'
 import { Sparkline } from '../components/Sparkline'
-import './AnalyticsView.css'
 
 interface AnalyticsViewProps {
   jobs: Job[]

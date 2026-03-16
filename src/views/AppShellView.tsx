@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Image from 'next/image'
 import type { ChangeEvent, FormEvent, RefObject } from 'react'
 import type { Job } from '../domain'
 import type { View } from '../hooks/useViewState'
@@ -227,7 +228,7 @@ export function AppShellView({
               <div className="hero-bottom">
                 <div className="hero-content">
                   <div className="hero-brand" aria-label="App logo">
-                    <img src={logoUrl} alt="Job Tracker logo" width={56} height={56} />
+                    <Image src={logoUrl} alt="Job Tracker logo" width={56} height={56} />
                   </div>
                   <p className="eyebrow">Job Tracker</p>
                   <h1>Track your search like a pipeline, not a spreadsheet.</h1>

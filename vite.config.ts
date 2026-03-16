@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
-import { createJobStore } from './backend/sqliteStore.js'
-import { handleJobsApi } from './backend/jobsApi.js'
+import { createJobStore } from './backend/sqliteStore'
+import { handleJobsApi } from './backend/jobsApi'
 
 const jobStore = createJobStore()
 

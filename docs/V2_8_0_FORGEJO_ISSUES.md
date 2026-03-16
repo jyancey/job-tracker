@@ -451,7 +451,7 @@ Add workspace ownership to the SQLite persistence layer by adding a `workspaceId
 
 #### Tasks
 
-- [ ] In `backend/sqliteStore.js`, add migration on startup:
+- [ ] In `backend/sqliteStore.ts`, add migration on startup:
   ```sql
   ALTER TABLE jobs ADD COLUMN workspaceId TEXT;
   CREATE INDEX IF NOT EXISTS idx_jobs_workspace_id ON jobs(workspaceId);
@@ -471,7 +471,7 @@ Add workspace ownership to the SQLite persistence layer by adding a `workspaceId
 #### References
 
 - `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §4 (SQLite Path)
-- `backend/sqliteStore.js`
+- `backend/sqliteStore.ts`
 
 ---
 
@@ -482,7 +482,7 @@ Add workspace ownership to the SQLite persistence layer by adding a `workspaceId
 
 #### Summary
 
-Update the `GET /api/jobs` and `PUT /api/jobs` routes in `backend/jobsApi.js` to require and validate a `workspaceId` query parameter. Requests without it should be rejected once migration is complete.
+Update the `GET /api/jobs` and `PUT /api/jobs` routes in `backend/jobsApi.ts` to require and validate a `workspaceId` query parameter. Requests without it should be rejected once migration is complete.
 
 **Depends on:** P3-9
 
@@ -493,7 +493,7 @@ Update the `GET /api/jobs` and `PUT /api/jobs` routes in `backend/jobsApi.js` to
 - [ ] Validate that `workspaceId` is a non-empty string. Return `400 Bad Request` with a descriptive message if missing or invalid.
 - [ ] Add API-level tests (or update existing) for: valid workspace request, missing workspaceId returns 400, two workspaces return isolated results.
 
-**Security note:** In v2.8.0, `workspaceId` is trusted from the client since there is no auth layer. Document this assumption in a comment in `jobsApi.js`. A future auth release should validate workspace membership server-side.
+**Security note:** In v2.8.0, `workspaceId` is trusted from the client since there is no auth layer. Document this assumption in a comment in `jobsApi.ts`. A future auth release should validate workspace membership server-side.
 
 #### Acceptance Criteria
 
@@ -504,7 +504,7 @@ Update the `GET /api/jobs` and `PUT /api/jobs` routes in `backend/jobsApi.js` to
 #### References
 
 - `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §5 (HTTP API)
-- `backend/jobsApi.js`
+- `backend/jobsApi.ts`
 
 ---
 

@@ -152,15 +152,10 @@ async function extractTextFromPDF(file: File): Promise<string> {
 }
 
 async function extractTextWithModernPdfJs(file: File): Promise<string> {
-  const [pdfjsModule, workerSrcModule] = await Promise.all([
-    import('pdfjs-dist'),
-    import('pdfjs-dist/build/pdf.worker.min.mjs?url'),
-  ])
+  const pdfjsModule = await import('pdfjs-dist')
 
   const pdfjsLib = resolvePdfJsModule(pdfjsModule)
-  const workerSrc = typeof workerSrcModule.default === 'string'
-    ? workerSrcModule.default
-    : String(workerSrcModule)
+  const workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()
 
   pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
 
@@ -170,15 +165,10 @@ async function extractTextWithModernPdfJs(file: File): Promise<string> {
 }
 
 async function extractTextWithLegacyPdfJs(file: File): Promise<string> {
-  const [pdfjsLegacyModule, legacyWorkerSrcModule] = await Promise.all([
-    import('pdfjs-dist/legacy/build/pdf.mjs'),
-    import('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url'),
-  ])
+  const pdfjsLegacyModule = await import('pdfjs-dist/legacy/build/pdf.mjs')
 
   const pdfjsLegacy = resolvePdfJsModule(pdfjsLegacyModule)
-  const workerSrc = typeof legacyWorkerSrcModule.default === 'string'
-    ? legacyWorkerSrcModule.default
-    : String(legacyWorkerSrcModule)
+  const workerSrc = new URL('pdfjs-dist/legacy/build/pdf.worker.min.mjs', import.meta.url).toString()
 
   pdfjsLegacy.GlobalWorkerOptions.workerSrc = workerSrc
   const arrayBuffer = await file.arrayBuffer()

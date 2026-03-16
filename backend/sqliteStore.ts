@@ -1,7 +1,7 @@
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
 import Database from 'better-sqlite3'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url))
 const DEFAULT_DB_PATH = path.join(MODULE_DIR, 'data', 'job-tracker.sqlite')
@@ -33,13 +33,73 @@ const JOB_COLUMNS = [
   'aiModel',
   'aiReasoning',
   'aiScoringInProgress',
-]
+] as const
 
-function normalizeText(value) {
+type JobRecord = {
+  id: string
+  company: string
+  roleTitle: string
+  applicationDate: string
+  status: string
+  jobUrl: string
+  atsUrl: string
+  salaryRange: string
+  notes: string
+  contactPerson: string
+  nextAction: string
+  nextActionDueDate: string
+  priority: string
+  createdAt: string
+  updatedAt: string
+  jobDescription: string
+  jobDescriptionSource: string
+  scoreFit: number | null
+  scoreCompensation: number | null
+  scoreLocation: number | null
+  scoreGrowth: number | null
+  scoreConfidence: number | null
+  aiScoredAt: string
+  aiModel: string
+  aiReasoning: string
+  aiScoringInProgress: number | null
+}
+
+type HydratedJob = Omit<JobRecord, 'aiScoringInProgress'> & {
+  aiScoringInProgress?: boolean
+}
+
+interface DatabaseInfo {
+  provider: 'sqlite'
+  dbPath: string
+  exists: boolean
+}
+
+interface DatabaseCreateResult {
+  created: boolean
+  dbPath: string
+  exists: boolean
+}
+
+interface ConnectionTestResult {
+  ok: boolean
+  dbPath: string
+}
+
+export interface JobStore {
+  dbPath: string
+  listJobs: () => HydratedJob[]
+  replaceAllJobs: (jobs: unknown[] | null | undefined) => void
+  getDatabaseInfo: () => DatabaseInfo
+  createDatabase: () => DatabaseCreateResult
+  testConnection: () => ConnectionTestResult
+  close: () => void
+}
+
+function normalizeText(value: unknown): string {
   return typeof value === 'string' ? value : ''
 }
 
-function normalizeNumber(value) {
+function normalizeNumber(value: unknown): number | null {
   if (value == null) {
     return null
   }
@@ -47,14 +107,14 @@ function normalizeNumber(value) {
   return Number.isFinite(num) ? num : null
 }
 
-function normalizeBooleanToInteger(value) {
+function normalizeBooleanToInteger(value: unknown): number | null {
   if (value == null) {
     return null
   }
   return value ? 1 : 0
 }
 
-function normalizeJob(input) {
+function normalizeJob(input: Record<string, unknown>): JobRecord {
   return {
     id: normalizeText(input.id),
     company: normalizeText(input.company),
@@ -85,7 +145,7 @@ function normalizeJob(input) {
   }
 }
 
-function hydrateJob(row) {
+function hydrateJob(row: JobRecord): HydratedJob {
   return {
     ...row,
     aiScoringInProgress:
@@ -93,7 +153,7 @@ function hydrateJob(row) {
   }
 }
 
-function ensureJobsSchema(db) {
+function ensureJobsSchema(db: InstanceType<typeof Database>): void {
   db.exec(`
     CREATE TABLE IF NOT EXISTS jobs (
       id TEXT PRIMARY KEY,
@@ -114,7 +174,7 @@ function ensureJobsSchema(db) {
     )
   `)
 
-  const columns = db.pragma('table_info(jobs)')
+  const columns = db.pragma('table_info(jobs)') as Array<{ name: string }>
   const columnNames = columns.map((col) => col.name)
 
   if (!columnNames.includes('scoreFit')) {
@@ -156,7 +216,9 @@ function ensureJobsSchema(db) {
   }
 }
 
-export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAULT_DB_PATH) {
+export function createJobStore(
+  dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAULT_DB_PATH,
+): JobStore {
   fs.mkdirSync(path.dirname(dbPath), { recursive: true })
 
   const db = new Database(dbPath)
@@ -188,18 +250,19 @@ export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAU
     )
   `)
 
-  const replaceAllStatement = db.transaction((jobs) => {
+  const replaceAllStatement = db.transaction((jobs: unknown[]) => {
     clearStatement.run()
 
     for (const job of jobs) {
-      insertStatement.run(normalizeJob(job))
+      const normalized = normalizeJob((job ?? {}) as Record<string, unknown>)
+      insertStatement.run(normalized)
     }
   })
 
   return {
     dbPath,
     listJobs() {
-      return listStatement.all().map(hydrateJob)
+      return (listStatement.all() as JobRecord[]).map(hydrateJob)
     },
     replaceAllJobs(jobs) {
       replaceAllStatement(Array.isArray(jobs) ? jobs : [])
@@ -222,7 +285,7 @@ export function createJobStore(dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAU
       }
     },
     testConnection() {
-      const result = db.prepare('SELECT 1 AS ok').get()
+      const result = db.prepare('SELECT 1 AS ok').get() as { ok?: number } | undefined
       return {
         ok: result?.ok === 1,
         dbPath,

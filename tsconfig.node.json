@@ -25,7 +25,9 @@
     "noUncheckedSideEffectImports": true
   },
   "include": [
+    "server.ts",
     "vite.config.ts",
+    "backend/**/*.ts",
     "backend/**/*.d.ts"
   ]
 }

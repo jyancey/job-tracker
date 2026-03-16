@@ -1,6 +1,5 @@
 import type { JobDiff, RestoreDiff } from './restoreDiff'
 import { formatFieldName, formatFieldValue } from './restoreDiff'
-import './RestoreDiffPreview.css'
 
 export interface RestoreDiffPreviewProps {
   diff: RestoreDiff

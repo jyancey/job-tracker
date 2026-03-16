@@ -1,4 +1,3 @@
-import './App.css'
 import { AppShellView } from './views/AppShellView'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { useAppContentModel } from './hooks/useAppContentModel'

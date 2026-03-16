@@ -177,7 +177,7 @@ src/services/
 src/storage.ts            (orchestrates the above, main interface)
 ```
 
-**Note:** `jobsApi.js` already exists! Opportunity to migrate to TypeScript and integrate properly.
+**Note:** `jobsApi.ts` already exists! Opportunity to migrate to TypeScript and integrate properly.
 
 **Impact:** Better testability, clearer separation  
 **Dependencies:** None  
@@ -1151,15 +1151,15 @@ For immediate impact with minimal effort:
 
 ## NOTES & OBSERVATIONS
 
-### Existing jobsApi.js File
-- **File:** `jobsApi.js` (root directory)
+### Existing jobsApi.ts File
+- **File:** `jobsApi.ts` (root directory)
 - **Status:** JavaScript file, appears to be duplicate API logic
 - **Recommendation:** Migrate to TypeScript, integrate with storage.ts refactoring
 - **Opportunity:** Could replace fetch calls in storage.ts
 
 ### Type Definitions Files
 - `jobsApi.d.ts` exists - suggests original TypeScript migration attempt
-- `sqliteStore.d.ts`, `sqliteStore.js` exist - backend storage types
+- `sqliteStore.d.ts`, `sqliteStore.ts` exist - backend storage types
 - These suggest a backend migration that wasn't completed
 - **Recommendation:** Review if these are still needed, clean up if obsolete
 

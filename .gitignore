@@ -9,6 +9,7 @@ lerna-debug.log*
 
 # TypeScript cache
 node_modules
+.next
 dist
 dist-ssr
 *.local

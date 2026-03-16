@@ -582,7 +582,7 @@ Create `POST /api/jobs/from-plugin` endpoint in the optional Node backend for us
 
 #### Tasks
 
-- [ ] In `backend/jobsApi.js`, add new route:
+- [ ] In `backend/jobsApi.ts`, add new route:
   ```javascript
   app.post('/api/jobs/from-plugin', authenticatePluginToken, async (req, res) => {
     // Receive JobCapture, validate, create Job in workspace, return jobId

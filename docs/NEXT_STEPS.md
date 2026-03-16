@@ -29,7 +29,7 @@
 - **Completed Refactoring:**
   - Extracted multiple custom hooks from App.tsx (including actions/compare/table context composition)
   - Separated domain logic (domain.ts)
-  - Isolated storage layer (`src/services/storageService.ts`, sqliteStore.js)
+  - Isolated storage layer (`src/services/storageService.ts`, sqliteStore.ts)
   - Split frontend storage concerns into focused modules (`jobsApi`, `storageLogger`, `fallbackStorage`)
   - Created service modules (jobService, aiScoringService, resumeParsingService)
   - Split export/import responsibilities into focused modules (`csvParser`, `jsonTransfer`, `jobMerger`)
@@ -57,7 +57,7 @@
 - ✅ Next action tracking per job
 - ✅ Local storage with SQLite backend option
 
-**Missing from Original Roadmap (NEXT_STEPS_PLAN.md):**
+**Missing from Original Roadmap (COMPREHENSIVE_ROADMAP.md):**
 - ✅ Pipeline intelligence metrics (conversion rates, time-in-stage)
 - ✅ "Today" and "This Week" action-focused views
 - ✅ Action priority levels and snooze functionality
@@ -634,7 +634,7 @@ src/exportImport.ts    (~50 lines: orchestrates the above)
 
 ## Deferred / Out of Scope
 
-The following items from the original NEXT_STEPS_PLAN.md are **deferred** for now:
+The following items from the original COMPREHENSIVE_ROADMAP.md are **deferred** for now:
 
 1. **Local Notifications for Due Tasks:**
    - Reason: Browser notification API is complex, low adoption

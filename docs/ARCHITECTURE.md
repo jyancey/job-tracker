@@ -204,14 +204,14 @@ job-tracker/
 ├── public/                              # Static assets
 ├── sample-data/                         # Import test data
 ├── scripts/                             # Build & utility scripts
-│   ├── generate-version.js              # Version generation
+│   ├── generate-version.ts              # Version generation
 │
 ├── package.json                         # Dependencies
 ├── tsconfig.json                        # TypeScript config
-├── vite.config.ts                       # Vite build config
-├── vitest.config.ts                     # Vitest test config
+├── next.config.ts                       # Next.js config
+├── vite.config.ts                       # Vitest + local middleware config
 ├── playwright.config.ts                 # Playwright config
-└── eslint.config.js                     # ESLint config
+└── eslint.config.ts                     # ESLint config
 ```
 
 ---
@@ -495,10 +495,11 @@ Queue cleared from plugin storage
 
 | Package | Purpose | Version |
 |---------|---------|---------|
-| React | UI library | 18.x |
+| Next.js | App framework / build system | 15.x |
+| React | UI library | 19.x |
 | TypeScript | Type safety | 5.x |
 | Vitest | Test runner | 4.x |
-| Vite | Build tool | 5.x |
+| Vite | Test tooling and dev middleware | 7.x |
 | Playwright | E2E testing | Latest |
 
 ### No External State Management

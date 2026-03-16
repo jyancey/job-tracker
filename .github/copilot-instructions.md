@@ -3,15 +3,17 @@
 ## Commands
 
 ```bash
-npm run dev          # Dev server at http://localhost:5173
-npm run build        # Production build → dist/
-npm run serve        # Serve dist/ + API at http://localhost:3100 (requires build first)
+npm run dev           # Next dev server at http://127.0.0.1:4173
+npm run build         # Next production build
+npm run start         # Run Next production server at http://127.0.0.1:3100
+npm run serve         # Alias of npm run start
+npm run preview       # Alias of npm run start
 npm run lint         # ESLint
 npm run lint:fix     # ESLint with auto-fix
 npm run test         # Vitest in watch mode
 npm run test:run     # Vitest single run
 npm run test:coverage # Run with coverage (thresholds: 70% lines/functions/statements, 65% branches)
-npm run test:e2e     # Playwright (against Vite dev server on port 4173)
+npm run test:e2e      # Playwright (against Next dev server on port 4173)
 npm run test:e2e:ui  # Playwright with UI
 ```
 
@@ -22,19 +24,19 @@ npx vitest run src/path/to/file.test.ts
 
 ## Architecture
 
-This is a local-first React/TypeScript SPA backed by a Node.js HTTP server and SQLite.
+This is a local-first Next.js + React + TypeScript app backed by SQLite.
 
-### Two-environment setup
+### Runtime setup
 
-- **Dev**: `npm run dev` starts Vite with the API injected as a Vite plugin middleware (see `vite.config.ts`). The backend handlers run inside the Vite process.
-- **Production**: `server.js` serves `dist/` as static files and mounts the same API handler on port 3100.
+- **Dev**: `npm run dev` runs Next.js on port 4173.
+- **Production**: `npm run build && npm run start` runs Next.js on port 3100.
 
-Both environments share `backend/jobsApi.js` and `backend/sqliteStore.js` (plain `.js`, not TypeScript).
+The API route handlers in `app/api/**/route.ts` use `lib/jobStore.ts` and the shared store in `backend/sqliteStore.ts`.
 
 ### Storage strategy
 
 The frontend uses a two-tier storage strategy in `src/services/storageService.ts`:
-1. **Primary**: `GET/PUT /api/jobs` → `backend/jobsApi.js` → `backend/sqliteStore.js` → `data/job-tracker.sqlite` (or `$JOB_TRACKER_DB_PATH`)
+1. **Primary**: `GET/PUT /api/jobs` → `app/api/jobs/route.ts` → `lib/jobStore.ts` → `backend/sqliteStore.ts` → `data/job-tracker.sqlite` (or `$JOB_TRACKER_DB_PATH`)
 2. **Fallback**: If the API returns a URL-pattern error (no backend present), falls back to `localStorage` key `job-tracker.jobs.fallback`
 
 ### Frontend layer structure
@@ -56,8 +58,8 @@ There is no global state library. All state flows through `useAppContentModel` (
 ## Conventions
 
 - **Test colocation**: Every source file has a sibling test file (`Foo.tsx` → `Foo.test.tsx`). Unit tests use Vitest + React Testing Library; E2E tests use Playwright in `e2e/`.
-- **Backend is plain JS**: `backend/*.js` files are not TypeScript. Type declarations live in `backend/*.d.ts`.
-- **`src/version.ts` is generated**: Auto-created by `scripts/generate-version.js` before dev/build/test runs. Do not edit it manually.
+- **Backend is TypeScript**: backend modules are implemented in `backend/*.ts`.
+- **`src/version.ts` is generated**: Auto-created by `scripts/generate-version.ts` before dev/build/test runs. Do not edit it manually.
 - **ESLint strictness**: Uses `typescript-eslint` strict mode. `no-console` is a warning (except `console.warn` and `console.error`). Unused vars prefixed with `_` are allowed.
 - **AI scoring fields**: Jobs have five `score*` fields (`scoreFit`, `scoreCompensation`, `scoreLocation`, `scoreGrowth`, `scoreConfidence`), each on a 0–5 scale. Scoring logic lives in `src/scoring.ts`.
 - **`JobDraft` vs `Job`**: Use `JobDraft` (omits `id`, `createdAt`, `updatedAt`) for new/edited records; call `createJobFromDraft()` from `src/domain.ts` to promote it to a `Job`.

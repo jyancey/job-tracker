@@ -417,8 +417,8 @@ The active workspace should be visible in:
 
 ### Backend Changes
 
-- [backend/jobsApi.js](../backend/jobsApi.js): accept and validate `workspaceId`
-- [backend/sqliteStore.js](../backend/sqliteStore.js): add `workspaceId` column and workspace-scoped queries
+- [backend/jobsApi.ts](../backend/jobsApi.ts): accept and validate `workspaceId`
+- [backend/sqliteStore.ts](../backend/sqliteStore.ts): add `workspaceId` column and workspace-scoped queries
 
 ### Future Modules Likely Needed (Not in v2.8.0)
 

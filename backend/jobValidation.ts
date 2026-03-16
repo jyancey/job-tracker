@@ -1,4 +1,11 @@
-const VALID_STATUSES = ['Applied', 'Phone Screen', 'Interview', 'Offer', 'Rejected', 'Withdrawn']
+const VALID_STATUSES = [
+  'Applied',
+  'Phone Screen',
+  'Interview',
+  'Offer',
+  'Rejected',
+  'Withdrawn',
+] as const
 
 const REQUIRED_FIELDS = [
   'id',
@@ -15,16 +22,27 @@ const REQUIRED_FIELDS = [
   'nextActionDueDate',
   'createdAt',
   'updatedAt',
-]
+] as const
 
-function isValidIsoDate(value) {
-  if (typeof value !== 'string') return false
+export interface JobValidationResult {
+  valid: boolean
+  error?: string
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function isValidIsoDate(value: unknown): boolean {
+  if (typeof value !== 'string') {
+    return false
+  }
+
   try {
     const date = new Date(value)
-    // Check if it's a valid date and can be converted to ISO format
-    // Don't require exact string matching as different sources may or may not include milliseconds
-    if (!(date instanceof Date) || isNaN(date.getTime())) return false
-    // Verify it's ISO format by checking the parsed result is equivalent
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+      return false
+    }
     const asIso = date.toISOString()
     const reparsed = new Date(asIso)
     return reparsed.getTime() === date.getTime()
@@ -33,19 +51,17 @@ function isValidIsoDate(value) {
   }
 }
 
-export function validateJob(job) {
-  if (!job || typeof job !== 'object') {
+export function validateJob(job: unknown): JobValidationResult {
+  if (!isRecord(job)) {
     return { valid: false, error: 'Job must be an object' }
   }
 
-  // Check all required fields exist
   for (const field of REQUIRED_FIELDS) {
     if (!(field in job)) {
       return { valid: false, error: `Missing required field: ${field}` }
     }
   }
 
-  // Validate field types
   if (typeof job.id !== 'string' || !job.id.trim()) {
     return { valid: false, error: 'id must be a non-empty string' }
   }
@@ -59,15 +75,13 @@ export function validateJob(job) {
     return { valid: false, error: 'status must be a string' }
   }
 
-  // Validate status enum
-  if (!VALID_STATUSES.includes(job.status)) {
+  if (!VALID_STATUSES.includes(job.status as (typeof VALID_STATUSES)[number])) {
     return {
       valid: false,
       error: `status must be one of: ${VALID_STATUSES.join(', ')}`,
     }
   }
 
-  // Validate ISO date strings
   if (!isValidIsoDate(job.applicationDate)) {
     return { valid: false, error: 'applicationDate must be a valid ISO 8601 date' }
   }
@@ -78,15 +92,17 @@ export function validateJob(job) {
     return { valid: false, error: 'updatedAt must be a valid ISO 8601 date' }
   }
 
-  // nextActionDueDate can be empty or valid ISO
   if (job.nextActionDueDate && !isValidIsoDate(job.nextActionDueDate)) {
-    return { valid: false, error: 'nextActionDueDate must be a valid ISO 8601 date or empty string' }
+    return {
+      valid: false,
+      error: 'nextActionDueDate must be a valid ISO 8601 date or empty string',
+    }
   }
 
   return { valid: true }
 }
 
-export function validateJobArray(jobs) {
+export function validateJobArray(jobs: unknown[]): JobValidationResult {
   if (!Array.isArray(jobs)) {
     return { valid: false, error: 'jobs must be an array' }
   }
