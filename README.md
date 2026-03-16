@@ -151,7 +151,7 @@ Triggers on: `git tag` (e.g., `git tag v1.0.0 && git push origin v1.0.0`)
 **Artifacts:**
 
 - `job-tracker-vX.Y.Z-source.tar.gz` — Source code archive
-- `job-tracker-vX.Y.Z-dist.zip` — Production build (deploy to static host)
+- `job-tracker-vX.Y.Z-standalone.zip` — Standalone Next.js deployment bundle
 
 ### 3. **Deploy** (`deploy.yml`)
 

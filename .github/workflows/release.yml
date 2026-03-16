@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build-release:
@@ -23,8 +23,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -45,15 +45,20 @@ jobs:
       - name: Create source tarball
         run: |
           /bin/mkdir -p release/${{ steps.tag_version.outputs.version }}
-          /usr/bin/tar --exclude='node_modules' --exclude='.git' --exclude='dist' \
+          /usr/bin/tar --exclude='node_modules' --exclude='.git' --exclude='.next' --exclude='dist' \
             -czf release/${{ steps.tag_version.outputs.version }}/job-tracker-${{ steps.tag_version.outputs.version }}-source.tar.gz .
         shell: bash
 
       - name: Create distribution zip
         run: |
-          cd dist
-          /usr/bin/zip -r ../release/${{ steps.tag_version.outputs.version }}/job-tracker-${{ steps.tag_version.outputs.version }}-dist.zip .
+          /bin/mkdir -p release/${{ steps.tag_version.outputs.version }}/deploy/.next
+          /bin/cp -r .next/standalone/* release/${{ steps.tag_version.outputs.version }}/deploy/
+          /bin/cp -r .next/static release/${{ steps.tag_version.outputs.version }}/deploy/.next/
+          /bin/cp -r public release/${{ steps.tag_version.outputs.version }}/deploy/
+          cd release/${{ steps.tag_version.outputs.version }}/deploy
+          /usr/bin/zip -r ../job-tracker-${{ steps.tag_version.outputs.version }}-standalone.zip .
           cd ..
+          /bin/rm -rf deploy
         shell: bash
 
       - name: Create release notes
@@ -67,11 +72,11 @@ jobs:
           - Build and test pipeline with automated releases
 
           ## Downloads
-          - `job-tracker-${{ steps.tag_version.outputs.version }}-dist.zip` - Distribution bundle (ready to deploy)
+          - `job-tracker-${{ steps.tag_version.outputs.version }}-standalone.zip` - Standalone Next.js server bundle
           - `job-tracker-${{ steps.tag_version.outputs.version }}-source.tar.gz` - Source code
 
           ## Installation
-          Extract the distribution zip and serve the contents via any static web server.
+          Extract the standalone zip and start it with `node server.js`.
 
           ## Testing
           All tests passing (11/11). Build verified and production-ready.

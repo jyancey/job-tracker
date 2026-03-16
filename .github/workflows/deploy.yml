@@ -41,9 +41,10 @@ jobs:
       - name: Create deployment artifact
         run: |
           /bin/mkdir -p deploy
-          /bin/cp -r .next deploy/
+          /bin/mkdir -p deploy/.next
+          /bin/cp -r .next/standalone/* deploy/
+          /bin/cp -r .next/static deploy/.next/
           /bin/cp -r public deploy/
-          /bin/cp package.json package-lock.json next.config.ts deploy/
           /bin/echo "Build timestamp: $(/bin/date -u +'%Y-%m-%dT%H:%M:%SZ')" > deploy/BUILD_INFO.txt
           /bin/echo "Git commit: ${{ github.sha }}" >> deploy/BUILD_INFO.txt
           /bin/echo "Git branch: ${{ github.ref_name }}" >> deploy/BUILD_INFO.txt
@@ -51,8 +52,9 @@ jobs:
       - name: Deploy artifact information
         run: |
           /bin/echo "Deployment ready:"
-          /bin/echo "- Next.js build output in deploy/.next/"
-          /bin/echo "- Start with: npm ci --omit=dev && npm rebuild && npm run start"
+          /bin/echo "- Standalone Next.js server in deploy/server.js"
+          /bin/echo "- Static assets in deploy/.next/static/ and deploy/public/"
+          /bin/echo "- Start with: node server.js"
           /bin/ls -la deploy/
 
       - name: Upload deployment artifacts
@@ -61,3 +63,4 @@ jobs:
           name: deployment-build-${{ github.run_number }}
           path: deploy/
           retention-days: 30
+          include-hidden-files: true
