@@ -30,10 +30,11 @@ try {
     lastCommit = 'unknown'
   }
 
+  const escape = (s: string) => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
   const content = `// This file is auto-generated during build. Do not edit manually.
-export const APP_VERSION = '${version}'
-export const GIT_BRANCH = '${branch}'
-export const GIT_COMMIT = '${lastCommit}'
+export const APP_VERSION = '${escape(version)}'
+export const GIT_BRANCH = '${escape(branch)}'
+export const GIT_COMMIT = '${escape(lastCommit)}'
 `
 
   fs.writeFileSync(versionFile, content)
