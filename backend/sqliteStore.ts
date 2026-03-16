@@ -223,6 +223,7 @@ export function createJobStore(
 
   const db = new Database(dbPath)
   db.pragma('journal_mode = WAL')
+  db.pragma('busy_timeout = 10000')
   ensureJobsSchema(db)
 
   const listStatement = db.prepare(`
