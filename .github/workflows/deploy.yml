@@ -41,7 +41,9 @@ jobs:
       - name: Create deployment artifact
         run: |
           /bin/mkdir -p deploy
-          /bin/cp -r dist/* deploy/
+          /bin/cp -r .next deploy/
+          /bin/cp -r public deploy/
+          /bin/cp package.json package-lock.json next.config.ts deploy/
           /bin/echo "Build timestamp: $(/bin/date -u +'%Y-%m-%dT%H:%M:%SZ')" > deploy/BUILD_INFO.txt
           /bin/echo "Git commit: ${{ github.sha }}" >> deploy/BUILD_INFO.txt
           /bin/echo "Git branch: ${{ github.ref_name }}" >> deploy/BUILD_INFO.txt
@@ -49,9 +51,8 @@ jobs:
       - name: Deploy artifact information
         run: |
           /bin/echo "Deployment ready:"
-          /bin/echo "- Static files ready in deploy/ directory"
-          /bin/echo "- Can be deployed to any static host (Netlify, Vercel, GitHub Pages, etc.)"
-          /bin/echo "- Recommended: Copy dist/ folder to your hosting provider"
+          /bin/echo "- Next.js build output in deploy/.next/"
+          /bin/echo "- Start with: npm ci --omit=dev && npm rebuild && npm run start"
           /bin/ls -la deploy/
 
       - name: Upload deployment artifacts
