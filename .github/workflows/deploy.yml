@@ -40,11 +40,7 @@ jobs:
 
       - name: Create deployment artifact
         run: |
-          /bin/mkdir -p deploy
-          /bin/mkdir -p deploy/.next
-          /bin/cp -r .next/standalone/* deploy/
-          /bin/cp -r .next/static deploy/.next/
-          /bin/cp -r public deploy/
+          ./scripts/package-standalone.sh deploy
           /bin/echo "Build timestamp: $(/bin/date -u +'%Y-%m-%dT%H:%M:%SZ')" > deploy/BUILD_INFO.txt
           /bin/echo "Git commit: ${{ github.sha }}" >> deploy/BUILD_INFO.txt
           /bin/echo "Git branch: ${{ github.ref_name }}" >> deploy/BUILD_INFO.txt
@@ -54,7 +50,8 @@ jobs:
           /bin/echo "Deployment ready:"
           /bin/echo "- Standalone Next.js server in deploy/server.js"
           /bin/echo "- Static assets in deploy/.next/static/ and deploy/public/"
-          /bin/echo "- Start with: node server.js"
+          /bin/echo "- macOS helpers in deploy/macos/"
+          /bin/echo "- Start with: node server.js or ./macos/start-job-tracker.sh"
           /bin/ls -la deploy/
 
       - name: Upload deployment artifacts

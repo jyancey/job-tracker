@@ -2,56 +2,45 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <!-- Unique identifier for this launch agent -->
   <key>Label</key>
   <string>com.local.job-tracker</string>
 
-  <!-- The program to run -->
-  <key>Program</key>
-  <string>/usr/bin/env</string>
-
-  <!-- Arguments to pass to the program -->
   <key>ProgramArguments</key>
   <array>
-    <string>/usr/bin/env</string>
-    <string>tsx</string>
-    <string>/path/to/job-tracker/server.ts</string>
+    <string>/bin/bash</string>
+    <string>__APP_ROOT__/macos/start-job-tracker.sh</string>
   </array>
 
-  <!-- Working directory -->
   <key>WorkingDirectory</key>
-  <string>/path/to/job-tracker</string>
+  <string>__APP_ROOT__</string>
 
-  <!-- Run at login -->
   <key>RunAtLoad</key>
   <true/>
 
-  <!-- Keep the service running; restart if it crashes -->
   <key>KeepAlive</key>
   <true/>
 
-  <!-- Set environment variables -->
   <key>EnvironmentVariables</key>
   <dict>
     <key>PORT</key>
     <string>3100</string>
+    <key>JOB_TRACKER_HOST</key>
+    <string>127.0.0.1</string>
     <key>NODE_ENV</key>
     <string>production</string>
+    <key>JOB_TRACKER_DB_PATH</key>
+    <string>__APP_ROOT__/data/job-tracker.sqlite</string>
   </dict>
 
-  <!-- Standard output log -->
   <key>StandardOutPath</key>
-  <string>/var/log/job-tracker.log</string>
+  <string>__LOG_DIR__/job-tracker.log</string>
 
-  <!-- Standard error log -->
   <key>StandardErrorPath</key>
-  <string>/var/log/job-tracker-error.log</string>
+  <string>__LOG_DIR__/job-tracker-error.log</string>
 
-  <!-- Process management -->
   <key>ProcessType</key>
   <string>Background</string>
 
-  <!-- Restart throttle: minimum 10 seconds between restarts -->
   <key>ThrottleInterval</key>
   <integer>10</integer>
 </dict>

@@ -1,78 +1,87 @@
 # Running Job Tracker as a macOS User Daemon
 
-This guide explains how to set up Job Tracker to run automatically in the background on macOS using `launchd`.
+This guide explains how to run the standalone Job Tracker bundle on macOS with `launchd`.
 
 ## Prerequisites
 
 - macOS 10.9 or later
-- Node.js 18+
-- Job Tracker built (run `npm run build`)
+- Node.js 20+
+- A packaged standalone Job Tracker bundle
 
 ## Installation Steps
 
-### 1. Build the Application
+### 1. Build or Extract the Standalone Bundle
 
 ```bash
 npm run build
 ```
 
-This creates the `.next/` production build output.
+Then package it:
+
+```bash
+./scripts/package-standalone.sh deploy
+```
+
+Or extract the release/deploy zip. The bundle should contain:
+
+```text
+server.js
+.next/
+public/
+macos/
+docs/DAEMON_SETUP.md
+```
 
 ### 2. Find Your Job Tracker Installation Path
 
-```bash
-pwd
-# Note the full path, e.g., /Users/john/tmp
-```
+Use the extracted bundle directory, for example `/Users/john/job-tracker`.
 
-### 3. Create the LaunchAgent Plist File
+### 3. Install the LaunchAgent
 
-Copy and customize the template:
+From the bundle root:
 
 ```bash
-# Copy the template
-cp scripts/launchd/com.local.job-tracker.plist.template ~/Library/LaunchAgents/com.local.job-tracker.plist
-
-# Edit to replace paths (use your favorite editor)
-nano ~/Library/LaunchAgents/com.local.job-tracker.plist
+./macos/install-launch-agent.sh
 ```
 
-**Replace these paths with your actual paths:**
-- `/path/to/job-tracker` → Your actual Job Tracker directory (e.g., `/Users/john/tmp`)
-- All occurrences of `/path/to/job-tracker` in both `Program` and `ProgramArguments`
+This script:
 
-Example (for `/Users/john/tmp`):
+- creates `~/Library/LaunchAgents/com.local.job-tracker.plist`
+- points it at `macos/start-job-tracker.sh`
+- configures logs under `~/Library/Logs/job-tracker/`
+- starts the LaunchAgent immediately
+
+If you need to customize paths or ports manually, edit the generated plist:
 
 ```xml
-<key>Program</key>
-<string>/usr/bin/env</string>
+<key>EnvironmentVariables</key>
+<dict>
+   <key>PORT</key>
+   <string>3100</string>
+   <key>JOB_TRACKER_HOST</key>
+   <string>127.0.0.1</string>
+   <key>JOB_TRACKER_DB_PATH</key>
+   <string>/Users/your-user/job-tracker/data/job-tracker.sqlite</string>
+</dict>
 
 <key>ProgramArguments</key>
 <array>
-   <string>/usr/bin/env</string>
-   <string>npm</string>
-   <string>run</string>
-   <string>start</string>
+   <string>/bin/bash</string>
+   <string>/Users/your-user/job-tracker/macos/start-job-tracker.sh</string>
 </array>
 
 <key>WorkingDirectory</key>
-<string>/Users/john/tmp</string>
+<string>/Users/your-user/job-tracker</string>
 ```
 
 ### 4. Set Permissions
 
-```bash
-chmod 644 ~/Library/LaunchAgents/com.local.job-tracker.plist
-```
+The installer script already applies the correct permissions.
 
 ### 5. Load the LaunchAgent
 
 ```bash
-# Load the service
-launchctl load ~/Library/LaunchAgents/com.local.job-tracker.plist
-
-# Verify it's running
-launchctl list | grep job-tracker
+launchctl print gui/$(id -u)/com.local.job-tracker
 ```
 
 ## Usage
@@ -80,39 +89,38 @@ launchctl list | grep job-tracker
 ### Start the Daemon
 
 ```bash
-# The daemon starts automatically on login, but you can manually start it:
-launchctl start com.local.job-tracker
+launchctl kickstart -k gui/$(id -u)/com.local.job-tracker
 ```
 
 ### Check Status
 
 ```bash
-# List running launch agents (grep for job-tracker)
-launchctl list | grep job-tracker
+# Show agent details
+launchctl print gui/$(id -u)/com.local.job-tracker
 
 # View logs
-tail -f /var/log/job-tracker.log
-tail -f /var/log/job-tracker-error.log
+tail -f ~/Library/Logs/job-tracker/job-tracker.log
+tail -f ~/Library/Logs/job-tracker/job-tracker-error.log
 ```
 
 ### Access the Application
 
 Once running, open your browser and navigate to:
 
-```
-http://localhost:3100
+```text
+http://127.0.0.1:3100
 ```
 
 ### Stop the Daemon
 
 ```bash
-launchctl stop com.local.job-tracker
+launchctl kill TERM gui/$(id -u)/com.local.job-tracker
 ```
 
 ### Unload the Daemon (Disable at Login)
 
 ```bash
-launchctl unload ~/Library/LaunchAgents/com.local.job-tracker.plist
+./macos/uninstall-launch-agent.sh
 ```
 
 ### Reload After Changes
@@ -120,8 +128,7 @@ launchctl unload ~/Library/LaunchAgents/com.local.job-tracker.plist
 If you edit the plist file:
 
 ```bash
-launchctl unload ~/Library/LaunchAgents/com.local.job-tracker.plist
-launchctl load ~/Library/LaunchAgents/com.local.job-tracker.plist
+./macos/install-launch-agent.sh
 ```
 
 ## Configuration
@@ -134,13 +141,15 @@ Edit the plist file and modify:
 <key>EnvironmentVariables</key>
 <dict>
   <key>PORT</key>
-  <string>3100</string>  <!-- Change this to your desired port (default is 3100) -->
+   <string>3100</string>
 </dict>
 ```
 
+The startup wrapper reads `JOB_TRACKER_HOST` from the plist and maps it to the `HOSTNAME` environment variable expected by the standalone Next.js server.
+
 ### Set a Custom SQLite Database Path
 
-Job Tracker stores jobs in a SQLite file (`data/job-tracker.sqlite` by default). To set a custom path, add `JOB_TRACKER_DB_PATH`:
+Job Tracker stores jobs in `data/job-tracker.sqlite` inside the bundle by default. To use a persistent external path, set `JOB_TRACKER_DB_PATH`:
 
 ```xml
 <key>EnvironmentVariables</key>
@@ -155,8 +164,8 @@ Job Tracker stores jobs in a SQLite file (`data/job-tracker.sqlite` by default).
 Then reload:
 
 ```bash
-launchctl unload ~/Library/LaunchAgents/com.local.job-tracker.plist
-launchctl load ~/Library/LaunchAgents/com.local.job-tracker.plist
+launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.local.job-tracker.plist
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.local.job-tracker.plist
 ```
 
 ### View Detailed Logs
@@ -166,8 +175,8 @@ launchctl load ~/Library/LaunchAgents/com.local.job-tracker.plist
 log stream --predicate 'process == "node"' --level debug
 
 # Or use the generated log files
-tail -f /var/log/job-tracker.log
-tail -f /var/log/job-tracker-error.log
+tail -f ~/Library/Logs/job-tracker/job-tracker.log
+tail -f ~/Library/Logs/job-tracker/job-tracker-error.log
 ```
 
 ## Troubleshooting
@@ -175,22 +184,25 @@ tail -f /var/log/job-tracker-error.log
 ### Application Won't Start
 
 1. **Check the plist syntax:**
+
    ```bash
    plutil -lint ~/Library/LaunchAgents/com.local.job-tracker.plist
    ```
 
 2. **Verify paths are correct:**
-   ```bash
-   # Check if npm is available
-   npm --version
 
-   # Check if package.json exists
-   ls -la /path/to/job-tracker/package.json
+   ```bash
+   # Check if the standalone server exists
+   ls -la /path/to/job-tracker/server.js
+
+   # Check if the startup helper exists
+   ls -la /path/to/job-tracker/macos/start-job-tracker.sh
    ```
 
 3. **Check logs for errors:**
+
    ```bash
-   tail -50 /var/log/job-tracker-error.log
+   tail -50 ~/Library/Logs/job-tracker/job-tracker-error.log
    ```
 
 ### Port Already in Use
@@ -204,14 +216,14 @@ If port 3100 is already in use, change the port in the plist:
 
 ### Node Command Not Found
 
-If `launchctl` can't find Node, find the correct path:
+If `launchctl` can't find Node, check that `node` is on the daemon PATH:
 
 ```bash
 which node
-# Output: /usr/local/bin/node (or /opt/homebrew/bin/node for M1/M2 Macs)
+# Example: /opt/homebrew/bin/node
 ```
 
-Update the `Program` and `ProgramArguments` in the plist with the correct path.
+Then update `macos/start-job-tracker.sh` to use the absolute Node path if needed.
 
 ### Permission Denied
 
@@ -227,11 +239,14 @@ To run Job Tracker as a system daemon (available to all users, starts before log
 
 1. Use `/Library/LaunchDaemons/` instead of `~/Library/LaunchAgents/`
 2. Change ownership:
+
    ```bash
    sudo chown root:wheel /Library/LaunchDaemons/com.local.job-tracker.plist
    chmod 644 /Library/LaunchDaemons/com.local.job-tracker.plist
    ```
+
 3. Load with `sudo`:
+
    ```bash
    sudo launchctl load /Library/LaunchDaemons/com.local.job-tracker.plist
    ```
@@ -248,8 +263,8 @@ If you rebuild the application:
 
 ```bash
 npm run build
-# LaunchAgent will serve the updated .next build on next start/restart
-# No restart needed!
+# Reinstall or restart the agent after replacing the bundle
+./macos/install-launch-agent.sh
 ```
 
 ## Disable on macOS Restart

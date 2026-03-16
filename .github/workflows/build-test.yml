@@ -69,13 +69,13 @@ jobs:
       - name: Build application
         run: npm run build
 
+      - name: Package standalone bundle
+        run: ./scripts/package-standalone.sh build-artifact
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build-standalone
-          path: |
-            .next/standalone/
-            .next/static/
-            public/
+          path: build-artifact/
           retention-days: 7
           include-hidden-files: true

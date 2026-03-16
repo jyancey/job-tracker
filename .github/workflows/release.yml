@@ -51,10 +51,7 @@ jobs:
 
       - name: Create distribution zip
         run: |
-          /bin/mkdir -p release/${{ steps.tag_version.outputs.version }}/deploy/.next
-          /bin/cp -r .next/standalone/* release/${{ steps.tag_version.outputs.version }}/deploy/
-          /bin/cp -r .next/static release/${{ steps.tag_version.outputs.version }}/deploy/.next/
-          /bin/cp -r public release/${{ steps.tag_version.outputs.version }}/deploy/
+          ./scripts/package-standalone.sh release/${{ steps.tag_version.outputs.version }}/deploy
           cd release/${{ steps.tag_version.outputs.version }}/deploy
           /usr/bin/zip -r ../job-tracker-${{ steps.tag_version.outputs.version }}-standalone.zip .
           cd ..
@@ -77,6 +74,7 @@ jobs:
 
           ## Installation
           Extract the standalone zip and start it with `node server.js`.
+          For macOS launchd setup, run `./macos/install-launch-agent.sh`.
 
           ## Testing
           All tests passing (11/11). Build verified and production-ready.
