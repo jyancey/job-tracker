@@ -14,7 +14,7 @@ jobs:
       contents: write
     env:
       npm_config_script_shell: /bin/bash
-      PATH: ${RUNNER_PATH}
+      PATH: ${{ vars.RUNNER_PATH }}
     defaults:
       run:
         shell: bash
