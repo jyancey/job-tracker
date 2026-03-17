@@ -2,7 +2,7 @@
 
 ![Build Stats](http://localhost:3000/john/job-tracker/actions/workflows/build-test.yml/badge.svg)
 ![Deploy Badge](http://localhost:3000/john/job-tracker/actions/workflows/deploy.yml/badge.svg)
-[![Release Badge](http://localhost:3000/john/job-tracker/actions/workflows/release.yml/badge.svg)](http://localhost:3000/john/job-tracker/releases)
+[![Latest Release](https://img.shields.io/badge/release-v2.7.1-blue)](http://localhost:3000/john/job-tracker/releases)
 
 A local-first, privacy-focused job application tracker built with React, TypeScript, and SQLite.
 
