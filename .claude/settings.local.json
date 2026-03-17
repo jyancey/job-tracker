@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Users/john/work/job-tracker/docs -type f -name *.md)"
+    ]
+  }
+}

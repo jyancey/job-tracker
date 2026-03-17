@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 jobs:
   build-release:
@@ -13,7 +14,7 @@ jobs:
       contents: write
     env:
       npm_config_script_shell: /bin/bash
-      PATH: /opt/homebrew/bin:/opt/macports/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+      PATH: ${RUNNER_PATH}
     defaults:
       run:
         shell: bash

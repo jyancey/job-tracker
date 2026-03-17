@@ -16,7 +16,7 @@ jobs:
     runs-on: macos-arm64
     env:
       npm_config_script_shell: /bin/bash
-      PATH: /opt/homebrew/bin:/opt/macports/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+      PATH: ${RUNNER_PATH}
     defaults:
       run:
         shell: bash
@@ -47,7 +47,7 @@ jobs:
     needs: test
     env:
       npm_config_script_shell: /bin/bash
-      PATH: /opt/homebrew/bin:/opt/macports/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+      PATH: ${RUNNER_PATH}
     defaults:
       run:
         shell: bash
