@@ -1,5 +1,5 @@
-import { createJobStore } from '../backend/sqliteStore'
-import type { JobStore } from '../backend/sqliteStore'
+import { createJobStore } from './sqliteStore'
+import type { JobStore } from './sqliteStore'
 
 const globalForStore = globalThis as unknown as {
   __jobStore?: JobStore

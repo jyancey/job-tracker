@@ -1,5 +1,5 @@
 import type { Job } from '../domain'
-import { calculateJobScore, DEFAULT_SCORE_WEIGHTS, type ScoreWeights } from '../scoring'
+import { calculateJobScore, DEFAULT_SCORE_WEIGHTS, type ScoreWeights } from '../services/scoring'
 
 interface ScoreCellProps {
   job: Job

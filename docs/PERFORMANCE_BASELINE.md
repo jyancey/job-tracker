@@ -174,4 +174,4 @@ These risk areas are candidates for the P2 optimization work in v2.8.0. Baseline
 
 | Date | Author | Change |
 |------|--------|--------|
-| 2026-03-17 | — | Initial document; framework established, measurements pending |
+| 2026-03-17 | John | Initial document; framework established, measurements pending |

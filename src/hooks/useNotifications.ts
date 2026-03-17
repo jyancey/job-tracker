@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createNotification, type Notification } from '../notifications'
+import { createNotification, type Notification } from '../services/notifications'
 
 export interface UseNotificationsResult {
   notifications: Notification[]

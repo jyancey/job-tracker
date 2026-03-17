@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { ScoreCell } from './ScoreCell'
 import type { Job, JobStatus } from '../domain'
-import type { ScoreWeights } from '../scoring'
+import type { ScoreWeights } from '../services/scoring'
 
 function createJob(overrides: Partial<Job> = {}): Job {
   return {

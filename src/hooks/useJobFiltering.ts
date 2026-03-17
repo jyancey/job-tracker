@@ -3,7 +3,7 @@ import type { Job } from '../domain'
 import { isOverdueFollowUp, compareDates, getTodayString } from '../utils/dateUtils'
 import { compareStrings } from '../utils/stringUtils'
 import { parseSalaryRange } from '../utils/salaryUtils'
-import { calculateJobScore, DEFAULT_SCORE_WEIGHTS } from '../scoring'
+import { calculateJobScore, DEFAULT_SCORE_WEIGHTS } from '../services/scoring'
 import type { FilterOptions, SortOptions, PaginationOptions } from '../types/filters'
 import { searchJobs } from '../features/search/searchJobs'
 

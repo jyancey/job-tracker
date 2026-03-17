@@ -31,19 +31,19 @@ This is a local-first Next.js + React + TypeScript app backed by SQLite.
 - **Dev**: `npm run dev` runs Next.js on port 4173.
 - **Production**: `npm run build && npm run start` runs Next.js on port 3100.
 
-The API route handlers in `app/api/**/route.ts` use `lib/jobStore.ts` and the shared store in `backend/sqliteStore.ts`.
+The API route handlers in `app/api/**/route.ts` use `backend/jobStore.ts` and the shared store in `backend/sqliteStore.ts`.
 
 ### Storage strategy
 
 The frontend uses a two-tier storage strategy in `src/services/storageService.ts`:
-1. **Primary**: `GET/PUT /api/jobs` → `app/api/jobs/route.ts` → `lib/jobStore.ts` → `backend/sqliteStore.ts` → `data/job-tracker.sqlite` (or `$JOB_TRACKER_DB_PATH`)
+1. **Primary**: `GET/PUT /api/jobs` → `app/api/jobs/route.ts` → `backend/jobStore.ts` → `backend/sqliteStore.ts` → `data/job-tracker.sqlite` (or `$JOB_TRACKER_DB_PATH`)
 2. **Fallback**: If the API returns a URL-pattern error (no backend present), falls back to `localStorage` key `job-tracker.jobs.fallback`
 
 ### Frontend layer structure
 
 ```
 src/domain.ts          # Core types: Job, JobDraft, JobStatus, JobPriority
-src/services/          # Pure business logic (jobService, storageService, aiScoringService, etc.)
+src/services/          # Pure business logic (jobService, scoring, notifications, storageService, aiScoringService, etc.)
 src/storage/           # Storage adapters (API client, localStorage fallback, AI config, logger)
 src/hooks/             # React hooks — one hook per concern, heavily decomposed
 src/components/        # Reusable UI components
@@ -61,7 +61,7 @@ There is no global state library. All state flows through `useAppContentModel` (
 - **Backend is TypeScript**: backend modules are implemented in `backend/*.ts`.
 - **`src/version.ts` is generated**: Auto-created by `scripts/generate-version.ts` before dev/build/test runs. Do not edit it manually.
 - **ESLint strictness**: Uses `typescript-eslint` strict mode. `no-console` is a warning (except `console.warn` and `console.error`). Unused vars prefixed with `_` are allowed.
-- **AI scoring fields**: Jobs have five `score*` fields (`scoreFit`, `scoreCompensation`, `scoreLocation`, `scoreGrowth`, `scoreConfidence`), each on a 0–5 scale. Scoring logic lives in `src/scoring.ts`.
+- **AI scoring fields**: Jobs have five `score*` fields (`scoreFit`, `scoreCompensation`, `scoreLocation`, `scoreGrowth`, `scoreConfidence`), each on a 0–5 scale. Scoring logic lives in `src/services/scoring.ts`.
 - **`JobDraft` vs `Job`**: Use `JobDraft` (omits `id`, `createdAt`, `updatedAt`) for new/edited records; call `createJobFromDraft()` from `src/domain.ts` to promote it to a `Job`.
 - **CI/CD**: Gitea Actions workflows in `.gitea/workflows/`. Requires `npm rebuild` after install for native modules (`better-sqlite3`).
 - **Debug logging**: Enable with `localStorage.setItem('job-tracker.debug', 'true')` in the browser console; download logs via "Export DB Logs" in the UI.

@@ -12,6 +12,7 @@ node_modules
 .next
 *.local
 data/
+backend/data/
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { jobStore } from '../../../../lib/jobStore'
+import { jobStore } from '../../../../backend/jobStore'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

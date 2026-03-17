@@ -1,5 +1,5 @@
 import type { Job } from '../domain'
-import { DEFAULT_SCORE_WEIGHTS, hasScoring, type ScoreWeights } from '../scoring'
+import { DEFAULT_SCORE_WEIGHTS, hasScoring, type ScoreWeights } from '../services/scoring'
 import { formatDate } from '../utils/dateUtils'
 import { ScoreCell } from '../components/ScoreCell'
 

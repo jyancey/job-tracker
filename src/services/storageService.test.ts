@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Job } from './domain'
-import { loadJobs, saveJobs } from './services/storageService'
+import type { Job } from '../domain'
+import { loadJobs, saveJobs } from './storageService'
 
 const FALLBACK_JOBS_KEY = 'job-tracker.jobs.fallback'
 

@@ -4,7 +4,6 @@
 ![Release Badge](http://localhost:3000/john/job-tracker/actions/workflows/deploy.yml/badge.svg)
 [![Release Badge](http://localhost:3000/john/job-tracker/actions/workflows/release.yml/badge.svg)](http://localhost:3000/john/job-tracker/releases)
 
-
 A local-first, privacy-focused job application tracker built with React, TypeScript, and SQLite.
 
 Track your search like a pipeline, not a spreadsheet. Manage opportunities, follow-ups, and monitor momentum from one workspace—all without leaving your browser.
@@ -57,33 +56,55 @@ You can also run as a macOS daemon. See [docs/DAEMON_SETUP.md](docs/DAEMON_SETUP
 ### Project Structure
 
 ```text
+app/
+  ├── layout.tsx              # Next.js root layout
+  ├── page.tsx                # Root page (renders AppClient)
+  ├── AppClient.tsx           # 'use client' bridge to src/App
+  ├── globals.css             # Global styles
+  └── api/
+      ├── jobs/route.ts       # GET/PUT /api/jobs
+      └── database/
+          ├── create/route.ts # POST /api/database/create
+          ├── info/route.ts   # GET /api/database/info
+          └── test/route.ts   # GET /api/database/test
+
 backend/
-  ├── jobsApi.ts            # Shared /api/jobs request handler
-  ├── sqliteStore.ts        # File-backed SQLite repository
-  └── jobValidation.ts      # Backend job payload validation
-
-docs/
-  ├── DAEMON_SETUP.md
-  ├── NEXT_STEPS.md
-  └── REFACTORING_ANALYSIS.md
-
-scripts/
-  ├── generate-version.ts
-  └── launchd/
-      └── com.local.job-tracker.plist.template
+  ├── jobStore.ts             # Lazy-init SQLite store proxy (used by API routes)
+  ├── jobsApi.ts              # Shared /api/jobs request handler
+  ├── sqliteStore.ts          # File-backed SQLite repository
+  └── jobValidation.ts        # Backend job payload validation
 
 src/
-  ├── App.tsx                # Main app orchestrator
-  ├── components/            # Reusable UI components (table, kanban, form, toast)
-  ├── hooks/                 # Custom state and behavior hooks
-  ├── services/              # Service layer (jobService)
-  ├── utils/                 # Date, accessibility, drag/drop, formatting helpers
-  ├── views/                 # View-level components (AnalyticsView, TableView, CalendarView, etc.)
-  ├── types/                 # Shared TypeScript types
-  └── test/setup.ts          # Vitest setup
+  ├── App.tsx                 # Main app orchestrator
+  ├── domain.ts               # Core types: Job, JobDraft, JobStatus, JobPriority
+  ├── components/             # Reusable UI components (table, kanban, form, toast)
+  ├── hooks/                  # Custom state and behavior hooks (~20 specialized hooks)
+  ├── services/               # Business logic (scoring, notifications, storage, AI, import/export)
+  ├── storage/                # Storage adapters (API client, localStorage fallback, logger)
+  ├── views/                  # Page-level view components (Analytics, Table, Calendar, etc.)
+  ├── features/               # Self-contained feature modules (analytics, backup, savedViews, search, tasks)
+  ├── types/                  # Shared TypeScript types (ai, filters, errors, componentProps)
+  ├── utils/                  # Date, accessibility, drag/drop, formatting helpers
+  └── test/setup.ts           # Vitest setup
 
-public/
-  └── job-tracker.png       # App logo
+docs/
+  ├── ARCHITECTURE.md         # Technical architecture overview
+  ├── DAEMON_SETUP.md         # macOS daemon setup guide
+  ├── PERFORMANCE_BASELINE.md # Performance measurement framework
+  ├── REFACTORING_ANALYSIS.md # Code quality audit
+  ├── REFACTORING_STATUS.md   # Refactoring progress tracker
+  ├── releases/               # Historical release notes (v2.5, v2.6, v2.7)
+  ├── planning/               # Roadmaps and release plans (v2.7, v2.8)
+  └── safari-plugin/          # Safari browser plugin architecture and planning
+
+scripts/
+  ├── generate-version.ts     # Auto-generates src/version.ts from git metadata
+  ├── package-standalone.sh   # Builds standalone deployment bundle
+  └── launchd/                # macOS launchd helpers (plist template, install/uninstall scripts)
+
+e2e/                          # Playwright end-to-end tests
+sample-data/                  # Demo JSON files for import testing
+public/                       # Static assets (favicon, logo)
 ```
 
 ### Testing
@@ -118,9 +139,9 @@ npm run build
 npm run start
 ```
 
-## CI/CD Pipeline (GitHub Actions)
+## CI/CD Pipeline (Gitea Actions)
 
-Workflow files are located in `.github/workflows/`:
+Workflow files are located in `.gitea/workflows/`:
 
 ### 1. **Build & Test** (`build-test.yml`)
 

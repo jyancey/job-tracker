@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { Job } from './domain'
+import type { Job } from '../domain'
 import {
   calculateJobScore,
   hasScoring,

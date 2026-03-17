@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import type { Notification } from '../notifications'
+import type { Notification } from '../services/notifications'
 
 interface ToastProps {
   notification: Notification

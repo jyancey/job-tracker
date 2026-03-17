@@ -1,4 +1,4 @@
-import type { Job } from './domain'
+import type { Job } from '../domain'
 
 /**
  * Scoring weights configuration
