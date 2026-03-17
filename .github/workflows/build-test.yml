@@ -13,7 +13,7 @@ on:
 jobs:
   test:
     name: Test
-    runs-on: macos-arm64
+    runs-on: macos-arm64, self-hosted
     env:
       npm_config_script_shell: /bin/bash
       PATH: /opt/homebrew/bin:/opt/macports/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin

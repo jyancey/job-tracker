@@ -8,7 +8,7 @@ on:
 jobs:
   build-release:
     name: Build & Package Release
-    runs-on: macos-arm64
+    runs-on: macos-arm64, self-hosted
     permissions:
       contents: write
     env:
