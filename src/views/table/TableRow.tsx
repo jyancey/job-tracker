@@ -1,3 +1,4 @@
+// Individual table row with job fields, quick-status editing, and selection checkbox.
 import type { Job } from '../../domain'
 import { ScoreCell } from '../../components/ScoreCell'
 import { StatusCell } from '../../components/StatusCell'

@@ -1,3 +1,4 @@
+// Modal displaying detailed job information with stuck-job warning badges for stale positions.
 import type { Job } from '../domain'
 import { formatDate } from '../utils/dateUtils'
 import { calculateDaysInCurrentStatus, DEFAULT_STUCK_THRESHOLDS } from '../features/analytics'

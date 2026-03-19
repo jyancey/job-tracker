@@ -1,3 +1,4 @@
+// Persists AI configuration and user profile to localStorage for client-side settings.
 import type { AIConfig, UserProfile } from '../types/ai'
 import { DEFAULT_AI_CONFIG, DEFAULT_USER_PROFILE } from '../types/ai'
 

@@ -1,6 +1,7 @@
+// Main application shell orchestrating all views, filters, forms, notifications, and modal dialogs.
 import { useState } from 'react'
 import Image from 'next/image'
-import type { ChangeEvent, FormEvent, RefObject } from 'react'
+import type { ChangeEvent, SyntheticEvent, RefObject } from 'react'
 import type { Job } from '../domain'
 import type { View } from '../hooks/useViewState'
 import type { ImportMode } from '../services/importExportService'
@@ -57,7 +58,7 @@ export interface AppShellViewProps {
   editingId: string | null
   draft: JobDraft
   updateDraft: <K extends keyof JobDraft>(key: K, value: JobDraft[K]) => void
-  handleSubmitJob: (event: FormEvent<HTMLFormElement>) => void
+  handleSubmitJob: (event: SyntheticEvent<HTMLFormElement>) => void
   resetForm: () => void
   handleExport: (format: 'json' | 'csv') => void
   handleImportClick: () => void
@@ -181,7 +182,7 @@ export function AppShellView({
 
   const canSubmitJobForm = Boolean(draft.company.trim() && draft.roleTitle.trim() && draft.applicationDate)
 
-  const handleJobFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleJobFormSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
     handleSubmitJob(event)
     if (canSubmitJobForm) {
       setIsJobFormManuallyOpen(false)

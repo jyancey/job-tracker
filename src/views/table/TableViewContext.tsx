@@ -1,3 +1,4 @@
+// React context providing table state, pagination, selection, and action callbacks to sub-components.
 import { createContext, useContext, type ReactNode, type RefObject } from 'react'
 import type { Job, JobStatus } from '../../domain'
 import type { SortColumn, SortDirection } from '../../hooks/useJobFiltering'

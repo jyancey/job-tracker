@@ -1,3 +1,4 @@
+// Centralized prop interface definitions for all major view and component types.
 import type { Job, JobStatus } from '../domain'
 import type { SortColumn, SortDirection } from './filters'
 import type { FilterAction, FilterState } from '../components/FilterToolbar'

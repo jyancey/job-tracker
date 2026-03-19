@@ -1,3 +1,4 @@
+// Exports jobs to JSON and imports with type validation and default priority handling.
 import type { Job } from '../domain'
 
 export function exportToJson(jobs: Job[]): string {

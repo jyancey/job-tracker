@@ -19,6 +19,6 @@ test.describe('Analytics drill-down', () => {
     await page.locator('.stat-card.interactive-card', { hasText: 'Applied' }).first().click()
 
     await expect(page.getByRole('button', { name: 'All Jobs' })).toHaveClass(/active/)
-    await expect(page.locator('.quick-filters select')).toHaveValue('Applied')
+    await expect(page.locator('.quick-filters select').first()).toHaveValue('Applied')
   })
 })

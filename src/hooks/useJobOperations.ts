@@ -1,3 +1,4 @@
+// Encapsulates all job mutation operations including edit, delete, move, and AI scoring.
 import { useCallback } from 'react'
 import type { Job, JobDraft, JobStatus } from '../domain'
 import * as jobService from '../services/jobService'

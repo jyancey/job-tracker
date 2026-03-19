@@ -1,3 +1,4 @@
+// Side-by-side comparison table for selected jobs with weighted score calculations.
 import type { Job } from '../domain'
 import { DEFAULT_SCORE_WEIGHTS, hasScoring, type ScoreWeights } from '../services/scoring'
 import { formatDate } from '../utils/dateUtils'

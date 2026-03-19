@@ -1,3 +1,4 @@
+// Modal panel for configuring AI provider credentials and settings (provider, API key, base URL, model).
 import { useState } from 'react'
 import type { AIConfig, AIProvider } from '../types/ai'
 import { loadAIConfig, saveAIConfig } from '../storage/aiStorage'

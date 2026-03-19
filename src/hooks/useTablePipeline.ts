@@ -1,3 +1,4 @@
+// Composes table-focused filtering, sorting, and pagination state with debounced query support.
 import {
   useJobFiltering,
   useJobSorting,

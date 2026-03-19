@@ -1,3 +1,4 @@
+// Standalone Node.js HTTP server API handler for managing jobs (legacy server implementation).
 import { URL } from 'node:url'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { validateJobArray } from './jobValidation'

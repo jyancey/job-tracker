@@ -1,3 +1,4 @@
+// Manages top-level application state for jobs, active saved views, and save status.
 import { useState } from 'react'
 import type { Job } from '../domain'
 import { useJobPersistence } from './useJobPersistence'

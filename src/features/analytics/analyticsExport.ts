@@ -1,3 +1,4 @@
+// Exports analytics metrics (conversion rates, trends, distribution) to CSV format.
 import type { Job } from '../../domain'
 import {
   calculateConversionMetrics,

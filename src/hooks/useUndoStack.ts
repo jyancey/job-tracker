@@ -1,3 +1,4 @@
+// Manages undo/redo stack for job operations with history tracking and restoration.
 import { useCallback, useState } from 'react'
 import type { Job } from '../domain'
 

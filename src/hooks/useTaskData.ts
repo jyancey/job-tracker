@@ -1,3 +1,4 @@
+// Builds task/date-derived collections including today/week tasks and groupings for non-table views.
 import { useMemo } from 'react'
 import type { Job } from '../domain'
 import { getTodayString } from '../utils/dateUtils'

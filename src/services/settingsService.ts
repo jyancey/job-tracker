@@ -1,3 +1,4 @@
+// Fetches database info and tests AI endpoint connectivity for settings management.
 import type { AIConfig } from '../types/ai'
 
 export interface DatabaseInfo {

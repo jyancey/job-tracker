@@ -1,3 +1,4 @@
+// User profile editor with tech skills list, seniority level, and resume file parsing.
 import { useRef, useState } from 'react'
 import type { UserProfile } from '../types/ai'
 import { loadUserProfile, saveUserProfile } from '../storage/aiStorage'

@@ -1,3 +1,4 @@
+// Core job operations: create, update, delete, and move with sorting by application date.
 import { createJobFromDraft, type Job, type JobDraft, type JobPriority, type JobStatus } from '../domain'
 
 /**

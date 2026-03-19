@@ -1,3 +1,4 @@
+// Modal panel for editing user profile with resume file parsing, tech skills selection, and persistence.
 import { useRef, useState } from 'react'
 import type { UserProfile } from '../types/ai'
 import { loadUserProfile, saveUserProfile } from '../storage/aiStorage'

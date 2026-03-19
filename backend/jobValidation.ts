@@ -1,3 +1,4 @@
+// Job validation constants (valid statuses, required fields) and validation result types.
 const VALID_STATUSES = [
   'Applied',
   'Phone Screen',

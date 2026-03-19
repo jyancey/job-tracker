@@ -1,3 +1,4 @@
+// Form component for creating/editing jobs with fields for company, role, salary, URL scraping, and status.
 import { useRef, useState } from 'react'
 import type { JobDraft, JobStatus } from '../domain'
 import { JOB_PRIORITIES } from '../domain'
@@ -8,7 +9,7 @@ interface JobFormProps {
   draft: JobDraft
   editingId: string | null
   onUpdateDraft: <K extends keyof JobDraft>(key: K, value: JobDraft[K]) => void
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void
+  onSubmit: (event: React.SyntheticEvent<HTMLFormElement>) => void
   onCancel: () => void
 }
 

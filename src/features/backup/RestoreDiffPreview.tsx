@@ -1,3 +1,4 @@
+// Preview of backup restore changes (added/updated/removed jobs) before confirming.
 import type { JobDiff, RestoreDiff } from './restoreDiff'
 import { formatFieldName, formatFieldValue } from './restoreDiff'
 

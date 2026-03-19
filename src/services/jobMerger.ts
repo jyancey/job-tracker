@@ -1,3 +1,4 @@
+// Merges imported jobs into the existing list using append, upsert, or replace modes.
 import type { Job } from '../domain'
 
 /**

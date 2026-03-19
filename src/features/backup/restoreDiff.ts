@@ -1,3 +1,4 @@
+// Computes detailed job diffs comparing backup vs current state with field-level change tracking.
 import type { Job } from '../../domain'
 import type { RestoreMode } from './backupService'
 

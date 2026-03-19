@@ -1,3 +1,4 @@
+// Manages toast notifications with add/remove operations and configurable duration.
 import { useState } from 'react'
 import { createNotification, type Notification } from '../services/notifications'
 

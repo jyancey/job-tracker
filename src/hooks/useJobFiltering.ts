@@ -1,3 +1,4 @@
+// Filters and sorts jobs by query, status, date range, salary range, and contact person.
 import { useMemo } from 'react'
 import type { Job } from '../domain'
 import { isOverdueFollowUp, compareDates, getTodayString } from '../utils/dateUtils'

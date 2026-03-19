@@ -1,3 +1,4 @@
+// Manages all filter-related state including query, status, date range, salary, and contact filters.
 import { useCallback, useState } from 'react'
 import type { StatusFilter } from '../types/filters'
 import type { FilterAction, FilterState } from '../components/FilterToolbar'

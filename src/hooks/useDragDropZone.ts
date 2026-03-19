@@ -1,3 +1,4 @@
+// Manages drag-over visual state and drop logic for kanban column drop zones.
 import { useState, useCallback } from 'react'
 import type { JobStatus } from '../domain'
 import { getJobDragData } from '../utils/dragDataUtils'

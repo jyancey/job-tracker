@@ -1,3 +1,4 @@
+// Groups jobs by status and groups tasks by due date for kanban and task views.
 import { useMemo } from 'react'
 import { JOB_STATUSES, type Job, type JobStatus } from '../domain'
 

@@ -1,3 +1,4 @@
+// Root component that wraps the app content with an error boundary and initializes the content model.
 import { AppShellView } from './views/AppShellView'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { useAppContentModel } from './hooks/useAppContentModel'

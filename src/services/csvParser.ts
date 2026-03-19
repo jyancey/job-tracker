@@ -1,3 +1,4 @@
+// Exports and imports jobs to/from CSV format with quoted field escaping.
 import type { Job, JobStatus, JobPriority } from '../domain'
 import { JOB_PRIORITIES, JOB_STATUSES } from '../domain'
 

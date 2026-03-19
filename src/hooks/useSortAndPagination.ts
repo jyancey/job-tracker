@@ -1,3 +1,4 @@
+// Manages sort column/direction state and pagination together with auto-reset on page count changes.
 import { useCallback, useState } from 'react'
 import type { SortColumn, SortDirection } from './useJobFiltering'
 

@@ -1,3 +1,4 @@
+// Task filtering and sorting utilities for today/week views using priority and due date ordering.
 import type { Job, JobPriority } from '../../domain'
 
 const PRIORITY_ORDER: Record<JobPriority, number> = {

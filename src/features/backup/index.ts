@@ -1,3 +1,4 @@
+// Public API barrel re-exporting backup, scheduler, and restore diff functionality.
 export {
   applyRestore,
   backupFilename,

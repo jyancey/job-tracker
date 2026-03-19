@@ -1,9 +1,32 @@
+/* #(@)searchJobs.ts - Multi-token AND-based search
+ * 
+ * Implements a search function that normalizes and tokenizes the query, 
+ * then filters jobs by checking that every token is present in a concatenated
+ * string of relevant job fields. This allows for flexible, case-insensitive
+ * searching across multiple attributes of a job.
+ * 
+ * Copyright (c) 2026 John Yancey . All rights reserved.
+ */
 import type { Job } from '../../domain'
 
+/**
+ * Normalize a string by converting it to lowercase and trimming whitespace.
+ *
+ * @param value - The string to normalize.
+ * @returns The normalized string.
+ */
 function normalize(value: string): string {
   return value.toLowerCase().trim()
 }
 
+/**
+ * Get a concatenated string of all searchable fields of a job, normalized
+ * to lowercase.
+ *
+ * @param job - The job object to extract search text from.
+ * @returns A string containing all searchable fields of the job, concatenated
+ *     and lowercased.
+ */
 function getSearchText(job: Job): string {
   return [
     job.company,

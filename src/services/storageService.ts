@@ -1,3 +1,4 @@
+// Loads jobs from backend API with automatic fallback to localStorage when API is unavailable.
 import type { Job } from '../domain'
 import {
   clearStorageLogs,

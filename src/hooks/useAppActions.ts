@@ -1,3 +1,4 @@
+// Provides user action handlers for job operations, selection management, and view navigation.
 import { useCallback } from 'react'
 import type { Job, JobStatus } from '../domain'
 import * as jobService from '../services/jobService'

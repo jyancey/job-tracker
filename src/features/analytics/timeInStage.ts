@@ -1,3 +1,4 @@
+// Time-in-stage analysis and stuck job detection with configurable thresholds.
 import type { Job, JobStatus } from '../../domain'
 
 /**

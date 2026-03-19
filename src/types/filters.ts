@@ -1,3 +1,4 @@
+// Filter options, sort columns/directions, and pagination interface type definitions.
 import type { JobStatus } from '../domain'
 
 /**

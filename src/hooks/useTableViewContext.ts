@@ -1,3 +1,4 @@
+// Composes the TableViewContext value from various state handlers and memoizes to prevent re-renders.
 import { useMemo, type RefObject } from 'react'
 import type { Job, JobStatus } from '../domain'
 import type { SortColumn, SortDirection } from './useJobFiltering'

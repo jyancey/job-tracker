@@ -1,3 +1,4 @@
+// GET/PUT API route for fetching and replacing all jobs with validation.
 import { NextResponse } from 'next/server'
 import { validateJobArray } from '../../../backend/jobValidation'
 import { jobStore } from '../../../backend/jobStore'

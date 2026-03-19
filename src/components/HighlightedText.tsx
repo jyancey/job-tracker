@@ -1,3 +1,4 @@
+// Highlights matching query terms in text by wrapping matches with <mark> tags.
 interface HighlightedTextProps {
   text: string
   query: string

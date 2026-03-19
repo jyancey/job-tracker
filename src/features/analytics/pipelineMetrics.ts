@@ -1,3 +1,4 @@
+// Conversion metric interfaces and calculations between pipeline stages.
 import { JOB_STATUSES } from '../../domain'
 import type { Job, JobStatus } from '../../domain'
 

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import type { FormEvent } from 'react'
+import type { SyntheticEvent } from 'react'
 import type { Job, JobDraft } from '../domain'
 import { useJobSubmission } from './useJobSubmission'
 
@@ -64,7 +64,7 @@ describe('useJobSubmission', () => {
     )
 
     act(() => {
-      result.current.handleSubmitJob({ preventDefault: vi.fn() } as unknown as FormEvent<HTMLFormElement>)
+      result.current.handleSubmitJob({ preventDefault: vi.fn() } as unknown as SyntheticEvent<HTMLFormElement>)
     })
 
     expect(setJobs).toHaveBeenCalledTimes(1)
@@ -83,7 +83,7 @@ describe('useJobSubmission', () => {
     )
 
     act(() => {
-      result.current.handleSubmitJob({ preventDefault: vi.fn() } as unknown as FormEvent<HTMLFormElement>)
+      result.current.handleSubmitJob({ preventDefault: vi.fn() } as unknown as SyntheticEvent<HTMLFormElement>)
     })
 
     expect(triggerAiScoring).toHaveBeenCalledTimes(1)
@@ -104,7 +104,7 @@ describe('useJobSubmission', () => {
     )
 
     act(() => {
-      result.current.handleSubmitJob({ preventDefault: vi.fn() } as unknown as FormEvent<HTMLFormElement>)
+      result.current.handleSubmitJob({ preventDefault: vi.fn() } as unknown as SyntheticEvent<HTMLFormElement>)
     })
 
     expect(triggerAiScoring).toHaveBeenCalledTimes(1)

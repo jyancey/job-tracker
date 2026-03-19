@@ -1,3 +1,4 @@
+// Composes selection state combining app-wide and current table page selection tracking.
 import { useRef } from 'react'
 import type { Job } from '../domain'
 import { useJobSelection } from './useJobSelection'

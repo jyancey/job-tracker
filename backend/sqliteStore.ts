@@ -1,3 +1,4 @@
+// SQLite database initialization, schema management, and job store implementation using better-sqlite3.
 import fs from 'node:fs'
 import path from 'node:path'
 import Database from 'better-sqlite3'

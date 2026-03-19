@@ -1,3 +1,4 @@
+// Settings hub for AI configuration, database setup, backup scheduling, and restore operations.
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import type { Job } from '../domain'

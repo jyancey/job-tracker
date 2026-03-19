@@ -1,3 +1,4 @@
+// Bulk action bar for comparing selected jobs and deleting jobs on current page.
 import { useTableViewContext } from './TableViewContext'
 
 export function TableBulkActions() {

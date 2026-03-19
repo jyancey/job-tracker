@@ -1,3 +1,4 @@
+// URL normalization and case-insensitive string comparison utilities.
 import type { SortDirection } from './dateUtils'
 
 /**

@@ -5,9 +5,9 @@ test.describe('Job Tracker smoke', () => {
     await page.goto('/')
 
     await expect(page.getByRole('heading', { name: /Track your search like a pipeline/i })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Add Job' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Dashboard' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Add Job' }).first()).toBeVisible()
     await expect(page.getByRole('button', { name: 'Analytics' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'All Jobs' })).toBeVisible()
   })
 
   test('opens and closes settings view', async ({ page }) => {

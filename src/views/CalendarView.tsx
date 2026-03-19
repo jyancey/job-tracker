@@ -1,3 +1,4 @@
+// Calendar grid view showing jobs grouped by their next action due date.
 import { useState, useMemo } from 'react'
 import type { Job } from '../domain'
 import {

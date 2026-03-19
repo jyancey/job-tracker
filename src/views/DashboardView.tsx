@@ -1,3 +1,4 @@
+// Simple grid dashboard displaying job counts grouped by status.
 import { JOB_STATUSES, type Job, type JobStatus } from '../domain'
 
 interface DashboardViewProps {

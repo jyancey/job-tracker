@@ -1,3 +1,4 @@
+// Orchestrates filtering, sorting, and pagination pipeline for table view data.
 import { useMemo } from 'react'
 import type { Job } from '../domain'
 import type { FilterOptions, PaginationOptions, SortOptions } from '../types/filters'

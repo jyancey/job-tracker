@@ -1,11 +1,12 @@
+// Handles job form submission logic including AI scoring trigger and job creation/update.
 import { useCallback } from 'react'
-import type { FormEvent } from 'react'
+import type { SyntheticEvent } from 'react'
 import type { Job, JobDraft } from '../domain'
 import * as jobService from '../services/jobService'
 
 interface UseJobSubmissionProps {
   editingId: string | null
-  submitForm: (event: FormEvent<HTMLFormElement>) => JobDraft | null
+  submitForm: (event: SyntheticEvent<HTMLFormElement>) => JobDraft | null
   resetForm: () => void
   setJobs: (updater: (jobs: Job[]) => Job[]) => void
   triggerAiScoring: (
@@ -20,7 +21,7 @@ interface UseJobSubmissionProps {
 
 export function useJobSubmission({ editingId, submitForm, resetForm, setJobs, triggerAiScoring }: UseJobSubmissionProps) {
   const handleSubmitJob = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
+    (event: SyntheticEvent<HTMLFormElement>) => {
       const normalizedDraft = submitForm(event)
       if (!normalizedDraft) {
         return

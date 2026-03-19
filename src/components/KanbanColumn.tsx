@@ -1,3 +1,4 @@
+// Kanban column that renders jobs grouped by status with drag-drop zone support for status changes.
 import { type Job, type JobStatus } from '../domain'
 import { KanbanCard } from './KanbanCard'
 import { useDragDropZone } from '../hooks/useDragDropZone'

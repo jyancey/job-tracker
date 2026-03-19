@@ -1,3 +1,4 @@
+// Main paginated table view of all jobs with filters, sorting, bulk selection, and row actions.
 import { getTodayString } from '../utils/dateUtils'
 import { Pagination } from '../components/Pagination'
 import { useTableViewContext } from './table/TableViewContext'

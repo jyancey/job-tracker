@@ -1,3 +1,4 @@
+// Manages state for comparing multiple selected jobs with modal visibility and selection.
 import { useCallback, useMemo, useState } from 'react'
 import type { Job } from '../domain'
 

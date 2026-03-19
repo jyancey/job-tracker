@@ -1,3 +1,4 @@
+// Manages import/export UI state including import mode selection and file reference handling.
 import { useCallback, useState } from 'react'
 import type { ImportMode } from '../services/importExportService'
 

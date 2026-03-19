@@ -1,3 +1,4 @@
+// Returns a debounced version of a value with a configurable delay.
 import { useEffect, useState } from 'react'
 
 export function useDebouncedValue<T>(value: T, delayMs: number): T {

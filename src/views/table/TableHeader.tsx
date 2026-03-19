@@ -1,3 +1,4 @@
+// Table header with sortable column triggers and select-all checkbox.
 import { SortableHeader } from '../../components/SortableHeader'
 import { useTableViewContext } from './TableViewContext'
 

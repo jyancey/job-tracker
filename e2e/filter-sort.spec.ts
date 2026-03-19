@@ -16,8 +16,7 @@ test.describe('Filter and sort workflows', () => {
 
     await openTableView(page)
 
-    await page.getByRole('button', { name: 'More Filters' }).click()
-    const searchInput = page.getByPlaceholder('Search company, role, or notes')
+    const searchInput = page.getByLabel('Search jobs')
     await searchInput.fill(zeta)
 
     await expect(page.locator('tbody tr', { hasText: zeta })).toHaveCount(1)
@@ -27,6 +26,7 @@ test.describe('Filter and sort workflows', () => {
     await expect(page.locator('tbody tr', { hasText: zeta })).toHaveCount(1)
     await expect(page.locator('tbody tr', { hasText: alpha })).toHaveCount(1)
 
+    await searchInput.fill(String(suffix))
     await page.getByRole('button', { name: 'Company' }).click()
     const firstCompanyCell = page.locator('tbody tr').first().locator('td').nth(1)
     await expect(firstCompanyCell).toHaveText(alpha)

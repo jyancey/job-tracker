@@ -1,3 +1,4 @@
+// Displays the calculated AI job score with color-coded output (low/medium/high) and loading state.
 import type { Job } from '../domain'
 import { calculateJobScore, DEFAULT_SCORE_WEIGHTS, type ScoreWeights } from '../services/scoring'
 

@@ -1,3 +1,4 @@
+// Routes import/export operations to CSV or JSON handler based on file extension.
 import type { Job } from '../domain'
 import { exportToCsv, importFromCsv } from './csvParser'
 import { exportToJson } from './jsonExport'

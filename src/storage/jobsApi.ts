@@ -1,3 +1,4 @@
+// Fetches and persists jobs via /api/jobs endpoint with error classification for missing backends.
 import type { Job } from '../domain'
 
 const API_JOBS_ENDPOINT = '/api/jobs'

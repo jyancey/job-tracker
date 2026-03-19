@@ -1,3 +1,4 @@
+// Error boundary class component that catches render errors and displays a fallback UI with retry/reload options.
 import React from 'react'
 
 interface ErrorBoundaryState {

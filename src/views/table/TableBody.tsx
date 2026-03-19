@@ -1,3 +1,4 @@
+// Renders table body rows for the current page of paginated jobs.
 import { useTableViewContext } from './TableViewContext'
 import { TableRow } from './TableRow'
 

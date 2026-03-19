@@ -1,3 +1,4 @@
+// Manages view navigation state and job detail modal visibility across the application.
 import { useCallback, useState } from 'react'
 import type { Job } from '../domain'
 

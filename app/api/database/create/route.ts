@@ -1,3 +1,4 @@
+// POST endpoint to initialize/create the SQLite job database.
 import { NextResponse } from 'next/server'
 import { jobStore } from '../../../../backend/jobStore'
 

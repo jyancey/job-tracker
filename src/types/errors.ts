@@ -1,3 +1,4 @@
+// Standardized error, validation, and operation result types used throughout the app.
 import type { Job } from '../domain'
 
 /**

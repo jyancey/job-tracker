@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 
 export async function resetAppState(page: Page): Promise<void> {
   await page.goto('/')
@@ -10,10 +10,12 @@ export async function resetAppState(page: Page): Promise<void> {
 }
 
 export async function addJob(page: Page, input: { company: string; roleTitle: string; applicationDate: string }) {
+  await page.getByRole('button', { name: 'Add Job' }).first().click()
   await page.getByLabel('Company *').fill(input.company)
   await page.getByLabel('Role Title *').fill(input.roleTitle)
   await page.getByLabel('Application Date *').fill(input.applicationDate)
-  await page.getByRole('button', { name: 'Add Job' }).click()
+  await page.locator('.job-form-modal button[type="submit"]').click()
+  await expect(page.locator('.job-form-modal')).toBeHidden()
 }
 
 export async function openTableView(page: Page): Promise<void> {

@@ -1,3 +1,4 @@
+// Reusable table header cell with clickable sort indicator showing ascending/descending direction arrows.
 import type { SortColumn, SortDirection } from '../hooks/useJobFiltering'
 
 interface SortableHeaderProps {

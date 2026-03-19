@@ -1,3 +1,4 @@
+// Date formatting, comparison, and overdue follow-up checking utilities.
 import type { Job } from '../domain'
 
 /**

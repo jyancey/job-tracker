@@ -1,3 +1,4 @@
+// Root HTML layout that sets page metadata and renders child components.
 import type { Metadata } from 'next'
 import './globals.css'
 

@@ -1,3 +1,4 @@
+// Toast notification components with auto-dismiss timers and configurable notification types.
 import { useEffect } from 'react'
 import type { Notification } from '../services/notifications'
 

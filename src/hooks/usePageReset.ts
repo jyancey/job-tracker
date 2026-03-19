@@ -1,3 +1,4 @@
+// Resets table pagination to page 1 whenever the active filter set changes.
 import { useEffect } from 'react'
 import type { FilterState } from '../components/FilterToolbar'
 

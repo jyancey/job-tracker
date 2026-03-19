@@ -1,3 +1,4 @@
+// Lazy-loaded proxy for the job store that defers SQLite initialization until first use.
 import { createJobStore } from './sqliteStore'
 import type { JobStore } from './sqliteStore'
 

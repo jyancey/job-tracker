@@ -1,3 +1,4 @@
+// Reads and writes jobs to localStorage as fallback when the backend API is unavailable.
 import type { Job } from '../domain'
 
 const FALLBACK_JOBS_KEY = 'job-tracker.jobs.fallback'

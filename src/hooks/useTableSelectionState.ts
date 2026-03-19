@@ -1,3 +1,4 @@
+// Computes table selection state derived from current page jobs and selected job IDs.
 import { useEffect, useMemo, type RefObject } from 'react'
 import type { Job } from '../domain'
 

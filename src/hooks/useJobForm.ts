@@ -1,3 +1,4 @@
+// Manages job form state, validation, editing, and submission with draft tracking.
 import { useState } from 'react'
 import { EMPTY_JOB_DRAFT, type Job, type JobDraft } from '../domain'
 import { normalizeUrl } from '../utils/stringUtils'
@@ -9,7 +10,7 @@ export interface UseJobFormResult {
   updateDraft: <K extends keyof JobDraft>(key: K, value: JobDraft[K]) => void
   resetForm: () => void
   startEdit: (job: Job) => void
-  submitForm: (event: React.FormEvent<HTMLFormElement>) => JobDraft | null
+  submitForm: (event: React.SyntheticEvent<HTMLFormElement>) => JobDraft | null
   isValid: boolean
 }
 
@@ -64,7 +65,7 @@ export function useJobForm(): UseJobFormResult {
     setEditingId(job.id)
   }
 
-  function submitForm(event: React.FormEvent<HTMLFormElement>): JobDraft | null {
+  function submitForm(event: React.SyntheticEvent<HTMLFormElement>): JobDraft | null {
     event.preventDefault()
     
     if (!isValid) {

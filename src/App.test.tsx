@@ -23,7 +23,7 @@ async function addJob(input: {
   await user.click(screen.getByRole('button', { name: /^add job$/i }))
 
   const modal = await screen.findByRole('heading', { name: /^add job$/i })
-  const formScope = modal.closest('.job-form-modal')
+  const formScope = modal.closest<HTMLElement>('.job-form-modal')
   if (!formScope) {
     throw new Error('Missing job form modal')
   }
@@ -165,7 +165,7 @@ describe('App', () => {
 
     await user.click(within(brightpathRow).getByRole('button', { name: 'Edit' }))
     const editTitle = await screen.findByRole('heading', { name: /^edit job$/i })
-    const editModal = editTitle.closest('.job-form-modal')
+    const editModal = editTitle.closest<HTMLElement>('.job-form-modal')
     if (!editModal) {
       throw new Error('Missing edit job modal')
     }

@@ -1,3 +1,4 @@
+// Hook for creating, loading, applying, and deleting saved filter/sort presets from localStorage.
 import { useCallback, useEffect, useState } from 'react'
 import type { FilterState } from '../../components/FilterToolbar'
 import type { SortColumn, SortDirection } from '../../types/filters'

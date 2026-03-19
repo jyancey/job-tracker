@@ -1,3 +1,4 @@
+// Handles initial storage hydration and autosave persistence for jobs with change tracking.
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import type { Job } from '../domain'
 import { loadJobs, saveJobs } from '../services/storageService'

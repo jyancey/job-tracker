@@ -1,3 +1,4 @@
+// Manages job selection state with toggle, clear, and batch add/remove operations.
 import { useCallback, useState } from 'react'
 
 /**

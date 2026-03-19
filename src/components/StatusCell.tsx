@@ -1,3 +1,4 @@
+// Table cell wrapper around StatusSelect that prevents event propagation for inline status changes.
 import type { JobStatus } from '../domain'
 import { StatusSelect } from './StatusSelect'
 import { stopPropagation } from '../utils/a11yUtils'

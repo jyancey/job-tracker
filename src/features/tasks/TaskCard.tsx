@@ -1,6 +1,29 @@
+/* #(@)TaskCard.tsx - Task card component for job tracking app
+ * 
+ * This component represents a single task related to a job application, such
+ * as a follow-up action or interview preparation. It displays the next action,
+ * due date, and priority level, and provides controls for marking the task as
+ * complete, snoozing it, or quickly updating the next action and due date. The
+ * card also visually indicates if the task is overdue based on today's date.
+ */
 import { useState } from 'react'
 import type { Job, JobPriority } from '../../domain'
 
+/**
+ * TaskCard component represents a single task with its details and controls
+ * for updating its status, priority, and next action. It allows users to
+ * quickly complete, snooze, or update the task's next action and due date
+ * directly from the card interface.
+ * 
+ * Props:
+ * - job: The job object containing all relevant information about the task.
+ * - today: A string representing today's date in 'YYYY-MM-DD' format for overdue calculation.
+ * - onComplete: Callback function to mark the task as complete.
+ * - onSnooze: Callback function to snooze the task's due date by a specified number of days.
+ * - onPriorityChange: Callback function to update the task's priority level.
+ * - onQuickAddAction: Callback function to quickly update the task's next action and due date.
+ * - onOpenJob: Callback function to open the full job details view.
+ */
 interface TaskCardProps {
   job: Job
   today: string
@@ -11,6 +34,15 @@ interface TaskCardProps {
   onOpenJob: (job: Job) => void
 }
 
+/**
+ * TaskCard component represents a single task with its details and controls
+ * for updating its status, priority, and next action. It allows users to
+ * quickly complete, snooze, or update the task's next action and due date
+ * directly from the card interface.
+ *
+ * @param param0 - The props for the TaskCard component.
+ * @returns A JSX element representing the task card.
+ */
 export function TaskCard({
   job,
   today,

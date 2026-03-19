@@ -1,3 +1,4 @@
+// Auto-backup scheduling with configurable intervals, retention limits, and persistence.
 import type { Job } from '../../domain'
 import { createBackupSnapshot, serializeBackup, backupFilename } from './backupService'
 
@@ -212,15 +213,6 @@ export function createAutoBackup(jobs: Job[], state: AutoBackupState): AutoBacku
   }
 }
 
-/**
- * Check whether a backup is due and, if so, create one and save the updated state.
- *
- * Convenience wrapper combining {@link shouldCreateBackup}, {@link createAutoBackup},
- * and {@link saveBackupState}.
- *
- * @param jobs - The current job list.
- * @returns The updated auto-backup state if a backup was created, or `null` if none was needed.
- */
 /**
  * Check whether a backup is due and, if so, create one and save the updated state.
  *

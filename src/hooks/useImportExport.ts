@@ -1,3 +1,4 @@
+// Encapsulates import/export state and handlers for CSV/JSON file operations with merge modes.
 import { useCallback, useRef, useState } from 'react'
 import type { Job } from '../domain'
 import {

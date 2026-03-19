@@ -1,3 +1,4 @@
+// Logs storage operations to localStorage with optional debug console output for troubleshooting.
 import { downloadTextFile } from '../utils/downloadUtils'
 
 const STORAGE_LOG_BUFFER_KEY = 'job-tracker.storage.logs'

@@ -1,3 +1,4 @@
+// Displays conversion metrics, weekly trends, stuck jobs, and status distribution analytics.
 import type { Job } from '../domain'
 import type { StatusFilter } from '../types/filters'
 import {

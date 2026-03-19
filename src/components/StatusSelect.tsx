@@ -1,3 +1,4 @@
+// Reusable dropdown for selecting job status, supporting filtering modes and custom styling.
 import { JOB_STATUSES, type JobStatus } from '../domain'
 
 interface StatusSelectProps {

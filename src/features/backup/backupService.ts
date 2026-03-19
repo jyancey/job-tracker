@@ -1,3 +1,4 @@
+// Backup snapshots, serialization/parsing, restore impact calculation, and restore execution.
 import type { Job } from '../../domain'
 import { mergeImportedJobs, type ImportMode, importFromJson } from '../../services/importExportService'
 

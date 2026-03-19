@@ -1,3 +1,4 @@
+// Serializes/deserializes job data for HTML5 drag-and-drop operations via DataTransfer API.
 import type { Job } from '../domain'
 
 /**

@@ -1,3 +1,4 @@
+// Calculates weighted composite job scores from five dimensions (fit, compensation, location, growth, confidence).
 import type { Job } from '../domain'
 
 /**

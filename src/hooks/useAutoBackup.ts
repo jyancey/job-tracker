@@ -1,3 +1,4 @@
+// Automatically checks and creates backups at configured intervals when jobs change.
 import { useEffect, useRef } from 'react'
 import type { Job } from '../domain'
 import { checkAndCreateAutoBackup, loadBackupState } from '../features/backup'

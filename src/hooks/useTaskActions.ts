@@ -1,3 +1,4 @@
+// Task-specific job mutation handlers for Today/This Week views (complete, snooze, priority).
 import { useCallback } from 'react'
 import type { Job, JobPriority } from '../domain'
 import * as jobService from '../services/jobService'

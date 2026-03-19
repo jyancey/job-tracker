@@ -1,3 +1,4 @@
+// Master composition hook that assembles all app-level state and actions into AppShellView props.
 import type { Job } from '../domain'
 import type { StatusFilter } from '../types/filters'
 import type { AppShellViewProps } from '../views/AppShellView'

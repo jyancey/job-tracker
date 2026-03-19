@@ -1,3 +1,4 @@
+// Filter toolbar with search, status dropdown, date range, salary range, and saved views management.
 import type { StatusFilter } from '../hooks/useJobFiltering'
 import { StatusSelect } from './StatusSelect'
 

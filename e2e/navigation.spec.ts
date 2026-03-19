@@ -6,11 +6,8 @@ test.describe('View navigation', () => {
     await resetAppState(page)
   })
 
-  test('navigates across dashboard, analytics, calendar, and kanban views', async ({ page }) => {
-    await expect(page.getByRole('button', { name: 'Dashboard' })).toHaveClass(/active/)
-    await expect(page.locator('.dashboard-grid h3', { hasText: 'Wishlist' })).toBeVisible()
-
-    await page.getByRole('button', { name: 'Analytics' }).click()
+  test('navigates across analytics, calendar, and kanban views', async ({ page }) => {
+    await expect(page.getByRole('button', { name: 'Analytics' })).toHaveClass(/active/)
     await expect(page.getByRole('heading', { name: 'Pipeline Analytics' })).toBeVisible()
 
     await page.getByRole('button', { name: 'Calendar' }).click()

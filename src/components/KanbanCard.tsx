@@ -1,3 +1,4 @@
+// Draggable card representing a single job in the kanban board with status selector and action buttons.
 import { type Job, type JobStatus } from '../domain'
 import { StatusSelect } from './StatusSelect'
 import { createButtonKbdProps, stopPropagation } from '../utils/a11yUtils'

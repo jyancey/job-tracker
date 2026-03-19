@@ -1,3 +1,4 @@
+// Encapsulates saved-view apply/save/rename/delete flows with filter and sort state management.
 import { useCallback } from 'react'
 import type { FilterState } from '../components/FilterToolbar'
 import type { SavedView } from '../features/savedViews/useSavedViews'
