@@ -230,7 +230,7 @@ export function ProfileView({ onClose }: ProfileViewProps) {
               <h2>Skills</h2>
               <label className="full-width">
                 Add Skill
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div className="skill-input-row">
                   <input
                     type="text"
                     value={customSkillInput}
@@ -242,13 +242,11 @@ export function ProfileView({ onClose }: ProfileViewProps) {
                       }
                     }}
                     placeholder="e.g., React, Python, AWS"
-                    style={{ flex: 1 }}
                   />
                   <button
                     type="button"
                     className="button-secondary"
                     onClick={handleAddCustomSkill}
-                    style={{ flexShrink: 0 }}
                   >
                     Add
                   </button>
@@ -257,38 +255,16 @@ export function ProfileView({ onClose }: ProfileViewProps) {
 
               {/* Display skills */}
               {profile.skills && profile.skills.length > 0 && (
-                <div style={{ marginTop: '1rem' }}>
-                  <p style={{ fontSize: '0.9rem', color: '#586069', marginBottom: '0.5rem' }}>
-                    Your skills:
-                  </p>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div className="profile-skills-section">
+                  <p className="profile-skills-label">Your skills:</p>
+                  <div className="profile-skills-list">
                     {profile.skills.map((skill) => (
-                      <div
-                        key={skill}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          padding: '0.4rem 0.75rem',
-                          background: '#f6f8fa',
-                          border: '1px solid #d1d5da',
-                          borderRadius: '999px',
-                          fontSize: '0.9rem',
-                        }}
-                      >
+                      <div key={skill} className="profile-skill-chip">
                         <span>{skill}</span>
                         <button
                           type="button"
                           onClick={() => handleRemoveSkill(skill)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            color: '#586069',
-                            padding: '0',
-                            fontSize: '1.1rem',
-                            lineHeight: '1',
-                          }}
+                          className="profile-skill-remove"
                           title={`Remove ${skill}`}
                         >
                           ×

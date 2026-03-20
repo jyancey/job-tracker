@@ -14,33 +14,34 @@
 .analytics-header {
   font-size: 2rem;
   margin: 0;
-  color: #1a1a1a;
+  color: #141413;
 }
 
 .analytics-export-btn {
   padding: 0.5rem 1rem;
-  background: #2563eb;
-  color: white;
+  background: #6a9bcc;
+  color: #faf9f5;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, transform 0.15s ease;
 }
 
 .analytics-export-btn:hover {
-  background: #1d4ed8;
+  background: #5a8bb8;
+  transform: translateY(-1px);
 }
 
 .analytics-export-btn:active {
-  background: #1e40af;
+  background: #4a7ba4;
 }
 
 .analytics-drilldown-hint {
   margin-top: -1rem;
   margin-bottom: 1.5rem;
-  color: #5b6472;
+  color: #b0aea5;
   font-size: 0.875rem;
 }
 
@@ -51,11 +52,11 @@
 
 .interactive-card:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(20, 20, 19, 0.08);
 }
 
 .interactive-card:focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid #d97757;
   outline-offset: 2px;
 }
 
@@ -66,8 +67,8 @@
 .analytics-section h3 {
   font-size: 1.25rem;
   margin-bottom: 1rem;
-  color: #333;
-  border-bottom: 2px solid #e5e5e5;
+  color: #141413;
+  border-bottom: 2px solid #e8e6dc;
   padding-bottom: 0.5rem;
 }
 
@@ -79,9 +80,9 @@
 }
 
 .stat-card {
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
+  background: #faf9f5;
+  border: 1px solid #e8e6dc;
+  border-radius: 10px;
   padding: 1.5rem 1rem;
   text-align: center;
 }
@@ -89,13 +90,13 @@
 .stat-value {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #2563eb;
+  color: #6a9bcc;
   margin-bottom: 0.5rem;
 }
 
 .stat-label {
   font-size: 0.875rem;
-  color: #6c757d;
+  color: #b0aea5;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -108,27 +109,31 @@
 }
 
 .conversion-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(106, 155, 204, 0.12), rgba(120, 140, 93, 0.12));
+  color: #141413;
+  border: 1px solid #e8e6dc;
+  border-left: 4px solid #6a9bcc;
+  border-radius: 10px;
   padding: 1.5rem;
 }
 
 .conversion-label {
   font-size: 0.875rem;
   margin-bottom: 0.75rem;
-  opacity: 0.9;
+  color: #b0aea5;
+  font-weight: 600;
 }
 
 .conversion-rate {
   font-size: 2.5rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
+  color: #6a9bcc;
 }
 
 .conversion-detail {
   font-size: 0.875rem;
-  opacity: 0.8;
+  color: #141413;
 }
 
 /* Trends Grid */
@@ -139,9 +144,9 @@
 }
 
 .trend-card {
-  background: white;
-  border: 2px solid #e5e5e5;
-  border-radius: 8px;
+  background: #faf9f5;
+  border: 1px solid #e8e6dc;
+  border-radius: 10px;
   padding: 1.5rem;
 }
 
@@ -155,12 +160,12 @@
 .trend-value {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #1a1a1a;
+  color: #141413;
 }
 
 .trend-label {
   font-size: 0.875rem;
-  color: #6c757d;
+  color: #b0aea5;
   margin-bottom: 0.75rem;
   margin-top: 0.75rem;
 }
@@ -171,15 +176,15 @@
 }
 
 .trend-up {
-  color: #22c55e;
+  color: #788c5d;
 }
 
 .trend-down {
-  color: #ef4444;
+  color: #d97757;
 }
 
 .trend-neutral {
-  color: #6c757d;
+  color: #b0aea5;
 }
 
 /* Time in Stage Grid */
@@ -190,16 +195,17 @@
 }
 
 .time-card {
-  background: #f8f9fa;
-  border-left: 4px solid #2563eb;
-  border-radius: 4px;
+  background: #faf9f5;
+  border: 1px solid #e8e6dc;
+  border-left: 4px solid #6a9bcc;
+  border-radius: 10px;
   padding: 1.5rem 1rem;
 }
 
 .time-status {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #333;
+  color: #b0aea5;
   margin-bottom: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -208,30 +214,30 @@
 .time-value {
   font-size: 2rem;
   font-weight: bold;
-  color: #1a1a1a;
+  color: #141413;
   margin-bottom: 0.25rem;
 }
 
 .time-count {
   font-size: 0.875rem;
-  color: #6c757d;
+  color: #b0aea5;
 }
 
 /* Stuck Jobs Section */
 .stuck-jobs-section {
-  background: #fee;
-  border: 2px solid #fcc;
-  border-radius: 8px;
+  background: #f9f0ed;
+  border: 1px solid rgba(217, 119, 87, 0.3);
+  border-radius: 10px;
   padding: 1.5rem;
 }
 
 .stuck-jobs-section h3 {
-  color: #c00;
-  border-bottom-color: #fcc;
+  color: #d97757;
+  border-bottom-color: rgba(217, 119, 87, 0.3);
 }
 
 .stuck-jobs-description {
-  color: #a00;
+  color: #d97757;
   margin-bottom: 1rem;
   font-size: 0.875rem;
 }
@@ -243,9 +249,9 @@
 }
 
 .stuck-job-item {
-  background: white;
-  border: 1px solid #fcc;
-  border-radius: 4px;
+  background: #faf9f5;
+  border: 1px solid rgba(217, 119, 87, 0.3);
+  border-radius: 8px;
   padding: 1rem;
 }
 
@@ -256,45 +262,45 @@
 
 .stuck-job-interactive:hover {
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(192, 0, 0, 0.1);
-  border-color: #c00;
+  box-shadow: 0 2px 8px rgba(217, 119, 87, 0.2);
+  border-color: #d97757;
 }
 
 .stuck-job-interactive:focus-visible {
-  outline: 2px solid #c00;
+  outline: 2px solid #d97757;
   outline-offset: 2px;
 }
 
 .stuck-job-header {
   margin-bottom: 0.5rem;
-  color: #333;
+  color: #141413;
 }
 
 .stuck-job-details {
   display: flex;
   gap: 1rem;
   font-size: 0.875rem;
-  color: #6c757d;
+  color: #b0aea5;
 }
 
 .stuck-job-status {
-  background: #fef3c7;
-  color: #92400e;
+  background: rgba(217, 119, 87, 0.12);
+  color: #d97757;
   padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  border-radius: 6px;
   font-weight: 500;
 }
 
 .stuck-job-duration {
-  color: #a00;
+  color: #d97757;
   font-weight: 500;
 }
 
 .stuck-jobs-more {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #fcc;
-  color: #a00;
+  border-top: 1px solid rgba(217, 119, 87, 0.3);
+  color: #d97757;
   text-align: center;
   font-size: 0.875rem;
 }

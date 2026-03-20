@@ -20,6 +20,9 @@ interface AnalyticsViewProps {
 
 export function AnalyticsView({ jobs, onFilterByStatus, onSelectJob }: AnalyticsViewProps) {
   const conversionMetrics = calculateConversionMetrics(jobs)
+  const appliedTotal = conversionMetrics.appliedToPhoneScreen.total
+  const offersTotal = conversionMetrics.interviewToOffer.converted
+  const appliedToOfferRate = appliedTotal > 0 ? Math.round((offersTotal / appliedTotal) * 100) : 0
   const weeklyTrends = calculateWeeklyTrends(jobs)
   const timeInStage = calculateTimeInStage(jobs)
   const stuckJobs = findStuckJobs(jobs)
@@ -89,14 +92,15 @@ export function AnalyticsView({ jobs, onFilterByStatus, onSelectJob }: Analytics
             <div className="conversion-label">Applied → Phone Screen</div>
             <div className="conversion-rate">{conversionMetrics.appliedToPhoneScreen.rate}%</div>
             <div className="conversion-detail">
-              {conversionMetrics.appliedToPhoneScreen.converted} of {conversionMetrics.appliedToPhoneScreen.total}
+              {conversionMetrics.appliedToPhoneScreen.converted} reached next stage out of{' '}
+              {conversionMetrics.appliedToPhoneScreen.total}
             </div>
           </div>
           <div className="conversion-card interactive-card" onClick={() => drillDown('Interview')} role="button" tabIndex={0}>
             <div className="conversion-label">Phone Screen → Interview</div>
             <div className="conversion-rate">{conversionMetrics.phoneScreenToInterview.rate}%</div>
             <div className="conversion-detail">
-              {conversionMetrics.phoneScreenToInterview.converted} of{' '}
+              {conversionMetrics.phoneScreenToInterview.converted} reached next stage out of{' '}
               {conversionMetrics.phoneScreenToInterview.total}
             </div>
           </div>
@@ -104,7 +108,15 @@ export function AnalyticsView({ jobs, onFilterByStatus, onSelectJob }: Analytics
             <div className="conversion-label">Interview → Offer</div>
             <div className="conversion-rate">{conversionMetrics.interviewToOffer.rate}%</div>
             <div className="conversion-detail">
-              {conversionMetrics.interviewToOffer.converted} of {conversionMetrics.interviewToOffer.total}
+              {conversionMetrics.interviewToOffer.converted} reached next stage out of{' '}
+              {conversionMetrics.interviewToOffer.total}
+            </div>
+          </div>
+          <div className="conversion-card interactive-card" onClick={() => drillDown('Offer')} role="button" tabIndex={0}>
+            <div className="conversion-label">Applied → Offer (Overall)</div>
+            <div className="conversion-rate">{appliedToOfferRate}%</div>
+            <div className="conversion-detail">
+              {offersTotal} offers out of {appliedTotal} applications
             </div>
           </div>
         </div>
@@ -121,7 +133,7 @@ export function AnalyticsView({ jobs, onFilterByStatus, onSelectJob }: Analytics
                 values={[weeklyTrends.previousWeek.newApplications, weeklyTrends.currentWeek.newApplications]}
                 height={24}
                 width={60}
-                color={weeklyTrends.changes.newApplications > 0 ? '#10b981' : '#ef4444'}
+                color={weeklyTrends.changes.newApplications > 0 ? '#788c5d' : '#d97757'}
               />
             </div>
             <div className="trend-label">Applications This Week</div>
@@ -136,7 +148,7 @@ export function AnalyticsView({ jobs, onFilterByStatus, onSelectJob }: Analytics
                 values={[weeklyTrends.previousWeek.phoneScreens, weeklyTrends.currentWeek.phoneScreens]}
                 height={24}
                 width={60}
-                color={weeklyTrends.changes.phoneScreens > 0 ? '#10b981' : '#ef4444'}
+                color={weeklyTrends.changes.phoneScreens > 0 ? '#788c5d' : '#d97757'}
               />
             </div>
             <div className="trend-label">Phone Screens</div>
@@ -151,7 +163,7 @@ export function AnalyticsView({ jobs, onFilterByStatus, onSelectJob }: Analytics
                 values={[weeklyTrends.previousWeek.interviews, weeklyTrends.currentWeek.interviews]}
                 height={24}
                 width={60}
-                color={weeklyTrends.changes.interviews > 0 ? '#10b981' : '#ef4444'}
+                color={weeklyTrends.changes.interviews > 0 ? '#788c5d' : '#d97757'}
               />
             </div>
             <div className="trend-label">Interviews</div>
@@ -166,7 +178,7 @@ export function AnalyticsView({ jobs, onFilterByStatus, onSelectJob }: Analytics
                 values={[weeklyTrends.previousWeek.offers, weeklyTrends.currentWeek.offers]}
                 height={24}
                 width={60}
-                color={weeklyTrends.changes.offers > 0 ? '#10b981' : '#ef4444'}
+                color={weeklyTrends.changes.offers > 0 ? '#788c5d' : '#d97757'}
               />
             </div>
             <div className="trend-label">Offers</div>

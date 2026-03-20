@@ -499,7 +499,7 @@ export function SettingsView({ onClose, jobs, setJobs, addNotification }: Settin
               </button>
             </div>
 
-            <label className="full-width" style={{ marginTop: '0.8rem' }}>
+            <label className="full-width settings-spaced-top">
               Restore Mode
               <select value={restoreMode} onChange={(e) => handleRestoreModeChange(e.target.value as RestoreMode)}>
                 <option value="upsert">Upsert (update matching IDs, insert new)</option>
@@ -521,7 +521,7 @@ export function SettingsView({ onClose, jobs, setJobs, addNotification }: Settin
               </div>
             )}
 
-            <div className="settings-actions-row" style={{ marginTop: '0.8rem' }}>
+            <div className="settings-actions-row settings-spaced-top">
               <button
                 type="button"
                 className="button-primary"
