@@ -238,7 +238,7 @@ export function SettingsView({ onClose, jobs, setJobs, addNotification }: Settin
   }
 
   return (
-    <div className="profile-view-container">
+    <>
       <header className="profile-view-header">
         <h1>Settings</h1>
         <button className="close-button" onClick={onClose} title="Close">
@@ -541,7 +541,7 @@ export function SettingsView({ onClose, jobs, setJobs, addNotification }: Settin
 
         <div className="profile-footer">
           <button type="button" className="button-secondary" onClick={onClose}>
-            ← Back to Jobs
+            Close
           </button>
           <button type="button" className="button-primary" onClick={handleSaveSettings}>
             Save Settings
@@ -560,6 +560,6 @@ export function SettingsView({ onClose, jobs, setJobs, addNotification }: Settin
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }

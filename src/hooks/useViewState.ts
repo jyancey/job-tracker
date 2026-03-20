@@ -9,8 +9,6 @@ export type View =
   | 'analytics'
   | 'today'
   | 'thisWeek'
-  | 'profile'
-  | 'settings'
 
 /**
  * Custom hook to manage view navigation and modal state

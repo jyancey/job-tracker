@@ -35,8 +35,6 @@ const VIEW_LABELS: Record<View, string> = {
   kanban: 'Kanban',
   calendar: 'Calendar',
   table: 'All Jobs',
-  profile: 'Profile',
-  settings: 'Settings',
 }
 
 export interface AppShellViewProps {
@@ -168,6 +166,8 @@ export function AppShellView({
   triggerAiScoring,
 }: AppShellViewProps) {
   const [isJobFormManuallyOpen, setIsJobFormManuallyOpen] = useState(false)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const isJobFormOpen = isJobFormManuallyOpen || Boolean(editingId)
 
   const openAddJobModal = () => {
@@ -197,30 +197,20 @@ export function AppShellView({
       <input ref={importFileRef} type="file" onChange={handleImportFile} style={{ display: 'none' }} />
       <ToastContainer notifications={notifications} onRemove={removeNotification} />
 
-      {view === 'profile' ? (
-        <ProfileView onClose={() => updateView('table')} />
-      ) : view === 'settings' ? (
-        <SettingsView
-          onClose={() => updateView('table')}
-          jobs={jobs}
-          setJobs={setJobs}
-          addNotification={addNotification}
-        />
-      ) : (
-        <>
+      <>
           <section className="top-grid">
             <header className="hero">
               <div className="hero-actions" role="group" aria-label="Profile and settings actions">
                 <button type="button" className="small" onClick={openAddJobModal} title="Open add job form">
                   Add Job
                 </button>
-                <button type="button" className="small ghost" onClick={() => updateView('profile')} title="Open profile">
+                <button type="button" className="small ghost" onClick={() => setIsProfileOpen(true)} title="Open profile">
                   Profile
                 </button>
                 <button
                   type="button"
                   className="small ghost"
-                  onClick={() => updateView('settings')}
+                  onClick={() => setIsSettingsOpen(true)}
                   title="Open settings"
                 >
                   Settings
@@ -277,7 +267,6 @@ export function AppShellView({
               <div className="toolbar">
                 <div className="view-tabs">
                   {(Object.keys(VIEW_LABELS) as View[])
-                    .filter((key) => key !== 'profile' && key !== 'settings')
                     .map((key) => (
                       <button
                         key={key}
@@ -407,6 +396,26 @@ export function AppShellView({
 
           {viewingJob && <JobModal job={viewingJob} onClose={closeViewOnly} onReAnalyze={triggerAiScoring} setJobs={setJobs} />}
         </>
+
+      {isProfileOpen && (
+        <div className="profile-modal-backdrop" onClick={() => setIsProfileOpen(false)}>
+          <section className="profile-modal panel" onClick={(event) => event.stopPropagation()}>
+            <ProfileView onClose={() => setIsProfileOpen(false)} />
+          </section>
+        </div>
+      )}
+
+      {isSettingsOpen && (
+        <div className="profile-modal-backdrop" onClick={() => setIsSettingsOpen(false)}>
+          <section className="profile-modal panel" onClick={(event) => event.stopPropagation()}>
+            <SettingsView
+              onClose={() => setIsSettingsOpen(false)}
+              jobs={jobs}
+              setJobs={setJobs}
+              addNotification={addNotification}
+            />
+          </section>
+        </div>
       )}
     </div>
   )

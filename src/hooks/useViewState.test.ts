@@ -48,7 +48,7 @@ describe('useViewState', () => {
 
   it('supports switching across all views', () => {
     const { result } = renderHook(() => useViewState('analytics'))
-    const views: View[] = ['table', 'kanban', 'calendar', 'analytics', 'today', 'thisWeek', 'profile', 'settings']
+    const views: View[] = ['table', 'kanban', 'calendar', 'analytics', 'today', 'thisWeek']
 
     for (const view of views) {
       act(() => {

@@ -103,7 +103,7 @@ export function ProfileView({ onClose }: ProfileViewProps) {
   }
 
   return (
-    <div className="profile-view-container">
+    <>
       <header className="profile-view-header">
         <h1>Your Profile</h1>
         <button className="close-button" onClick={onClose} title="Close">
@@ -309,13 +309,13 @@ export function ProfileView({ onClose }: ProfileViewProps) {
 
         <div className="profile-footer">
           <button type="button" className="button-secondary" onClick={onClose}>
-            ← Back to Jobs
+            Close
           </button>
           <button type="button" className="button-primary" onClick={handleSaveProfile}>
             Save Profile
           </button>
         </div>
       </div>
-    </div>
+    </>
   )
 }

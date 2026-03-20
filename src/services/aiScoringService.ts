@@ -1,9 +1,17 @@
-/**
- * AI Scoring Service - Analyzes job descriptions and generates quality scores
+/* #(@)aiScoringService.ts - AI Job Scoring Service
+ * 
+ * This service provides functionality to analyze job descriptions using AI
+ * and generate quality scores based on a candidate's profile. It supports
+ * multiple AI providers (OpenAI and LM Studio) and includes robust handling
+ * of API responses, ensuring that the application can extract meaningful
+ * insights from the AI's analysis. The service also includes validation for
+ * AI configuration settings and normalization of API endpoints to accommodate
+ * different provider requirements. This allows users to receive personalized
+ * job scoring that can help them make informed decisions about their job
+ * applications.
  */
 
 import type { AIConfig, AIScoreRequest, AIScoreResult, AIProvider, UserProfile } from '../types/ai'
-
 
 const SCORING_PROMPT = `You are an expert career advisor analyzing job opportunities. Given a job description and a candidate's profile, provide objective quality scores across 5 dimensions on a 0-5 scale:
 
@@ -103,7 +111,7 @@ async function callOpenAI(config: AIConfig, messages: Array<{ role: string; cont
       model,
       messages,
       temperature: 0.3,
-      max_tokens: 500,
+      max_tokens: 4096,
     }),
   })
 
@@ -130,7 +138,7 @@ async function callLMStudio(config: AIConfig, messages: Array<{ role: string; co
       model,
       messages,
       temperature: 0.3,
-      max_tokens: 500,
+      max_tokens: 4096,
     }),
   })
 
@@ -144,26 +152,66 @@ async function callLMStudio(config: AIConfig, messages: Array<{ role: string; co
 }
 
 function parseScoreResponse(content: string): Omit<AIScoreResult, 'analyzedAt' | 'model' | 'provider'> {
-  // Remove markdown code blocks if present
-  let cleaned = content.trim()
-  if (cleaned.startsWith('```json')) {
-    cleaned = cleaned.replace(/```json\n?/, '').replace(/\n?```$/, '')
-  } else if (cleaned.startsWith('```')) {
-    cleaned = cleaned.replace(/```\n?/, '').replace(/\n?```$/, '')
+  if (!content.trim()) {
+    throw new Error('AI returned an empty response — the model may not be loaded or max_tokens was too low')
+  }
+
+  // Extract the first JSON object from the response, handling:
+  // - bare JSON
+  // - JSON wrapped in ```json ... ``` or ``` ... ```
+  // - JSON embedded in prose ("Here are the scores: {...}")
+  const jsonMatch = content.match(/\{[\s\S]*\}/)
+  
+  let parsed: Record<string, unknown> | null = null
+  
+  // Try parsing the matched JSON
+  if (jsonMatch) {
+    try {
+      parsed = JSON.parse(jsonMatch[0]) as Record<string, unknown>
+    } catch {
+      // JSON might be truncated; will try fallback parsing below
+      parsed = null
+    }
   }
   
-  const parsed = JSON.parse(cleaned)
-  
-  // Validate scores are within 0-5 range
-  const clamp = (val: number) => Math.max(0, Math.min(5, val))
-  
+  // Fallback: if JSON parsing fails, extract individual score fields with regex
+  if (!parsed) {
+    const extractScore = (name: string): number => {
+      const pattern = new RegExp(`"${name}"\\s*:\\s*([0-9.]+)`)
+      const match = content.match(pattern)
+      return match ? Math.max(0, Math.min(5, Number(match[1]))) : 0
+    }
+    
+    // If we have at least one valid score, build a partial result
+    const scores = {
+      scoreFit: extractScore('scoreFit'),
+      scoreCompensation: extractScore('scoreCompensation'),
+      scoreLocation: extractScore('scoreLocation'),
+      scoreGrowth: extractScore('scoreGrowth'),
+      scoreConfidence: extractScore('scoreConfidence'),
+    }
+    
+    // If we extracted any scores (at least one non-zero), use them
+    if (Object.values(scores).some((s) => s > 0)) {
+      parsed = scores
+    } else {
+      throw new Error(`No valid JSON object found in AI response: ${content.slice(0, 200)}`)
+    }
+  }
+
+  // Coerce to number: handles string scores (e.g. "3.5") returned by some models
+  const toScore = (val: unknown): number => {
+    const n = Number(val)
+    return isNaN(n) ? 0 : Math.max(0, Math.min(5, n))
+  }
+
   return {
-    scoreFit: clamp(parsed.scoreFit || 0),
-    scoreCompensation: clamp(parsed.scoreCompensation || 0),
-    scoreLocation: clamp(parsed.scoreLocation || 0),
-    scoreGrowth: clamp(parsed.scoreGrowth || 0),
-    scoreConfidence: clamp(parsed.scoreConfidence || 0),
-    reasoning: parsed.reasoning || 'No reasoning provided',
+    scoreFit: toScore(parsed.scoreFit),
+    scoreCompensation: toScore(parsed.scoreCompensation),
+    scoreLocation: toScore(parsed.scoreLocation),
+    scoreGrowth: toScore(parsed.scoreGrowth),
+    scoreConfidence: toScore(parsed.scoreConfidence),
+    reasoning: typeof parsed.reasoning === 'string' ? parsed.reasoning : 'No reasoning provided (response may have been truncated)',
   }
 }
 
