@@ -217,6 +217,42 @@ function ensureJobsSchema(db: InstanceType<typeof Database>): void {
   }
 }
 
+function ensureUserProfileSchema(db: InstanceType<typeof Database>): void {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS user_profile (
+      id TEXT PRIMARY KEY DEFAULT 'default',
+      name TEXT,
+      currentRole TEXT,
+      yearsExperience INTEGER,
+      skills TEXT,
+      preferredRoles TEXT,
+      preferredCompanySize TEXT,
+      preferredLocation TEXT,
+      salaryExpectation TEXT,
+      targetIndustries TEXT,
+      careerGoals TEXT,
+      dealBreakers TEXT,
+      resumeText TEXT,
+      updatedAt TEXT NOT NULL,
+      createdAt TEXT NOT NULL
+    )
+  `)
+}
+
+function ensureAIConfigSchema(db: InstanceType<typeof Database>): void {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS ai_config (
+      id TEXT PRIMARY KEY DEFAULT 'default',
+      provider TEXT NOT NULL,
+      apiKey TEXT,
+      baseUrl TEXT,
+      model TEXT,
+      updatedAt TEXT NOT NULL,
+      createdAt TEXT NOT NULL
+    )
+  `)
+}
+
 export function createJobStore(
   dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAULT_DB_PATH,
 ): JobStore {
@@ -226,6 +262,8 @@ export function createJobStore(
   db.pragma('journal_mode = WAL')
   db.pragma('busy_timeout = 10000')
   ensureJobsSchema(db)
+  ensureUserProfileSchema(db)
+  ensureAIConfigSchema(db)
 
   const listStatement = db.prepare(`
     SELECT ${JOB_COLUMNS.join(', ')}
@@ -296,5 +334,181 @@ export function createJobStore(
     close() {
       db.close()
     },
+  }
+}
+
+/**
+ * Get or initialize a user profile from the database.
+ * Returns the stored profile or an empty profile object.
+ */
+export function getUserProfile(
+  dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAULT_DB_PATH,
+): Record<string, unknown> {
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true })
+  const db = new Database(dbPath)
+  db.pragma('journal_mode = WAL')
+  db.pragma('busy_timeout = 10000')
+  ensureUserProfileSchema(db)
+
+  try {
+    const row = db.prepare('SELECT * FROM user_profile WHERE id = ?').get('default') as
+      | Record<string, unknown>
+      | undefined
+
+    if (!row) {
+      return {}
+    }
+
+    // Parse JSON fields
+    const profile: Record<string, unknown> = { ...row }
+    const jsonFields = ['skills', 'preferredRoles', 'targetIndustries', 'dealBreakers']
+    for (const field of jsonFields) {
+      if (typeof profile[field] === 'string') {
+        try {
+          profile[field] = JSON.parse(profile[field] as string)
+        } catch {
+          profile[field] = []
+        }
+      }
+    }
+
+    return profile
+  } finally {
+    db.close()
+  }
+}
+
+/**
+ * Save a user profile to the database.
+ */
+export function saveUserProfile(
+  profile: Record<string, unknown>,
+  dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAULT_DB_PATH,
+): void {
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true })
+  const db = new Database(dbPath)
+  db.pragma('journal_mode = WAL')
+  db.pragma('busy_timeout = 10000')
+  ensureUserProfileSchema(db)
+
+  try {
+    const now = new Date().toISOString()
+    
+    // Convert array fields to JSON strings
+    const toSave: Record<string, unknown> = { ...profile, id: 'default' }
+    const jsonFields = ['skills', 'preferredRoles', 'targetIndustries', 'dealBreakers']
+    for (const field of jsonFields) {
+      if (Array.isArray(toSave[field])) {
+        toSave[field] = JSON.stringify(toSave[field])
+      }
+    }
+
+    const existing = db.prepare('SELECT id FROM user_profile WHERE id = ?').get('default')
+
+    if (existing) {
+      const updateStmt = db.prepare(`
+        UPDATE user_profile SET 
+          name = @name,
+          currentRole = @currentRole,
+          yearsExperience = @yearsExperience,
+          skills = @skills,
+          preferredRoles = @preferredRoles,
+          preferredCompanySize = @preferredCompanySize,
+          preferredLocation = @preferredLocation,
+          salaryExpectation = @salaryExpectation,
+          targetIndustries = @targetIndustries,
+          careerGoals = @careerGoals,
+          dealBreakers = @dealBreakers,
+          resumeText = @resumeText,
+          updatedAt = @updatedAt
+        WHERE id = 'default'
+      `)
+      updateStmt.run({ ...toSave, updatedAt: now })
+    } else {
+      const insertStmt = db.prepare(`
+        INSERT INTO user_profile (
+          id, name, currentRole, yearsExperience, skills, preferredRoles,
+          preferredCompanySize, preferredLocation, salaryExpectation,
+          targetIndustries, careerGoals, dealBreakers, resumeText,
+          updatedAt, createdAt
+        ) VALUES (
+          'default', @name, @currentRole, @yearsExperience, @skills, @preferredRoles,
+          @preferredCompanySize, @preferredLocation, @salaryExpectation,
+          @targetIndustries, @careerGoals, @dealBreakers, @resumeText,
+          @updatedAt, @createdAt
+        )
+      `)
+      insertStmt.run({ ...toSave, updatedAt: now, createdAt: now })
+    }
+  } finally {
+    db.close()
+  }
+}
+
+/**
+ * Get or initialize AI configuration from the database.
+ */
+export function getAIConfig(
+  dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAULT_DB_PATH,
+): Record<string, unknown> {
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true })
+  const db = new Database(dbPath)
+  db.pragma('journal_mode = WAL')
+  db.pragma('busy_timeout = 10000')
+  ensureAIConfigSchema(db)
+
+  try {
+    const row = db.prepare('SELECT * FROM ai_config WHERE id = ?').get('default') as
+      | Record<string, unknown>
+      | undefined
+
+    return row || {}
+  } finally {
+    db.close()
+  }
+}
+
+/**
+ * Save AI configuration to the database.
+ */
+export function saveAIConfig(
+  config: Record<string, unknown>,
+  dbPath = process.env.JOB_TRACKER_DB_PATH || DEFAULT_DB_PATH,
+): void {
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true })
+  const db = new Database(dbPath)
+  db.pragma('journal_mode = WAL')
+  db.pragma('busy_timeout = 10000')
+  ensureAIConfigSchema(db)
+
+  try {
+    const now = new Date().toISOString()
+    const toSave = { ...config, id: 'default' }
+
+    const existing = db.prepare('SELECT id FROM ai_config WHERE id = ?').get('default')
+
+    if (existing) {
+      const updateStmt = db.prepare(`
+        UPDATE ai_config SET 
+          provider = @provider,
+          apiKey = @apiKey,
+          baseUrl = @baseUrl,
+          model = @model,
+          updatedAt = @updatedAt
+        WHERE id = 'default'
+      `)
+      updateStmt.run({ ...toSave, updatedAt: now })
+    } else {
+      const insertStmt = db.prepare(`
+        INSERT INTO ai_config (
+          id, provider, apiKey, baseUrl, model, updatedAt, createdAt
+        ) VALUES (
+          'default', @provider, @apiKey, @baseUrl, @model, @updatedAt, @createdAt
+        )
+      `)
+      insertStmt.run({ ...toSave, updatedAt: now, createdAt: now })
+    }
+  } finally {
+    db.close()
   }
 }

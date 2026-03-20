@@ -17,7 +17,9 @@ test.describe('Job Tracker smoke', () => {
     await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Download Backup Snapshot' })).toBeVisible()
 
-    await page.getByRole('button', { name: /Back to Jobs/i }).click()
+    // Close the settings modal by clicking the close button at the bottom
+    const settingsPanel = page.locator('[class*="profile-modal"]').last()
+    await settingsPanel.getByRole('button', { name: 'Close' }).click()
     await expect(page.getByRole('heading', { name: /Track your search like a pipeline/i })).toBeVisible()
   })
 })

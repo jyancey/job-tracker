@@ -80,17 +80,23 @@ describe('ProfileView', () => {
     expect(screen.getAllByText('save failed').length).toBeGreaterThan(0)
   })
 
-  it('updates skill selection via checkbox toggles', async () => {
+  it('adds custom skills via input and displays them as chips', async () => {
     const user = userEvent.setup()
 
     render(<ProfileView onClose={vi.fn()} />)
 
-    const pythonCheckbox = screen.getAllByRole('checkbox', { name: 'Python' })[0]
-    expect(pythonCheckbox).not.toBeChecked()
+    const skillInputs = screen.getAllByPlaceholderText('e.g., React, Python, AWS')
+    expect(skillInputs.length).toBeGreaterThan(0)
+    const skillInput = skillInputs[0]
 
-    await user.click(pythonCheckbox)
-    expect(pythonCheckbox).toBeChecked()
+    // Add a custom skill
+    await user.type(skillInput, 'TypeScript')
+    await user.click(screen.getAllByRole('button', { name: 'Add' })[0])
 
+    // Verify the skill is displayed as a chip
+    expect(screen.getByText('TypeScript')).toBeInTheDocument()
+
+    // Save the profile
     await user.click(screen.getAllByRole('button', { name: 'Save Profile' })[0])
     expect(saveUserProfile).toHaveBeenCalled()
   })
