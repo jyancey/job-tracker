@@ -46,6 +46,7 @@ export function ProfileView({ onClose }: ProfileViewProps) {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [customSkillInput, setCustomSkillInput] = useState('')
   const resumeFileRef = useRef<HTMLInputElement>(null)
 
   const handleProfileFieldChange = <K extends keyof UserProfile>(key: K, value: UserProfile[K]) => {
@@ -61,6 +62,27 @@ export function ProfileView({ onClose }: ProfileViewProps) {
         ? skills.filter((s) => s !== skill)
         : [...skills, skill]
       return { ...prev, skills: updated }
+    })
+    setSaved(false)
+  }
+
+  const handleAddCustomSkill = () => {
+    const trimmedSkill = customSkillInput.trim()
+    if (!trimmedSkill) return
+    
+    setProfile((prev) => {
+      const skills = prev.skills || []
+      if (skills.includes(trimmedSkill)) return prev // Already exists
+      return { ...prev, skills: [...skills, trimmedSkill] }
+    })
+    setCustomSkillInput('')
+    setSaved(false)
+  }
+
+  const handleRemoveSkill = (skill: string) => {
+    setProfile((prev) => {
+      const skills = prev.skills || []
+      return { ...prev, skills: skills.filter((s) => s !== skill) }
     })
     setSaved(false)
   }
@@ -251,6 +273,10 @@ export function ProfileView({ onClose }: ProfileViewProps) {
 
             <div className="settings-section">
               <h2>Skills</h2>
+              <p style={{ fontSize: '0.9rem', color: '#586069', marginBottom: '1rem' }}>
+                Select from known skills or add your own custom skills.
+              </p>
+
               <div className="skills-grid">
                 {TECH_SKILLS.map((skill) => (
                   <label key={skill} className="skill-checkbox">
@@ -262,6 +288,80 @@ export function ProfileView({ onClose }: ProfileViewProps) {
                     <span>{skill}</span>
                   </label>
                 ))}
+              </div>
+
+              {/* Custom skills input */}
+              <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e1e4e8' }}>
+                <label className="full-width">
+                  Add Custom Skill
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input
+                      type="text"
+                      value={customSkillInput}
+                      onChange={(e) => setCustomSkillInput(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          handleAddCustomSkill()
+                        }
+                      }}
+                      placeholder="e.g., Kubernetes, Machine Learning"
+                      style={{ flex: 1 }}
+                    />
+                    <button
+                      type="button"
+                      className="button-secondary"
+                      onClick={handleAddCustomSkill}
+                      style={{ flexShrink: 0 }}
+                    >
+                      Add
+                    </button>
+                  </div>
+                </label>
+
+                {/* Display custom skills */}
+                {profile.skills && profile.skills.length > 0 && (
+                  <div style={{ marginTop: '1rem' }}>
+                    <p style={{ fontSize: '0.9rem', color: '#586069', marginBottom: '0.5rem' }}>
+                      Your selected skills:
+                    </p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      {profile.skills.map((skill) => (
+                        <div
+                          key={skill}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.4rem 0.75rem',
+                            background: '#f6f8fa',
+                            border: '1px solid #d1d5da',
+                            borderRadius: '999px',
+                            fontSize: '0.9rem',
+                          }}
+                        >
+                          <span>{skill}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSkill(skill)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              color: '#586069',
+                              padding: '0',
+                              fontSize: '1.1rem',
+                              lineHeight: '1',
+                            }}
+                            title={`Remove ${skill}`}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
