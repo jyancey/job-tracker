@@ -2,9 +2,9 @@
 
 ![Build Stats](http://localhost:3000/john/job-tracker/actions/workflows/build-test.yml/badge.svg)
 ![Deploy Badge](http://localhost:3000/john/job-tracker/actions/workflows/deploy.yml/badge.svg)
-[![Latest Release](https://img.shields.io/badge/release-v2.7.1-blue)](http://localhost:3000/john/job-tracker/releases)
+[![Latest Release](https://img.shields.io/badge/release-v2.7.2-blue)](http://localhost:3000/john/job-tracker/releases)
 
-A local-first, privacy-focused job application tracker built with React, TypeScript, and SQLite.
+A local-first, privacy-focused job application tracker built with Next.js, React, TypeScript, and SQLite.
 
 Track your search like a pipeline, not a spreadsheet. Manage opportunities, follow-ups, and monitor momentum from one workspace—all without leaving your browser.
 
@@ -62,6 +62,8 @@ app/
   ├── AppClient.tsx           # 'use client' bridge to src/App
   ├── globals.css             # Global styles
   └── api/
+      ├── config/route.ts     # POST /api/config
+      ├── profile/route.ts    # POST /api/profile
       ├── jobs/route.ts       # GET/PUT /api/jobs
       └── database/
           ├── create/route.ts # POST /api/database/create
@@ -69,8 +71,8 @@ app/
           └── test/route.ts   # GET /api/database/test
 
 backend/
+  ├── data/                   # SQLite schema and default profile/config data
   ├── jobStore.ts             # Lazy-init SQLite store proxy (used by API routes)
-  ├── jobsApi.ts              # Shared /api/jobs request handler
   ├── sqliteStore.ts          # File-backed SQLite repository
   └── jobValidation.ts        # Backend job payload validation
 
@@ -93,7 +95,7 @@ docs/
   ├── PERFORMANCE_BASELINE.md # Performance measurement framework
   ├── REFACTORING_ANALYSIS.md # Code quality audit
   ├── REFACTORING_STATUS.md   # Refactoring progress tracker
-  ├── releases/               # Historical release notes (v2.5, v2.6, v2.7)
+  ├── releases/               # Historical release notes (latest: v2.7.2)
   ├── planning/               # Roadmaps and release plans (v2.7, v2.8)
   └── safari-plugin/          # Safari browser plugin architecture and planning
 
@@ -122,11 +124,12 @@ npm run test:run
 npm run test:run -- --coverage  # (requires coverage provider)
 ```
 
-**Current Status (v2.7.0):**
+**Current Status (v2.7.2):**
 
 - 78 test files
 - 681 passing tests
 - Covers app workflows, hooks, backend API/store modules, services, and utility modules
+- Playwright E2E suite includes profile/settings persistence coverage
 
 ### Building
 
@@ -250,7 +253,7 @@ Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dis
 | --- | --- |
 | **UI Framework** | React 19 |
 | **Language** | TypeScript 5 |
-| **Build Tool** | Next.js 15 (App Router) |
+| **Build Tool** | Next.js 16 (App Router) |
 | **Database** | SQLite (file-backed via better-sqlite3) |
 | **Testing** | Vitest + React Testing Library + userEvent |
 | **Linting** | ESLint 9 |
@@ -282,5 +285,5 @@ Report issues, suggest features, or contribute pull requests on the project repo
 
 ---
 
-**Last Updated:** March 11, 2026  
-**Current Release Tag:** v2.7.0
+**Last Updated:** March 21, 2026  
+**Current Release Tag:** v2.7.2
