@@ -25,4 +25,4 @@ launchctl kickstart -k "$GUI_DOMAIN/com.local.job-tracker"
 
 echo "Installed launch agent at $TARGET_PLIST"
 echo "Logs: $LOG_DIR/job-tracker.log"
-echo "Open: http://127.0.0.1:3100"
+echo "Open: http://localhost:3100"

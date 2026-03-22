@@ -25,7 +25,7 @@
     <key>PORT</key>
     <string>3100</string>
     <key>JOB_TRACKER_HOST</key>
-    <string>127.0.0.1</string>
+    <string>localhost</string>
     <key>NODE_ENV</key>
     <string>production</string>
     <key>JOB_TRACKER_DB_PATH</key>

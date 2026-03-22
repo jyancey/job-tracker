@@ -25,12 +25,22 @@ Then package it:
 Or extract the release/deploy zip. The bundle should contain:
 
 ```text
+start.sh
 server.js
 .next/
 public/
 macos/
 docs/DAEMON_SETUP.md
 ```
+
+For manual startup (without launchd), run from the bundle root:
+
+```bash
+./start.sh
+```
+
+This wrapper normalizes host binding for Next.js standalone mode and avoids hostname resolution errors like `getaddrinfo ENOTFOUND <machine-name>`.
+It also auto-rebuilds `better-sqlite3` if the bundled native binary was compiled for a different Node.js ABI.
 
 ### 2. Find Your Job Tracker Installation Path
 
@@ -59,7 +69,7 @@ If you need to customize paths or ports manually, edit the generated plist:
    <key>PORT</key>
    <string>3100</string>
    <key>JOB_TRACKER_HOST</key>
-   <string>127.0.0.1</string>
+   <string>localhost</string>
    <key>JOB_TRACKER_DB_PATH</key>
    <string>/Users/your-user/job-tracker/data/job-tracker.sqlite</string>
 </dict>
@@ -108,7 +118,7 @@ tail -f ~/Library/Logs/job-tracker/job-tracker-error.log
 Once running, open your browser and navigate to:
 
 ```text
-http://127.0.0.1:3100
+http://localhost:3100
 ```
 
 ### Stop the Daemon
@@ -203,6 +213,20 @@ tail -f ~/Library/Logs/job-tracker/job-tracker-error.log
 
    ```bash
    tail -50 ~/Library/Logs/job-tracker/job-tracker-error.log
+   ```
+
+4. **If you see `getaddrinfo ENOTFOUND <machine-name>`:**
+
+   - Start the standalone bundle with `./start.sh` (or `./macos/start-job-tracker.sh` for launchd)
+   - Ensure `JOB_TRACKER_HOST` is set to `localhost`, `127.0.0.1`, or `0.0.0.0`
+
+5. **If you see `NODE_MODULE_VERSION` / `ERR_DLOPEN_FAILED` for `better-sqlite3`:**
+
+   - The startup wrappers now attempt `npm rebuild better-sqlite3 --omit=dev` automatically
+   - If it still fails, run manually from the bundle root:
+
+   ```bash
+   npm rebuild better-sqlite3 --omit=dev
    ```
 
 ### Port Already in Use
