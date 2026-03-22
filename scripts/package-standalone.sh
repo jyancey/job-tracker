@@ -58,6 +58,45 @@ export PORT="${PORT:-3100}"
 export NODE_ENV="production"
 export JOB_TRACKER_DB_PATH="${JOB_TRACKER_DB_PATH:-$APP_ROOT/data/job-tracker.sqlite}"
 
+ensure_sqlite_external_aliases() {
+  local chunks_dir="$APP_ROOT/.next/server/chunks"
+  local aliases_dir="$APP_ROOT/.next/node_modules"
+  local aliases
+
+  if [[ ! -d "$chunks_dir" ]]; then
+    return 0
+  fi
+
+  mkdir -p "$aliases_dir"
+  aliases="$(grep -RhoE 'better-sqlite3-[a-f0-9]{8,}' "$chunks_dir" 2>/dev/null | sort -u || true)"
+  if [[ -z "$aliases" ]]; then
+    return 0
+  fi
+
+  while IFS= read -r alias; do
+    if [[ -z "$alias" ]]; then
+      continue
+    fi
+
+    if /usr/bin/env node -e "require.resolve('$alias')" >/dev/null 2>&1; then
+      continue
+    fi
+
+    echo "Repairing missing Next external alias package: $alias" >&2
+    mkdir -p "$aliases_dir/$alias"
+    cat > "$aliases_dir/$alias/package.json" <<JSON
+{
+  "name": "$alias",
+  "private": true,
+  "main": "index.js"
+}
+JSON
+    cat > "$aliases_dir/$alias/index.js" <<'JS'
+module.exports = require('better-sqlite3');
+JS
+  done <<< "$aliases"
+}
+
 ensure_sqlite_native_module() {
   if /usr/bin/env node -e "try { require('better-sqlite3'); process.exit(0); } catch (e) { if (e && e.code === 'ERR_DLOPEN_FAILED') process.exit(42); throw e; }" >/dev/null 2>&1; then
     return 0
@@ -86,6 +125,7 @@ ensure_sqlite_native_module() {
   fi
 }
 
+ensure_sqlite_external_aliases
 ensure_sqlite_native_module
 
 exec /usr/bin/env node server.js

@@ -229,6 +229,12 @@ tail -f ~/Library/Logs/job-tracker/job-tracker-error.log
    npm rebuild better-sqlite3 --omit=dev
    ```
 
+6. **If you see `Cannot find module 'better-sqlite3-<hash>'`:**
+
+   - This means a Next.js external alias package under `.next/node_modules/` is missing
+   - The startup wrappers now auto-repair missing `better-sqlite3-<hash>` aliases on launch
+   - If needed, re-package and re-extract the standalone bundle, then start via `./start.sh`
+
 ### Port Already in Use
 
 If port 3100 is already in use, change the port in the plist:
