@@ -13,7 +13,7 @@ This guide explains how to run the standalone Job Tracker bundle on macOS with `
 ### 1. Build or Extract the Standalone Bundle
 
 ```bash
-npm run build
+pnpm build
 ```
 
 Then package it:
@@ -222,11 +222,11 @@ tail -f ~/Library/Logs/job-tracker/job-tracker-error.log
 
 5. **If you see `NODE_MODULE_VERSION` / `ERR_DLOPEN_FAILED` for `better-sqlite3`:**
 
-   - The startup wrappers now attempt `npm rebuild better-sqlite3 --omit=dev` automatically
+   - The startup wrappers now attempt `pnpm rebuild better-sqlite3` automatically
    - If it still fails, run manually from the bundle root:
 
    ```bash
-   npm rebuild better-sqlite3 --omit=dev
+   pnpm rebuild better-sqlite3
    ```
 
 6. **If you see `Cannot find module 'better-sqlite3-<hash>'`:**
@@ -292,7 +292,7 @@ To run Job Tracker as a system daemon (available to all users, starts before log
 If you rebuild the application:
 
 ```bash
-npm run build
+pnpm build
 # Reinstall or restart the agent after replacing the bundle
 ./macos/install-launch-agent.sh
 ```

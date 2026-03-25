@@ -39,7 +39,7 @@ describe('useAutoBackup', () => {
     const mockLoadBackupState = vi.mocked(backupModule.loadBackupState)
     mockLoadBackupState.mockReturnValue({
       lastBackupAt: '2026-03-08T00:00:00Z',
-      config: { interval: 'daily' },
+      config: { interval: 'daily', keepLastN: 7, autoSaveToStorage: true },
       backupHistory: [],
     })
 
@@ -52,7 +52,7 @@ describe('useAutoBackup', () => {
     const mockLoadBackupState = vi.mocked(backupModule.loadBackupState)
     mockLoadBackupState.mockReturnValue({
       lastBackupAt: '2026-03-08T00:00:00Z',
-      config: { interval: 'daily' },
+      config: { interval: 'daily', keepLastN: 7, autoSaveToStorage: true },
       backupHistory: [],
     })
 
@@ -66,7 +66,7 @@ describe('useAutoBackup', () => {
     const mockLoadBackupState = vi.mocked(backupModule.loadBackupState)
     mockLoadBackupState.mockReturnValue({
       lastBackupAt: '2026-03-08T00:00:00Z',
-      config: { interval: 'disabled' },
+      config: { interval: 'disabled', keepLastN: 7, autoSaveToStorage: true },
       backupHistory: [],
     })
 
@@ -80,7 +80,7 @@ describe('useAutoBackup', () => {
     const mockLoadBackupState = vi.mocked(backupModule.loadBackupState)
     mockLoadBackupState.mockReturnValue({
       lastBackupAt: '2026-03-08T00:00:00Z',
-      config: { interval: 'daily' },
+      config: { interval: 'daily', keepLastN: 7, autoSaveToStorage: true },
       backupHistory: [],
     })
 
@@ -96,7 +96,7 @@ describe('useAutoBackup', () => {
 
     mockLoadBackupState.mockReturnValue({
       lastBackupAt: '2026-03-08T00:00:00Z',
-      config: { interval: 'daily' },
+      config: { interval: 'daily', keepLastN: 7, autoSaveToStorage: true },
       backupHistory: [],
     })
 
@@ -115,7 +115,7 @@ describe('useAutoBackup', () => {
 
     mockLoadBackupState.mockReturnValue({
       lastBackupAt: '2026-03-08T00:00:00Z',
-      config: { interval: 'daily' },
+      config: { interval: 'daily', keepLastN: 7, autoSaveToStorage: true },
       backupHistory: [],
     })
 
@@ -134,7 +134,7 @@ describe('useAutoBackup', () => {
 
     mockLoadBackupState.mockReturnValue({
       lastBackupAt: '2026-03-08T00:00:00Z',
-      config: { interval: 'daily' },
+      config: { interval: 'daily', keepLastN: 7, autoSaveToStorage: true },
       backupHistory: [],
     })
 
@@ -157,7 +157,7 @@ describe('useAutoBackup', () => {
     const mockLoadBackupState = vi.mocked(backupModule.loadBackupState)
     mockLoadBackupState.mockReturnValue({
       lastBackupAt: '2026-03-08T00:00:00Z',
-      config: { interval: 'daily' },
+      config: { interval: 'daily', keepLastN: 7, autoSaveToStorage: true },
       backupHistory: [],
     })
 

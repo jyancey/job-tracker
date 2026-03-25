@@ -53,7 +53,7 @@ describe('KanbanCard', () => {
       />,
     )
 
-    const actions = container.querySelector('.kanban-actions')
+    const actions = container.querySelector('.kanban-actions') as HTMLElement | null
     expect(actions).toBeTruthy()
     if (!actions) {
       throw new Error('Expected kanban actions container')
@@ -80,7 +80,7 @@ describe('KanbanCard', () => {
       />,
     )
 
-    const actions = container.querySelector('.kanban-actions')
+    const actions = container.querySelector('.kanban-actions') as HTMLElement | null
     expect(actions).toBeTruthy()
     if (!actions) {
       throw new Error('Expected kanban actions container')

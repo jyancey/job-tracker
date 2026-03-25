@@ -2,7 +2,7 @@
 
 ![Build Stats](http://localhost:3000/john/job-tracker/actions/workflows/build-test.yml/badge.svg)
 ![Deploy Badge](http://localhost:3000/john/job-tracker/actions/workflows/deploy.yml/badge.svg)
-[![Latest Release](https://img.shields.io/badge/release-v2.7.2-blue)](http://localhost:3000/john/job-tracker/releases)
+[![Latest Release](https://img.shields.io/badge/release-v2.7.4-blue)](http://localhost:3000/john/job-tracker/releases)
 
 A local-first, privacy-focused job application tracker built with Next.js, React, TypeScript, and SQLite.
 
@@ -28,25 +28,25 @@ Track your search like a pipeline, not a spreadsheet. Manage opportunities, foll
 
 ### Prerequisites
 
-- Node.js 20+ and npm
+- Node.js 20+ and pnpm
 
 ### Installation
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Start development server (http://127.0.0.1:4173)
-npm run dev
+pnpm dev
 
 # Run tests
-npm run test:run
+pnpm test:run
 
 # Build for production
-npm run build
+pnpm build
 
-# Preview/serve the production build (requires npm run build first)
-npm run serve
+# Preview/serve the production build (requires pnpm build first)
+pnpm serve
 ```
 
 You can also run as a macOS daemon. See [docs/DAEMON_SETUP.md](docs/DAEMON_SETUP.md) for instructions.
@@ -73,17 +73,20 @@ app/
 backend/
   ├── data/                   # SQLite schema and default profile/config data
   ├── jobStore.ts             # Lazy-init SQLite store proxy (used by API routes)
-  ├── sqliteStore.ts          # File-backed SQLite repository
+  ├── sqliteStore.ts          # Public SQLite facade used by the rest of the app
+  ├── sqlite/                 # DB connection, schema, and repository modules
   └── jobValidation.ts        # Backend job payload validation
 
 src/
   ├── App.tsx                 # Main app orchestrator
   ├── domain.ts               # Core types: Job, JobDraft, JobStatus, JobPriority
-  ├── components/             # Reusable UI components (table, kanban, form, toast)
+  ├── components/             # Reusable UI components (table, kanban, form, toast, AI config)
   ├── hooks/                  # Custom state and behavior hooks (~20 specialized hooks)
   ├── services/               # Business logic (scoring, notifications, storage, AI, import/export)
   ├── storage/                # Storage adapters (API client, localStorage fallback, logger)
   ├── views/                  # Page-level view components (Analytics, Table, Calendar, etc.)
+  │   ├── settings/           # Extracted settings sections
+  │   └── table/              # Table-specific view pieces
   ├── features/               # Self-contained feature modules (analytics, backup, savedViews, search, tasks)
   ├── types/                  # Shared TypeScript types (ai, filters, errors, componentProps)
   ├── utils/                  # Date, accessibility, drag/drop, formatting helpers
@@ -95,12 +98,14 @@ docs/
   ├── PERFORMANCE_BASELINE.md # Performance measurement framework
   ├── REFACTORING_ANALYSIS.md # Code quality audit
   ├── REFACTORING_STATUS.md   # Refactoring progress tracker
-  ├── releases/               # Historical release notes (latest: v2.7.2)
+  ├── releases/               # Historical release notes (latest: v2.7.4)
   ├── planning/               # Roadmaps and release plans (v2.7, v2.8)
   └── safari-plugin/          # Safari browser plugin architecture and planning
 
 scripts/
   ├── generate-version.ts     # Auto-generates src/version.ts from git metadata
+  ├── require-pnpm.mjs        # Fails installs launched without pnpm
+  ├── withColor.ts            # Forces colored CLI output for repo scripts
   ├── package-standalone.sh   # Builds standalone deployment bundle
   └── launchd/                # macOS launchd helpers (plist template, install/uninstall scripts)
 
@@ -111,35 +116,33 @@ public/                       # Static assets (favicon, logo)
 
 ### Testing
 
-Tests are run with Vitest and React Testing Library:
+Tests are run with Vitest, React Testing Library, and Playwright:
 
 ```bash
 # Run tests in watch mode
-npm run test
+pnpm test
 
 # Run tests once
-npm run test:run
+pnpm test:run
 
-# Current test coverage
-npm run test:run -- --coverage  # (requires coverage provider)
+# Run coverage
+pnpm test:coverage
+
+# Run end-to-end tests
+pnpm test:e2e
 ```
 
-**Current Status (v2.7.2):**
-
-- 78 test files
-- 681 passing tests
-- Covers app workflows, hooks, backend API/store modules, services, and utility modules
-- Playwright E2E suite includes profile/settings persistence coverage
+The test suite covers app workflows, hooks, backend repositories and API flows, services, and end-to-end profile/settings persistence scenarios. For one-off runs, use `pnpm exec vitest run src/path/to/file.test.ts` or `pnpm exec playwright test e2e/path/to/spec.ts`.
 
 ### Building
 
 ```bash
 # Production build (optimized, minified, tree-shaken)
-npm run build
+pnpm build
 
 # Next.js outputs server/client artifacts in .next/
 # Start production server with:
-npm run start
+pnpm start
 ```
 
 ## CI/CD Pipeline (Gitea Actions)
@@ -156,8 +159,6 @@ Triggers on: `push` to main/develop, `pull_request` against main/develop
 - Run full test suite
 - Build application
 - Upload build artifacts (7-day retention)
-
-**Status:** ✅ Passing on current main branch
 
 ### 2. **Release** (`release.yml`)
 
@@ -187,7 +188,7 @@ Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dis
 - Create deployment artifact with metadata
 - Upload to artifacts (30-day retention)
 
-**Status:** Ready for manual deployment to Netlify, Vercel, GitHub Pages, or custom server
+**Status:** Produces a standalone Next.js deployment artifact for a Node-capable target or the included macOS launchd helper scripts
 
 ## Usage Tips
 
@@ -285,5 +286,5 @@ Report issues, suggest features, or contribute pull requests on the project repo
 
 ---
 
-**Last Updated:** March 21, 2026  
-**Current Release Tag:** v2.7.2
+**Last Updated:** March 24, 2026  
+**Current Release Tag:** v2.7.4

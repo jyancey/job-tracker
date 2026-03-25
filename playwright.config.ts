@@ -12,7 +12,7 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npm run dev',
+    command: 'pnpm dev',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: process.env.CI ? false : true,
     timeout: 120000,

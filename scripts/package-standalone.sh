@@ -109,13 +109,13 @@ ensure_sqlite_native_module() {
   fi
 
   echo "Detected better-sqlite3 ABI mismatch; rebuilding native module for current Node.js..." >&2
-  if ! command -v npm >/dev/null 2>&1; then
-    echo "ERROR: npm is required to rebuild better-sqlite3 but was not found in PATH." >&2
+  if ! command -v pnpm >/dev/null 2>&1; then
+    echo "ERROR: pnpm is required to rebuild better-sqlite3 but was not found in PATH." >&2
     return 1
   fi
 
-  if ! npm rebuild better-sqlite3 --omit=dev --no-audit --no-fund; then
-    echo "ERROR: npm rebuild better-sqlite3 failed." >&2
+  if ! pnpm rebuild better-sqlite3; then
+    echo "ERROR: pnpm rebuild better-sqlite3 failed." >&2
     return 1
   fi
 

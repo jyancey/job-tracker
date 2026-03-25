@@ -452,7 +452,7 @@ export function TableView({
 **Subtask 5.3.1: Verify All Phase 5 Tests Pass (1-2 hours)**
 
 ```bash
-npm run test:run 2>&1 | grep -E "Test Files|Tests"
+pnpm test:run 2>&1 | grep -E "Test Files|Tests"
 # Expected: All 646+ tests passing
 ```
 
@@ -715,7 +715,7 @@ Move: src/Toast.tsx → src/components/feedback/Toast.tsx
 **Subtask 6.4.1: Full Test Suite Verification**
 
 ```bash
-npm run test:run 2>&1 | tail -10
+pnpm test:run 2>&1 | tail -10
 # Expected: 680+ tests, ~73 files, 100% pass rate
 ```
 

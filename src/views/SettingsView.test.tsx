@@ -116,7 +116,7 @@ describe('SettingsView', () => {
     const user = userEvent.setup()
     renderSettings()
 
-    const dbSection = screen.getByText('Database Settings').closest('.settings-section')
+    const dbSection = screen.getByText('Database Settings').closest('.settings-section') as HTMLElement | null
     if (!dbSection) {
       throw new Error('Database settings section not found')
     }

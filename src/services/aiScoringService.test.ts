@@ -12,9 +12,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { scoreJobWithAI } from './aiScoringService'
 import type { AIScoreRequest } from '../types/ai'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { scoreJobWithAI } from './aiScoringService'
-import type { AIScoreRequest } from '../types/ai'
 
 /**
  * Tests for the AI scoring service, focusing on endpoint normalization for LM Studio configurations and robust response parsing to handle various AI response formats. The tests ensure that the service correctly constructs API requests based on different base URL configurations and can accurately extract scoring information from responses that may include JSON wrapped in code blocks or embedded in prose. This helps maintain a reliable integration with AI providers and ensures that users receive accurate job scoring based on their profiles and job descriptions.

@@ -1,4 +1,9 @@
-// Job validation constants (valid statuses, required fields) and validation result types.
+/* @(#)jobValidation.ts - Validation logic for job objects
+ *
+ * This module provides functions to validate job objects and arrays of job 
+ * objects to ensure they conform to the expected structure and data types.
+ * It checks for required fields, valid status values, and proper date formats.
+ */
 const VALID_STATUSES = [
   'Applied',
   'Phone Screen',
@@ -52,6 +57,11 @@ function isValidIsoDate(value: unknown): boolean {
   }
 }
 
+/**
+ * Validates a job object to ensure it meets the required structure and data types.
+ * @param job The job object to validate.
+ * @returns A JobValidationResult indicating whether the job is valid and any errors.
+ */
 export function validateJob(job: unknown): JobValidationResult {
   if (!isRecord(job)) {
     return { valid: false, error: 'Job must be an object' }
@@ -103,6 +113,11 @@ export function validateJob(job: unknown): JobValidationResult {
   return { valid: true }
 }
 
+/**
+ * Validates an array of job objects to ensure each job meets the required structure and data types.
+ * @param jobs The array of job objects to validate.
+ * @returns A JobValidationResult indicating whether all jobs are valid and any errors.
+ */
 export function validateJobArray(jobs: unknown[]): JobValidationResult {
   if (!Array.isArray(jobs)) {
     return { valid: false, error: 'jobs must be an array' }

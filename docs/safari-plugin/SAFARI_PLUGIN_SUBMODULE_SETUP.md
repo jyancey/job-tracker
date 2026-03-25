@@ -12,7 +12,7 @@
 
 - ✅ Independent repository with its own issue tracking, releases, and CI/CD
 - ✅ Separate versioning (plugin v1.0 != job-tracker v2.8.0)
-- ✅ Can be published to npm or Safari App Store separately
+- ✅ Can be published to a package registry or Safari App Store separately
 - ✅ Clear separation of concerns (browser extension ≠ web app)
 - ✅ Plugin can be used by other job-tracking apps
 - ✅ Easy for contributors to clone/work on either part independently
@@ -57,7 +57,7 @@ cat > package.json << 'EOF'
   "main": "build/background.js",
   "scripts": {
     "build": "esbuild src/background.ts --bundle --outfile=build/background.js && esbuild src/content.ts --bundle --outfile=build/content.js",
-    "dev": "npm run build -- --sourcemap --watch",
+    "dev": "pnpm build -- --sourcemap --watch",
     "test": "vitest",
     "test:run": "vitest run",
     "test:watch": "vitest --watch",
@@ -126,8 +126,8 @@ A Safari browser extension that captures job postings directly from web pages an
 
 ## Quick Start
 
-1. Install dependencies: `npm install`
-2. Build: `npm run build`
+1. Install dependencies: `pnpm install`
+2. Build: `pnpm build`
 3. Load in Safari: Xcode → Safari Extension settings
 
 ## Documentation
@@ -304,19 +304,19 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Build
-        run: npm run build
+        run: pnpm build
 
       - name: Lint
-        run: npm run lint
+        run: pnpm lint
 
       - name: Type check
-        run: npm run type-check
+        run: pnpm type-check
 
       - name: Test
-        run: npm run test:run
+        run: pnpm test:run
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
@@ -343,22 +343,22 @@ jobs:
           node-version: '18'
 
       - name: Install job-tracker dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Install plugin dependencies
-        run: npm install --prefix safari-plugin
+        run: pnpm --dir safari-plugin install
 
       - name: Build job-tracker
-        run: npm run build
+        run: pnpm build
 
       - name: Build plugin
-        run: npm run build --prefix safari-plugin
+        run: pnpm --dir safari-plugin build
 
       - name: Test job-tracker
-        run: npm run test:run
+        run: pnpm test:run
 
       - name: Test plugin
-        run: npm run test:run --prefix safari-plugin
+        run: pnpm --dir safari-plugin test:run
 ```
 
 ---
@@ -367,25 +367,25 @@ jobs:
 
 ### Shared Types
 
-Option 1: **Publish plugin types to npm**
+Option 1: **Publish plugin types to a package registry**
 ```bash
 # In safari-plugin/package.json, add types export
 "exports": {
   "types": "./src/types.ts"
 }
 
-# Then publish to npm
-npm publish
+# Then publish to your package registry
+pnpm publish
 
 # In job-tracker, import from package
-npm install @job-tracker/safari-plugin
+pnpm add @job-tracker/safari-plugin
 import type { JobCapture } from '@job-tracker/safari-plugin/types'
 ```
 
 Option 2: **Symlink during development**
 ```bash
 # In job-tracker, during dev
-npm link ../safari-plugin
+pnpm link ../safari-plugin
 ```
 
 Option 3: **Copy types during build**
@@ -609,4 +609,3 @@ git commit --amend --no-edit
 # Push both changes
 git push origin feature/plugin-integration
 ```
-

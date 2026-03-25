@@ -64,7 +64,7 @@ describe('KanbanColumn', () => {
   it('renders empty state when no jobs', () => {
     render(
       <KanbanColumn
-        status="Wishlist"
+        status="Applied"
         jobs={[]}
         onStatusChange={vi.fn()}
         onEdit={vi.fn()}
@@ -106,7 +106,7 @@ describe('KanbanColumn', () => {
       />,
     )
 
-    const actions = container.querySelector('.kanban-actions')
+    const actions = container.querySelector('.kanban-actions') as HTMLElement | null
     expect(actions).toBeTruthy()
     if (!actions) {
       throw new Error('Expected kanban actions container')
@@ -131,7 +131,7 @@ describe('KanbanColumn', () => {
       />,
     )
 
-    const actions = container.querySelector('.kanban-actions')
+    const actions = container.querySelector('.kanban-actions') as HTMLElement | null
     expect(actions).toBeTruthy()
     if (!actions) {
       throw new Error('Expected kanban actions container')
@@ -164,7 +164,7 @@ describe('KanbanColumn', () => {
   })
 
   it('renders correct status in header', () => {
-    const statuses: JobStatus[] = ['Wishlist', 'Applied', 'Phone Screen', 'Interview', 'Offer', 'Rejected', 'Withdrawn']
+    const statuses: JobStatus[] = ['Applied', 'Phone Screen', 'Interview', 'Offer', 'Rejected', 'Withdrawn']
 
     statuses.forEach((status) => {
       const { container, unmount } = render(

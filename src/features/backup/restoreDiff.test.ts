@@ -218,7 +218,7 @@ describe('restoreDiff', () => {
 
     it('should format objects as JSON', () => {
       const obj = { key: 'value' }
-      expect(formatFieldValue(obj)).toBe(JSON.stringify(obj))
+      expect(formatFieldValue(obj as unknown as Job[keyof Job])).toBe(JSON.stringify(obj))
     })
   })
 })

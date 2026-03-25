@@ -22,7 +22,7 @@ v2.7.4 is a standalone runtime reliability patch release. It hardens startup beh
 - On `ERR_DLOPEN_FAILED` / `NODE_MODULE_VERSION` mismatch, wrappers run:
 
   ```bash
-  npm rebuild better-sqlite3 --omit=dev --no-audit --no-fund
+  pnpm rebuild better-sqlite3
   ```
 
 - Startup proceeds only after successful native module load validation

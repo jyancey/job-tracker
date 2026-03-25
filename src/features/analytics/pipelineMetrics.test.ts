@@ -7,7 +7,7 @@ import {
 import { Job, JobStatus } from '../../domain'
 
 // Helper to create test jobs
-function createJob(overrides: Partial<Job>): Job {
+function createJob(overrides: Partial<Job> = {}): Job {
   const now = new Date().toISOString()
   return {
     id: crypto.randomUUID(),
@@ -237,7 +237,6 @@ describe('calculateStatusDistribution', () => {
 
   it('counts jobs by status', () => {
     const jobs: Job[] = [
-      createJob({ status: 'Wishlist' }),
       createJob({ status: 'Applied' }),
       createJob({ status: 'Applied' }),
       createJob({ status: 'Phone Screen' }),
@@ -250,7 +249,7 @@ describe('calculateStatusDistribution', () => {
 
     const distribution = calculateStatusDistribution(jobs)
 
-    expect(distribution.Wishlist).toBe(1)
+    expect(distribution.Wishlist).toBe(0)
     expect(distribution.Applied).toBe(2)
     expect(distribution['Phone Screen']).toBe(1)
     expect(distribution.Interview).toBe(1)

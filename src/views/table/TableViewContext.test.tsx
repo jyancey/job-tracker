@@ -13,6 +13,7 @@ const mockContextValue: TableViewContextValue = {
   currentPage: 1,
   totalPages: 1,
   pageSize: 10,
+  searchQuery: '',
   selectAllCheckboxRef: { current: null },
   onSort: vi.fn(),
   onToggleSelection: vi.fn(),

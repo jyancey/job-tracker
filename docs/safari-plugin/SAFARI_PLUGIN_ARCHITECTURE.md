@@ -724,12 +724,12 @@ export function usePluginQueue() {
 
 ### Build Commands
 ```bash
-npm run build         # Compile TypeScript to build/
-npm run dev           # Watch mode for development
-npm run test          # Run all tests
-npm run test:watch   # Watch mode tests
-npm run lint          # ESLint code quality
-npm run type-check   # TypeScript type check
+pnpm build         # Compile TypeScript to build/
+pnpm dev           # Watch mode for development
+pnpm test          # Run all tests
+pnpm test:watch   # Watch mode tests
+pnpm lint          # ESLint code quality
+pnpm type-check   # TypeScript type check
 ```
 
 ### Key Files to Know

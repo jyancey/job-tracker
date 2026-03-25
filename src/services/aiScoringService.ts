@@ -1,4 +1,4 @@
-/* #(@)aiScoringService.ts - AI Job Scoring Service
+/* @(#)aiScoringService.ts - AI Job Scoring Service
  * 
  * This service provides functionality to analyze job descriptions using AI
  * and generate quality scores based on a candidate's profile. It supports
@@ -13,6 +13,7 @@
 
 import type { AIConfig, AIScoreRequest, AIScoreResult, AIProvider, UserProfile } from '../types/ai'
 
+// AI Job Scoring Service Prompt Template
 const SCORING_PROMPT = `You are an expert career advisor analyzing job opportunities. Given a job description and a candidate's profile, provide objective quality scores across 5 dimensions on a 0-5 scale:
 
 **Scoring Dimensions:**
@@ -26,17 +27,22 @@ const SCORING_PROMPT = `You are an expert career advisor analyzing job opportuni
 1. Analyze the job description carefully
 2. Compare against the candidate's profile
 3. Return ONLY valid JSON in this exact format (no markdown, no code blocks):
-{
-  "scoreFit": 3.5,
-  "scoreCompensation": 4.0,
-  "scoreLocation": 5.0,
-  "scoreGrowth": 4.5,
-  "scoreConfidence": 3.0,
-  "reasoning": "Brief 2-3 sentence explanation of the overall assessment"
-}
+  {
+    "scoreFit": 3.5,
+    "scoreCompensation": 4.0,
+    "scoreLocation": 5.0,
+    "scoreGrowth": 4.5,
+    "scoreConfidence": 3.0,
+    "reasoning": "Brief 2-3 sentence explanation of the overall assessment"
+  }
 
 **Important:** Return ONLY the JSON object. Do not include markdown formatting or code blocks.`
 
+/**
+ * Builds the messages array for the AI scoring request.
+ * @param request The AIScoreRequest containing job details to be scored.
+ * @returns An array of messages formatted for the AI provider.
+ */
 function buildScoringMessages(request: AIScoreRequest) {
   const profileSummary = formatUserProfile(request.userProfile)
   
@@ -59,6 +65,11 @@ Please analyze this opportunity and provide quality scores.`
   ]
 }
 
+/**
+ * Formats a user's profile into a string suitable for AI analysis.
+ * @param profile The user's profile information.
+ * @returns A formatted string representing the user's profile.
+ */
 function formatUserProfile(profile: UserProfile): string {
   const parts: string[] = []
   
@@ -77,6 +88,12 @@ function formatUserProfile(profile: UserProfile): string {
   return parts.join('\n')
 }
 
+/**
+ * Normalizes the API base URL by ensuring it ends with '/v1'.
+ * @param baseUrl The base URL provided by the user.
+ * @param defaultRoot The default root URL to use if baseUrl is not provided.
+ * @returns The normalized API base URL.
+ */
 function normalizeApiBaseUrl(baseUrl: string, defaultRoot: string): string {
   const raw = (baseUrl || defaultRoot).trim()
   const withoutTrailingSlash = raw.replace(/\/+$/, '')
@@ -85,6 +102,11 @@ function normalizeApiBaseUrl(baseUrl: string, defaultRoot: string): string {
     : `${withoutTrailingSlash}/v1`
 }
 
+/**
+ * Normalizes the LM Studio base URL by ensuring it ends with '/v1' and determines if it's using the native API.
+ * @param baseUrl The base URL provided by the user.
+ * @returns An object containing the normalized URL and a flag indicating if the native API is used.
+ */
 function normalizeLmStudioBaseUrl(baseUrl: string): { url: string; nativeApi: boolean } {
   const raw = (baseUrl || 'http://localhost:1234').trim().replace(/\/+$/, '')
   if (raw.endsWith('/api/v1')) {
@@ -97,6 +119,12 @@ function normalizeLmStudioBaseUrl(baseUrl: string): { url: string; nativeApi: bo
   }
 }
 
+/**
+ * Calls the OpenAI API with the provided configuration and messages.
+ * @param config The AIConfig object containing API details.
+ * @param messages An array of messages to send to the AI model.
+ * @returns The AI's response as a string.
+ */
 async function callOpenAI(config: AIConfig, messages: Array<{ role: string; content: string }>): Promise<string> {
   const baseUrl = normalizeApiBaseUrl(config.baseUrl || '', 'https://api.openai.com')
   const model = config.model || 'gpt-4o-mini'
@@ -124,6 +152,12 @@ async function callOpenAI(config: AIConfig, messages: Array<{ role: string; cont
   return data.choices[0]?.message?.content || ''
 }
 
+/**
+ * Calls the LM Studio API with the provided configuration and messages.
+ * @param config The AIConfig object containing API details.
+ * @param messages An array of messages to send to the AI model.
+ * @returns The AI's response as a string.
+ */
 async function callLMStudio(config: AIConfig, messages: Array<{ role: string; content: string }>): Promise<string> {
   const base = normalizeLmStudioBaseUrl(config.baseUrl || '')
   const model = config.model || 'local-model'
@@ -151,6 +185,11 @@ async function callLMStudio(config: AIConfig, messages: Array<{ role: string; co
   return data.choices[0]?.message?.content || ''
 }
 
+/**
+ * Parses the AI response content to extract scoring results.
+ * @param content The raw AI response content.
+ * @returns An object containing the extracted scores and reasoning.
+ */
 function parseScoreResponse(content: string): Omit<AIScoreResult, 'analyzedAt' | 'model' | 'provider'> {
   if (!content.trim()) {
     throw new Error('AI returned an empty response — the model may not be loaded or max_tokens was too low')
@@ -215,6 +254,12 @@ function parseScoreResponse(content: string): Omit<AIScoreResult, 'analyzedAt' |
   }
 }
 
+/**
+ * Scores a job using the configured AI provider.
+ * @param request The AIScoreRequest containing job details to be scored.
+ * @param config The AIConfig containing AI provider settings.
+ * @returns A promise that resolves to an AIScoreResult with the scores and reasoning.
+ */
 export async function scoreJobWithAI(
   request: AIScoreRequest,
   config: AIConfig,
@@ -255,6 +300,11 @@ export async function scoreJobWithAI(
   }
 }
 
+/**
+ * Validates the AI configuration.
+ * @param config The AIConfig object to validate.
+ * @returns An object indicating whether the configuration is valid and an optional error message.
+ */
 export function validateAIConfig(config: AIConfig): { valid: boolean; error?: string } {
   if (config.provider === 'disabled') {
     return { valid: true }

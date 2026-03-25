@@ -2,25 +2,29 @@
 
 ## Commands
 
+Use `pnpm` everywhere in this repo.
+
 ```bash
-npm run dev           # Next dev server at http://127.0.0.1:4173
-npm run build         # Next production build
-npm run start         # Run Next production server at http://127.0.0.1:3100
-npm run serve         # Alias of npm run start
-npm run preview       # Alias of npm run start
-npm run lint          # ESLint
-npm run lint:fix      # ESLint with auto-fix
-npm run test         # Vitest in watch mode
-npm run test:run     # Vitest single run
-npm run test:coverage # Run with coverage (thresholds: 70% lines/functions/statements, 65% branches)
-npm run test:e2e      # Playwright (against Next dev server on port 4173)
-npm run test:e2e:ui  # Playwright with UI
+pnpm install         # Install dependencies
+pnpm dev             # Next dev server at http://127.0.0.1:4173
+pnpm build           # Next production build
+pnpm start           # Run Next production server at http://127.0.0.1:3100
+pnpm serve           # Alias of pnpm start
+pnpm preview         # Alias of pnpm start
+pnpm lint            # ESLint
+pnpm lint:fix        # ESLint with auto-fix
+pnpm test            # Vitest in watch mode
+pnpm test:run        # Vitest single run
+pnpm test:coverage   # Vitest with coverage
+pnpm test:e2e        # Playwright against the dev server on port 4173
+pnpm test:e2e:ui     # Playwright UI mode
 ```
 
 Run a single test file:
+
 ```bash
-npx vitest run src/path/to/file.test.ts
-npx playwright test e2e/path/to/spec.ts --project=chromium
+pnpm exec vitest run src/path/to/file.test.ts
+pnpm exec playwright test e2e/path/to/spec.ts --project=chromium
 ```
 
 ## Architecture
@@ -29,44 +33,57 @@ This is a local-first Next.js 16 + React 19 + TypeScript app backed by SQLite.
 
 ### Runtime setup
 
-- **Dev**: `npm run dev` runs Next.js on port 4173.
-- **Production**: `npm run build && npm run start` runs Next.js on port 3100.
-- **E2E**: Playwright uses `playwright.config.ts` to start or reuse `npm run dev` at `http://127.0.0.1:4173`.
+- **Dev**: `pnpm dev` runs Next.js on `127.0.0.1:4173`.
+- **Production**: `pnpm build && pnpm start` runs Next.js on `127.0.0.1:3100`.
+- **E2E**: Playwright uses `playwright.config.ts` to start or reuse `pnpm dev`.
 
-The API route handlers in `app/api/**/route.ts` use `backend/jobStore.ts` and the shared store in `backend/sqliteStore.ts`.
+### Backend boundaries
+
+- `app/api/**/route.ts` is the HTTP layer.
+- `backend/jobStore.ts` is the lazy-init entry point used by route handlers.
+- `backend/sqliteStore.ts` is a compatibility facade. The real SQLite implementation lives in `backend/sqlite/`.
+- `backend/sqlite/db.ts` owns connection setup and DB path handling.
+- `backend/sqlite/schema.ts` owns table creation and migrations.
+- `backend/sqlite/jobsRepository.ts`, `backend/sqlite/userProfileRepository.ts`, and `backend/sqlite/aiConfigRepository.ts` own repository logic.
 
 ### Storage strategy
 
-The frontend uses a two-tier storage strategy in `src/services/storageService.ts`:
-1. **Primary**: `GET/PUT /api/jobs` → `app/api/jobs/route.ts` → `backend/jobStore.ts` → `backend/sqliteStore.ts` → `data/job-tracker.sqlite` (or `$JOB_TRACKER_DB_PATH`)
-2. **Fallback**: If the API returns a URL-pattern error (no backend present), falls back to `localStorage` key `job-tracker.jobs.fallback`
+The app uses a two-tier storage flow in `src/services/storageService.ts`:
 
-AI configuration and user profile follow the same pattern through `src/storage/aiStorage.ts`, syncing localStorage with `app/api/config/route.ts` and `app/api/profile/route.ts`.
+1. Primary: `GET/PUT /api/jobs` -> `app/api/jobs/route.ts` -> `backend/jobStore.ts` -> `backend/sqliteStore.ts` -> `data/job-tracker.sqlite` (or `$JOB_TRACKER_DB_PATH`)
+2. Fallback: if the API is unavailable in a browser-only environment, the frontend falls back to localStorage key `job-tracker.jobs.fallback`
 
-### Frontend layer structure
+AI configuration and user profile follow the same API-plus-local cache pattern through `src/storage/aiStorage.ts`, `app/api/config/route.ts`, and `app/api/profile/route.ts`.
 
-```
-src/domain.ts          # Core types: Job, JobDraft, JobStatus, JobPriority
-src/services/          # Pure business logic (jobService, scoring, notifications, storageService, aiScoringService, etc.)
-src/storage/           # Storage adapters (API client, localStorage fallback, AI config, logger)
-src/hooks/             # React hooks — one hook per concern, heavily decomposed
-src/components/        # Reusable UI components
-src/views/             # Page-level view components
-src/features/          # Self-contained feature modules: analytics, backup, savedViews, search, tasks
+### Frontend structure
+
+```text
+src/domain.ts              # Core types and domain helpers
+src/services/              # Business logic (jobs, scoring, storage, AI, import/export)
+src/storage/               # Storage adapters and browser persistence helpers
+src/hooks/                 # State/composition hooks; useAppContentModel is the top-level app model
+src/components/            # Reusable UI components
+src/views/                 # Page-level views
+src/views/settings/        # Settings sub-sections extracted from SettingsView
+src/views/table/           # Table-specific view pieces
+src/features/              # Feature modules: analytics, backup, savedViews, search, tasks
 ```
 
 ### State management
 
-There is no global state library. All state flows through `useAppContentModel` (in `src/hooks/`), which composes ~20 specialized hooks and passes their results as props to `AppShellView`. The pattern is: `App` → `useAppContentModel` → `AppShellView` → view components.
+There is no global state library. The main flow is:
+
+`App` -> `useAppContentModel` -> `AppShellView` -> view components
+
+Keep transient UI state local to the feature or section that owns it. The refactored settings screen follows that pattern: `SettingsView` owns persisted draft state while the extracted section components own transient async state.
 
 ## Conventions
 
-- **Test colocation**: Every source file has a sibling test file (`Foo.tsx` → `Foo.test.tsx`). Unit tests use Vitest + React Testing Library; E2E tests use Playwright in `e2e/`.
-- **Backend is TypeScript**: backend modules are implemented in `backend/*.ts`.
-- **Generated files**: `src/version.ts` is auto-created by `scripts/generate-version.ts` before dev/build/test runs, and `next-env.d.ts` is maintained by Next.js. Do not edit either manually.
-- **ESLint strictness**: Uses `typescript-eslint` strict mode. `no-console` is a warning (except `console.warn` and `console.error`). Unused vars prefixed with `_` are allowed.
-- **AI scoring fields**: Jobs have five `score*` fields (`scoreFit`, `scoreCompensation`, `scoreLocation`, `scoreGrowth`, `scoreConfidence`), each on a 0–5 scale. Scoring logic lives in `src/services/scoring.ts`.
-- **`JobDraft` vs `Job`**: Use `JobDraft` (omits `id`, `createdAt`, `updatedAt`) for new/edited records; call `createJobFromDraft()` from `src/domain.ts` to promote it to a `Job`.
-- **CI/CD**: Gitea Actions workflows in `.gitea/workflows/`. Requires `npm rebuild` after install for native modules (`better-sqlite3`).
-- **Tooling config**: The repo uses `eslint.config.ts`, `next.config.ts`, `playwright.config.ts`, and `vitest.config.ts` at the root.
-- **Debug logging**: Enable with `localStorage.setItem('job-tracker.debug', 'true')` in the browser console; download logs via "Export DB Logs" in the UI.
+- **Package manager**: use `pnpm`, not `npm`.
+- **Test colocation**: keep tests beside the source file they cover whenever practical.
+- **Generated files**: `src/version.ts` is generated by `scripts/generate-version.ts`; `next-env.d.ts` is maintained by Next.js. Do not hand-edit either.
+- **Backend facade**: keep `backend/sqliteStore.ts` as the public compatibility surface unless you are intentionally changing all import sites.
+- **`JobDraft` vs `Job`**: use `JobDraft` for create/edit flows and promote via `createJobFromDraft()` in `src/domain.ts`.
+- **AI scoring fields**: jobs carry five `score*` fields on a 0-5 scale; scoring logic lives in `src/services/scoring.ts`.
+- **Tooling config**: root config lives in `eslint.config.ts`, `next.config.ts`, `playwright.config.ts`, and `vitest.config.ts`.
+- **Debug logging**: enable with `localStorage.setItem('job-tracker.debug', 'true')` in the browser console, then export logs from the UI.

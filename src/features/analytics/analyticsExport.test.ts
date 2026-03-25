@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { exportAnalyticsToCSV } from './analyticsExport'
 import { Job, JobStatus } from '../../domain'
 
-function createJob(overrides: Partial<Job>): Job {
+function createJob(overrides: Partial<Job> = {}): Job {
   const now = new Date().toISOString()
   return {
     id: crypto.randomUUID(),

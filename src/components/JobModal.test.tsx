@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { JobModal } from './JobModal'
 import { Job, JobStatus } from '../domain'
 
-function createJob(overrides: Partial<Job>): Job {
+function createJob(overrides: Partial<Job> = {}): Job {
   const now = new Date().toISOString()
   return {
     id: crypto.randomUUID(),

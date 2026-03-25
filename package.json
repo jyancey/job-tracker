@@ -2,23 +2,32 @@
   "name": "job-tracker",
   "private": true,
   "version": "0.0.0",
+  "packageManager": "pnpm@10.30.3",
   "type": "module",
   "scripts": {
-    "pre-build": "tsx scripts/generate-version.ts",
-    "dev": "npm run pre-build && next dev -H 127.0.0.1 -p 4173",
-    "build": "npm run pre-build && next build",
-    "start": "next start -H 127.0.0.1 -p 3100",
-    "lint": "tsx ./node_modules/eslint/bin/eslint.js .",
-    "lint:fix": "tsx ./node_modules/eslint/bin/eslint.js . --fix",
-    "preview": "next start -H 127.0.0.1 -p 3100",
-    "serve": "next start -H 127.0.0.1 -p 3100",
-    "test": "vitest",
-    "pretest:run": "tsx scripts/generate-version.ts",
-    "test:run": "vitest run",
-    "pretest:coverage": "tsx scripts/generate-version.ts",
-    "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "preinstall": "node scripts/require-pnpm.mjs",
+    "pre-build": "tsx scripts/withColor.ts tsx scripts/generate-version.ts",
+    "dev": "pnpm run pre-build && tsx scripts/withColor.ts next dev -H 127.0.0.1 -p 4173",
+    "build": "pnpm run pre-build && tsx scripts/withColor.ts next build",
+    "start": "tsx scripts/withColor.ts next start -H 127.0.0.1 -p 3100",
+    "lint": "tsx scripts/withColor.ts tsx ./node_modules/eslint/bin/eslint.js .",
+    "lint:fix": "tsx scripts/withColor.ts tsx ./node_modules/eslint/bin/eslint.js . --fix",
+    "preview": "tsx scripts/withColor.ts next start -H 127.0.0.1 -p 3100",
+    "serve": "tsx scripts/withColor.ts next start -H 127.0.0.1 -p 3100",
+    "test": "tsx scripts/withColor.ts vitest",
+    "pretest:run": "tsx scripts/withColor.ts tsx scripts/generate-version.ts",
+    "test:run": "tsx scripts/withColor.ts vitest run",
+    "pretest:coverage": "tsx scripts/withColor.ts tsx scripts/generate-version.ts",
+    "test:coverage": "tsx scripts/withColor.ts vitest run --coverage",
+    "test:e2e": "tsx scripts/withColor.ts playwright test",
+    "test:e2e:ui": "tsx scripts/withColor.ts playwright test --ui"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "esbuild",
+      "sharp"
+    ]
   },
   "dependencies": {
     "better-sqlite3": "^11.10.0",
