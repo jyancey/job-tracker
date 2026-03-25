@@ -1,7 +1,7 @@
 # v2.8.0 Technical Design: Workspace Separation and Lightweight Multi-User Support
 
-**Date:** March 11, 2026  
-**Status:** Proposed  
+**Date:** March 25, 2026  
+**Status:** Proposed, synced to current codebase  
 **Related Plan:** [V2_8_0_RELEASE_PLAN.md](./V2_8_0_RELEASE_PLAN.md)
 
 ---
@@ -11,11 +11,12 @@
 The current app supports exactly one effective workspace per installation.
 
 Today, user-scoped data is effectively global:
-- AI config is stored under a single localStorage key in [src/storage/aiStorage.ts](../src/storage/aiStorage.ts)
-- user profile data is stored under a single localStorage key in [src/storage/aiStorage.ts](../src/storage/aiStorage.ts)
-- saved views are stored under a single localStorage key in [src/features/savedViews/useSavedViews.ts](../src/features/savedViews/useSavedViews.ts)
+- AI config is stored under a single localStorage key in [src/storage/aiStorage.ts](../../src/storage/aiStorage.ts)
+- user profile data is stored under a single localStorage key in [src/storage/aiStorage.ts](../../src/storage/aiStorage.ts)
+- saved views are stored under a single localStorage key in [src/features/savedViews/useSavedViews.ts](../../src/features/savedViews/useSavedViews.ts)
 - backup state and local backup artifacts are keyed globally
-- jobs persistence has no notion of user ownership in the fallback path or SQLite path
+- jobs persistence has no notion of workspace ownership in the fallback path or SQLite path
+- AI config and user profile also sync through `/api/config` and `/api/profile`, which currently persist one global SQLite row each
 
 This means users cannot cleanly separate different job-search tracks, such as applying to different job classes with different resumes, preferences, and saved views. It also means more than one person using the same installation would overwrite each other's workspace data.
 
@@ -58,13 +59,13 @@ Primary product use case:
 
 ### Key Design Decision
 
-Do **not** introduce `profileId` into the user-facing `Job` domain model unless forced by implementation friction.
+Do **not** introduce `workspaceId` into the user-facing `Job` domain model unless forced by implementation friction.
 
 Preferred approach:
 - keep `Job` as the business object used throughout the UI
-- scope persistence by `profileId` at the storage boundary
-- use profile-specific storage keys for localStorage-backed state
-- use profile-aware API/storage calls for SQLite-backed jobs
+- scope persistence by `workspaceId` at the storage boundary
+- use workspace-specific storage keys for localStorage-backed state
+- use workspace-aware API/storage calls for SQLite-backed persistence
 
 This minimizes blast radius across the existing UI and tests.
 
@@ -155,13 +156,12 @@ On migration, the app creates one default workspace:
 
 ### 1. Workspace Registry Storage
 
-Add new localStorage keys:
+Add one new localStorage key:
 
-- `job-tracker.profiles.v1`
-- `job-tracker.current-workspace-id`
+- `job-tracker.workspaces.v1`
 
 Responsibility:
-- store profile list
+- store workspace list
 - store currently active workspace
 - support create/rename/archive/switch actions
 
@@ -169,11 +169,19 @@ Future compatibility note:
 - this registry can later become the local cache for workspace membership and active workspace selection
 - it should not store password material or authentication tokens
 
+Source-of-truth rule:
+- `WorkspaceRegistry.currentWorkspaceId` is the only persisted source of truth for the active workspace
+- do not introduce a second `job-tracker.current-workspace-id` key unless profiling proves a real startup bottleneck
+
 ### 2. Workspace-Scoped AI Profile and Config Storage
 
 Current keys:
 - `job-tracker-ai-config`
 - `job-tracker-user-profile`
+
+Current backend behavior:
+- `/api/config` persists one global SQLite row in `ai_config`
+- `/api/profile` persists one global SQLite row in `user_profile`
 
 Replace with workspace-scoped keys:
 - `job-tracker.ai-config.<workspaceId>`
@@ -182,7 +190,9 @@ Replace with workspace-scoped keys:
 Design impact:
 - `loadAIConfig()` and `saveAIConfig()` become workspace-aware
 - `loadUserProfile()` and `saveUserProfile()` become workspace-aware
-- old signatures can be temporarily preserved via an active-workspace resolver
+- `/api/config` and `/api/profile` become workspace-aware
+- the SQLite `ai_config` and `user_profile` tables move from one singleton row to one row per workspace
+- old signatures can be temporarily preserved via an active-workspace resolver during migration if needed
 
 Recommended API shape:
 
@@ -192,6 +202,20 @@ saveAIConfig(workspaceId: string, config: AIConfig): void
 loadUserProfile(workspaceId: string): UserProfile
 saveUserProfile(workspaceId: string, profile: UserProfile): void
 ```
+
+Recommended backend shape:
+
+```ts
+GET /api/config?workspaceId=<id>
+POST /api/config?workspaceId=<id>
+GET /api/profile?workspaceId=<id>
+POST /api/profile?workspaceId=<id>
+```
+
+SQLite recommendation:
+- keep the existing `ai_config` and `user_profile` tables, but replace the singleton `'default'` row semantics with one row per workspace
+- use `workspaceId` as the persisted row identifier in those tables
+- migrate any existing `'default'` row to the default workspace during startup migration
 
 This is what allows one workspace to hold a resume and preference set for one job class, while another workspace can hold a completely different resume and targeting strategy.
 
@@ -204,7 +228,7 @@ Replace with:
 - `jobTracker.savedViews.v1.<workspaceId>`
 
 Design impact:
-- [src/features/savedViews/useSavedViews.ts](../src/features/savedViews/useSavedViews.ts) becomes profile-aware
+- [src/features/savedViews/useSavedViews.ts](../../src/features/savedViews/useSavedViews.ts) becomes workspace-aware
 - saved views no longer leak across workspaces
 
 ### 4. Jobs Storage
@@ -243,10 +267,18 @@ This preserves the existing replace-all semantics while scoping them safely.
 Current API:
 - `GET /api/jobs`
 - `PUT /api/jobs`
+- `GET /api/config`
+- `POST /api/config`
+- `GET /api/profile`
+- `POST /api/profile`
 
 Proposed API:
 - `GET /api/jobs?workspaceId=<id>`
 - `PUT /api/jobs?workspaceId=<id>`
+- `GET /api/config?workspaceId=<id>`
+- `POST /api/config?workspaceId=<id>`
+- `GET /api/profile?workspaceId=<id>`
+- `POST /api/profile?workspaceId=<id>`
 
 Behavior:
 - missing `workspaceId` should be rejected after migration is complete
@@ -329,13 +361,15 @@ Move all single-workspace installations into a valid default-workspace model wit
 1. Create workspace registry if none exists.
 2. Create one default workspace.
 3. Set `currentWorkspaceId` to the default workspace.
-4. Migrate global AI config into `job-tracker.ai-config.<defaultWorkspaceId>`.
-5. Migrate global user profile into `job-tracker.user-profile.<defaultWorkspaceId>`.
+4. Migrate global AI config localStorage into `job-tracker.ai-config.<defaultWorkspaceId>`.
+5. Migrate global user profile localStorage into `job-tracker.user-profile.<defaultWorkspaceId>`.
 6. Migrate saved views into `jobTracker.savedViews.v1.<defaultWorkspaceId>`.
 7. Migrate fallback job storage into `job-tracker.jobs.fallback.<defaultWorkspaceId>`.
 8. Migrate backup state/config/artifacts into workspace-scoped keys.
-9. For SQLite stores, backfill `workspaceId` on all existing rows with the default workspace id.
-10. Leave legacy keys readable for one release only if rollback safety is desired.
+9. Migrate any singleton SQLite AI config row (`id = 'default'`) to the default workspace row.
+10. Migrate any singleton SQLite user profile row (`id = 'default'`) to the default workspace row.
+11. For SQLite jobs, backfill `workspaceId` on all existing rows with the default workspace id.
+12. Leave legacy keys readable for one release only if rollback safety is desired.
 
 ### Migration Rules
 
@@ -404,21 +438,31 @@ The active workspace should be visible in:
 - `src/hooks/useWorkspace.ts`
   - active workspace state
   - switch/create/rename/archive actions
+  - app-wide provider mounted from the current app root (`app/AppClient.tsx` / `src/App.tsx`)
 
 ### Existing Modules to Update
 
-- [src/storage/aiStorage.ts](../src/storage/aiStorage.ts)
-- [src/features/savedViews/useSavedViews.ts](../src/features/savedViews/useSavedViews.ts)
-- [src/services/storageService.ts](../src/services/storageService.ts)
-- [src/services/apiClient.ts](../src/services/apiClient.ts)
-- [src/features/backup/backupService.ts](../src/features/backup/backupService.ts)
+- [src/storage/aiStorage.ts](../../src/storage/aiStorage.ts)
+- [src/features/savedViews/useSavedViews.ts](../../src/features/savedViews/useSavedViews.ts)
+- [src/storage/fallbackStorage.ts](../../src/storage/fallbackStorage.ts)
+- [src/services/storageService.ts](../../src/services/storageService.ts)
+- [src/storage/jobsApi.ts](../../src/storage/jobsApi.ts)
+- [src/services/apiClient.ts](../../src/services/apiClient.ts) — compatibility re-export only
+- [src/features/backup/backupService.ts](../../src/features/backup/backupService.ts)
+- [src/features/backup/backupScheduler.ts](../../src/features/backup/backupScheduler.ts)
 - backup scheduler/storage helpers
 - profile-related views/components
 
 ### Backend Changes
 
-- [backend/jobsApi.ts](../backend/jobsApi.ts): accept and validate `workspaceId`
-- [backend/sqliteStore.ts](../backend/sqliteStore.ts): add `workspaceId` column and workspace-scoped queries
+- [app/api/jobs/route.ts](../../app/api/jobs/route.ts): accept and validate `workspaceId`
+- [app/api/config/route.ts](../../app/api/config/route.ts): accept and validate `workspaceId`
+- [app/api/profile/route.ts](../../app/api/profile/route.ts): accept and validate `workspaceId`
+- [backend/sqlite/jobsRepository.ts](../../backend/sqlite/jobsRepository.ts): add `workspaceId` column and workspace-scoped queries for jobs
+- [backend/sqlite/aiConfigRepository.ts](../../backend/sqlite/aiConfigRepository.ts): scope AI config rows by workspace
+- [backend/sqlite/userProfileRepository.ts](../../backend/sqlite/userProfileRepository.ts): scope profile rows by workspace
+- [backend/sqlite/schema.ts](../../backend/sqlite/schema.ts): add migrations for workspace-aware persistence
+- [backend/sqliteStore.ts](../../backend/sqliteStore.ts): keep as compatibility facade while implementation moves into split modules
 
 ### Future Modules Likely Needed (Not in v2.8.0)
 
@@ -474,17 +518,18 @@ The highest-risk failure is silent data bleed across workspaces. Isolation tests
 
 ### Phase 2: Client Storage Scoping
 
-1. Make AI config/profile storage profile-aware.
-2. Make saved views storage profile-aware.
+1. Make AI config/profile storage workspace-aware.
+2. Make saved views storage workspace-aware.
 3. Make backup config/state/artifacts workspace-aware.
 4. Make fallback jobs storage workspace-aware.
 
 ### Phase 3: Persistence Boundary Updates
 
-1. Update `storageService` and `apiClient` to require `profileId`.
-2. Update backend API to accept `profileId`.
-3. Add SQLite `profileId` column and scoped queries.
-4. Backfill existing SQLite rows to the default profile.
+1. Update `storageService` and `jobsApi` to require `workspaceId` for job reads/writes.
+2. Update `/api/jobs`, `/api/config`, and `/api/profile` to accept `workspaceId`.
+3. Add SQLite `workspaceId` column and scoped queries for jobs.
+4. Migrate singleton AI config/profile rows to workspace-scoped rows.
+5. Backfill existing SQLite job rows to the default workspace.
 
 ### Phase 4: UI Integration
 
@@ -517,13 +562,13 @@ Recommended default: no. Keep exported jobs portable; store workspace identity o
 5. How should future admin privileges be modeled?
 Recommended default: as account membership roles plus a separate admin-only app configuration domain, not as a special profile type.
 
-6. Should a future authenticated release reuse `profileId` terminology?
-Recommended default: no. Internally migrate terminology toward `workspaceId` once server-backed auth is introduced.
+6. Should any persisted key or API surface keep `profile` terminology?
+Recommended default: no. Standardize on `workspace` and `workspaceId` before implementation starts.
 
 ---
 
 ## Recommendation
 
-For v2.8.0, implement **profile workspaces** as a local-only, one-active-profile-at-a-time system. This solves the immediate multi-user problem with low architectural risk and keeps the door open for a future team/collaboration model without forcing auth complexity now.
+For v2.8.0, implement **local workspaces** as a local-only, one-active-workspace-at-a-time system. This solves the immediate multi-user problem with low architectural risk and keeps the door open for a future team/collaboration model without forcing auth complexity now.
 
 If login/password, roles, and permissions are added later, they should be layered on top of this design by introducing `Account`, `WorkspaceMembership`, and `AppConfig` models rather than by mutating local workspaces into account records.

@@ -40,7 +40,6 @@ Use this file as the live planning/status document.
 
 Treat these as historical reference material, not live status:
 
-- `docs/planning/V2_7_0_RELEASE_PLAN.md`
 - `docs/planning/COMPREHENSIVE_ROADMAP.md`
 - release notes under `docs/releases/`
 

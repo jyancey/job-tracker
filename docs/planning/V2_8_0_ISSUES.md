@@ -1,10 +1,13 @@
 # v2.8.0 Forgejo Issue Backlog
 
 **Milestone:** v2.8.0  
-**Release Theme:** Performance, Accessibility, Workspace Separation, and Advanced Workflow Intelligence  
-**Generated:** March 11, 2026
+**Release Theme:** Performance, Accessibility, Workspace Separation, and Reliability  
+**Generated:** March 11, 2026  
+**Updated:** March 25, 2026
 
 Copy each issue block into Forgejo. Suggested labels are noted per issue.
+
+Checked tasks below reflect work already present in the live codebase as of the update date. An issue can still remain open even when some setup or baseline tasks are already complete.
 
 ---
 
@@ -21,12 +24,14 @@ Copy each issue block into Forgejo. Suggested labels are noted per issue.
 
 Before optimizing anything, establish a documented performance baseline for the table-heavy and analytics-heavy views. This gives the team a measurable reference point for all subsequent P1 optimization work.
 
+Current repo status: partially complete. `docs/PERFORMANCE_BASELINE.md` exists, the target interactions are identified, and thresholds are documented, but the measurement tables are still blank.
+
 #### Tasks
 
-- [ ] Identify the 3–5 most latency-sensitive user interactions (e.g. large-dataset table render, filter apply, analytics recalculation).
+- [x] Identify the 3–5 most latency-sensitive user interactions (e.g. large-dataset table render, filter apply, analytics recalculation).
 - [ ] Record baseline metrics (interaction response time, component render count) using browser DevTools or React DevTools profiler.
-- [ ] Document results as a brief table in `docs/` (or a new `docs/PERFORMANCE_BASELINE.md`).
-- [ ] Define acceptable thresholds that will be used to gate the Gate 1 checklist item.
+- [x] Document the baseline workflow and measurement tables in `docs/PERFORMANCE_BASELINE.md`.
+- [x] Define acceptable thresholds that will be used to gate the Gate 1 checklist item.
 
 #### Acceptance Criteria
 
@@ -36,7 +41,7 @@ Before optimizing anything, establish a documented performance baseline for the 
 
 #### References
 
-- `docs/V2_8_0_RELEASE_PLAN.md` — Track P1
+- `docs/planning/V2_8_0_RELEASE_PLAN.md` — Track P1
 
 ---
 
@@ -65,7 +70,7 @@ Using the baseline from P1-1, apply focused memoization and render-boundary impr
 
 #### References
 
-- `docs/V2_8_0_RELEASE_PLAN.md` — Track P1
+- `docs/planning/V2_8_0_RELEASE_PLAN.md` — Track P1
 - Baseline doc from Issue P1-1
 
 ---
@@ -79,12 +84,14 @@ Using the baseline from P1-1, apply focused memoization and render-boundary impr
 
 Formalize the performance thresholds established in P1-1 and P1-2 as documented budgets that can be checked in future releases. This makes performance a first-class release gate rather than a one-off concern.
 
+Current repo status: partially complete. The budget section already exists in `docs/PERFORMANCE_BASELINE.md`, and the release plan references that doc, but there is no automated budget enforcement in CI yet.
+
 #### Tasks
 
-- [ ] Write a short performance budget section in `docs/PERFORMANCE_BASELINE.md` (or equivalent).
+- [x] Write a short performance budget section in `docs/PERFORMANCE_BASELINE.md` (or equivalent).
 - [ ] Identify which budgets can be enforced automatically (e.g. bundle size check, build output warning).
 - [ ] Add bundle size check to build output or CI if not already present.
-- [ ] Update Gate 1 checklist in `V2_8_0_RELEASE_PLAN.md` to reference the budget doc.
+- [x] Ensure `docs/planning/V2_8_0_RELEASE_PLAN.md` references the budget/baseline doc.
 
 #### Acceptance Criteria
 
@@ -93,7 +100,7 @@ Formalize the performance thresholds established in P1-1 and P1-2 as documented 
 
 #### References
 
-- `docs/V2_8_0_RELEASE_PLAN.md` — Track P1, Gate 1
+- `docs/planning/V2_8_0_RELEASE_PLAN.md` — Track P1, Gate 1
 
 ---
 
@@ -126,7 +133,7 @@ Audit the core user journeys (add job, edit job, filter, import, backup) for key
 
 #### References
 
-- `docs/V2_8_0_RELEASE_PLAN.md` — Track P2
+- `docs/planning/V2_8_0_RELEASE_PLAN.md` — Track P2
 - WCAG 2.1 AA as the target standard
 
 ---
@@ -156,7 +163,7 @@ Fix the high-severity accessibility issues identified in the P2-1 audit. Focus o
 
 #### References
 
-- `docs/V2_8_0_RELEASE_PLAN.md` — Track P2, Gate 2
+- `docs/planning/V2_8_0_RELEASE_PLAN.md` — Track P2, Gate 2
 - Findings from Issue P2-1
 
 ---
@@ -193,7 +200,7 @@ Introduce the `Workspace` and `WorkspaceRegistry` TypeScript interfaces that for
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Data Model section
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Data Model section
 
 ---
 
@@ -209,10 +216,10 @@ Create `src/services/workspaceService.ts`, the core service responsible for read
 #### Tasks
 
 - [ ] Create `src/services/workspaceService.ts` with:
-  - `getRegistry(): WorkspaceRegistry` — reads `job-tracker.profiles.v1` from localStorage, returns a safe default if absent
+  - `getRegistry(): WorkspaceRegistry` — reads `job-tracker.workspaces.v1` from localStorage, returns a safe default if absent
   - `saveRegistry(registry: WorkspaceRegistry): void` — persists to localStorage
-  - `getCurrentWorkspaceId(): string` — reads `job-tracker.current-workspace-id`
-  - `setCurrentWorkspaceId(id: string): void`
+  - `getCurrentWorkspaceId(): string` — resolves `registry.currentWorkspaceId`
+  - `setCurrentWorkspaceId(id: string): void` — updates `registry.currentWorkspaceId` without introducing a second persisted key
   - `createWorkspace(displayName: string, options?: Partial<Workspace>): Workspace`
   - `renameWorkspace(id: string, displayName: string): void`
   - `archiveWorkspace(id: string): void`
@@ -228,7 +235,7 @@ Create `src/services/workspaceService.ts`, the core service responsible for read
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §1, Service and Module Changes
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §1, Service and Module Changes
 
 ---
 
@@ -252,7 +259,10 @@ Implement the idempotent startup migration that converts an existing single-work
   6. Migrate saved views key → `jobTracker.savedViews.v1.<defaultWorkspaceId>`.
   7. Migrate fallback jobs key → `job-tracker.jobs.fallback.<defaultWorkspaceId>`.
   8. Migrate backup config/state keys → workspace-scoped equivalents.
-  9. Leave legacy keys in place (do not delete) for one release cycle for rollback safety.
+  9. Migrate singleton SQLite AI config row (`id = 'default'`) to the default workspace row.
+  10. Migrate singleton SQLite user profile row (`id = 'default'`) to the default workspace row.
+  11. Backfill SQLite jobs `workspaceId` for existing rows using the default workspace ID.
+  12. Leave legacy keys in place (do not delete) for one release cycle for rollback safety.
 - [ ] Call `runWorkspaceMigration()` from app initialization before any workspace-dependent reads.
 - [ ] Log a clear console message on first migration completion and on subsequent skips.
 - [ ] Write unit tests:
@@ -269,7 +279,7 @@ Implement the idempotent startup migration that converts an existing single-work
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Migration Strategy
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Migration Strategy
 
 ---
 
@@ -293,7 +303,7 @@ Create `src/hooks/useWorkspace.ts` to expose active workspace state and workspac
   - `archiveWorkspace(id: string): void`
 - [ ] State should react to workspace switches (consumers re-render on active workspace change).
 - [ ] Wrap a context provider (`WorkspaceProvider`) so active workspace is accessible app-wide without prop drilling.
-- [ ] Mount `WorkspaceProvider` at the app root in `src/main.tsx` (or `App.tsx`).
+- [ ] Mount `WorkspaceProvider` at the app root in `app/AppClient.tsx` (or `src/App.tsx`).
 - [ ] Write unit/hook tests for: initial state, switch, create, rename, archive.
 
 #### Acceptance Criteria
@@ -304,7 +314,7 @@ Create `src/hooks/useWorkspace.ts` to expose active workspace state and workspac
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Service and Module Changes
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Service and Module Changes
 
 ---
 
@@ -315,7 +325,7 @@ Create `src/hooks/useWorkspace.ts` to expose active workspace state and workspac
 
 #### Summary
 
-Update `src/storage/aiStorage.ts` so that AI config and user profile data are read and written under workspace-scoped localStorage keys. This is the first Phase 2 storage scoping change.
+Update AI config and user profile persistence so that browser storage, API sync, and SQLite rows are all scoped to the active workspace. This is the first Phase 2 storage scoping change.
 
 **Depends on:** P3-3 (migration), P3-2 (workspaceService)
 
@@ -323,21 +333,28 @@ Update `src/storage/aiStorage.ts` so that AI config and user profile data are re
 
 - [ ] Update `loadAIConfig()` and `saveAIConfig()` to accept a `workspaceId: string` parameter. Read/write key `job-tracker.ai-config.<workspaceId>`.
 - [ ] Update `loadUserProfile()` and `saveUserProfile()` to accept a `workspaceId: string` parameter. Read/write key `job-tracker.user-profile.<workspaceId>`.
+- [ ] Update `/api/config` and `/api/profile` requests to include `workspaceId` and reject missing IDs once migration is complete.
+- [ ] Update `backend/sqlite/aiConfigRepository.ts` and `backend/sqlite/userProfileRepository.ts` to persist one row per workspace instead of one singleton `'default'` row.
 - [ ] Update all call sites to pass the active workspace ID from `useWorkspace()` or a resolved service call.
 - [ ] Verify legacy keys are no longer written (migration handles reading them on first run only).
-- [ ] Add unit tests for: load/save with explicit workspaceId, isolation between two different workspace IDs.
+- [ ] Add unit tests for: load/save with explicit workspaceId, isolation between two different workspace IDs, and migration of existing singleton backend rows.
 
 #### Acceptance Criteria
 
 - AI config changes in workspace A do not appear in workspace B.
 - User profile changes in workspace A do not appear in workspace B.
+- `/api/config` and `/api/profile` return workspace-scoped data only.
 - Tests confirm isolation.
 - Existing test suite still passes.
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §2
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §2
 - `src/storage/aiStorage.ts`
+- `app/api/config/route.ts`
+- `app/api/profile/route.ts`
+- `backend/sqlite/aiConfigRepository.ts`
+- `backend/sqlite/userProfileRepository.ts`
 
 ---
 
@@ -367,7 +384,7 @@ Update `src/features/savedViews/useSavedViews.ts` to read and write saved views 
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §3
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §3
 - `src/features/savedViews/useSavedViews.ts`
 
 ---
@@ -405,7 +422,7 @@ Update the backup subsystem so that backup config, backup state, and auto-backup
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §6
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §6
 - `src/features/backup/backupService.ts`
 
 ---
@@ -423,7 +440,7 @@ Update the localStorage fallback path for job storage to use a workspace-scoped 
 
 #### Tasks
 
-- [ ] Identify the current fallback jobs localStorage key in `src/services/storageService.ts` or equivalent.
+- [ ] Identify the current fallback jobs localStorage key in `src/storage/fallbackStorage.ts` (used by `src/services/storageService.ts`).
 - [ ] Change key to: `job-tracker.jobs.fallback.<workspaceId>`
 - [ ] Ensure the active workspace ID is resolved before any fallback read/write.
 - [ ] Add unit tests for: fallback write scoped to workspace, isolation between two workspace IDs.
@@ -436,7 +453,8 @@ Update the localStorage fallback path for job storage to use a workspace-scoped 
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §4 (Local Fallback Path)
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §4 (Local Fallback Path)
+- `src/storage/fallbackStorage.ts`
 
 ---
 
@@ -451,7 +469,7 @@ Add workspace ownership to the SQLite persistence layer by adding a `workspaceId
 
 #### Tasks
 
-- [ ] In `backend/sqliteStore.ts`, add migration on startup:
+- [ ] In `backend/sqlite/schema.ts` and `backend/sqlite/jobsRepository.ts`, add migration on startup:
   ```sql
   ALTER TABLE jobs ADD COLUMN workspaceId TEXT;
   CREATE INDEX IF NOT EXISTS idx_jobs_workspace_id ON jobs(workspaceId);
@@ -470,41 +488,47 @@ Add workspace ownership to the SQLite persistence layer by adding a `workspaceId
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §4 (SQLite Path)
-- `backend/sqliteStore.ts`
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §4 (SQLite Path)
+- `backend/sqlite/schema.ts`
+- `backend/sqlite/jobsRepository.ts`
+- `backend/sqliteStore.ts` — compatibility facade
 
 ---
 
-### Issue P3-10: Update backend HTTP API to accept and validate workspaceId
+### Issue P3-10: Update backend HTTP APIs to accept and validate workspaceId
 
 **Labels:** `workspace` `backend` `api` `v2.8.0`  
 **Milestone:** v2.8.0
 
 #### Summary
 
-Update the `GET /api/jobs` and `PUT /api/jobs` routes in `backend/jobsApi.ts` to require and validate a `workspaceId` query parameter. Requests without it should be rejected once migration is complete.
+Update the workspace-sensitive backend routes to require and validate `workspaceId`. At minimum this includes `/api/jobs`, `/api/config`, and `/api/profile`. Requests without it should be rejected once migration is complete.
 
-**Depends on:** P3-9
+**Depends on:** P3-5, P3-9
 
 #### Tasks
 
 - [ ] Update `GET /api/jobs` to read `workspaceId` from `req.query` and pass it to `listJobs()`.
 - [ ] Update `PUT /api/jobs` to read `workspaceId` from `req.query` and pass it to `replaceAllJobs()`.
+- [ ] Update `GET /api/config` and `POST /api/config` to read `workspaceId` and pass it through the AI config persistence path.
+- [ ] Update `GET /api/profile` and `POST /api/profile` to read `workspaceId` and pass it through the user profile persistence path.
 - [ ] Validate that `workspaceId` is a non-empty string. Return `400 Bad Request` with a descriptive message if missing or invalid.
-- [ ] Add API-level tests (or update existing) for: valid workspace request, missing workspaceId returns 400, two workspaces return isolated results.
+- [ ] Add API-level tests (or update existing) for: valid workspace request, missing workspaceId returns 400, and two workspaces return isolated results for jobs, config, and profile.
 
-**Security note:** In v2.8.0, `workspaceId` is trusted from the client since there is no auth layer. Document this assumption in a comment in `jobsApi.ts`. A future auth release should validate workspace membership server-side.
+**Security note:** In v2.8.0, `workspaceId` is trusted from the client since there is no auth layer. Document this assumption in a comment in `app/api/jobs/route.ts`. A future auth release should validate workspace membership server-side.
 
 #### Acceptance Criteria
 
 - Valid requests with `workspaceId` are served correctly.
 - Requests missing `workspaceId` return `400` with a clear error message.
-- No workspace data from one ID is returned in a request for another ID.
+- No workspace data from one ID is returned in a request for another ID across jobs, AI config, or user profile routes.
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §5 (HTTP API)
-- `backend/jobsApi.ts`
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Storage Design §5 (HTTP API)
+- `app/api/jobs/route.ts`
+- `app/api/config/route.ts`
+- `app/api/profile/route.ts`
 
 ---
 
@@ -515,13 +539,13 @@ Update the `GET /api/jobs` and `PUT /api/jobs` routes in `backend/jobsApi.ts` to
 
 #### Summary
 
-Update the frontend service layer (`src/services/storageService.ts`, `src/services/apiClient.ts`) so that all job reads and writes pass the active workspace ID through the persistence stack.
+Update the frontend service layer (`src/services/storageService.ts`, `src/storage/jobsApi.ts`, and the `src/services/apiClient.ts` compatibility re-export) so that all job reads and writes pass the active workspace ID through the persistence stack.
 
 **Depends on:** P3-4, P3-10
 
 #### Tasks
 
-- [ ] Update `apiClient.ts` to include `workspaceId` as a query parameter in `GET /api/jobs` and `PUT /api/jobs` calls.
+- [ ] Update `src/storage/jobsApi.ts` to include `workspaceId` as a query parameter in `GET /api/jobs` and `PUT /api/jobs` calls, and keep `src/services/apiClient.ts` aligned as the compatibility re-export.
 - [ ] Update `storageService.ts` to resolve the active workspace ID (from `workspaceService` or passed as a parameter) for all job operations.
 - [ ] Ensure the `workspaceId` resolved at the service call site matches the `useWorkspace()` active state.
 - [ ] Update or add unit tests for: outgoing requests include correct `workspaceId`, switching active workspace changes which ID is sent.
@@ -534,8 +558,10 @@ Update the frontend service layer (`src/services/storageService.ts`, `src/servic
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Service and Module Changes
-- `src/services/storageService.ts`, `src/services/apiClient.ts`
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Service and Module Changes
+- `src/services/storageService.ts`
+- `src/storage/jobsApi.ts`
+- `src/services/apiClient.ts`
 
 ---
 
@@ -568,7 +594,8 @@ Add a visible, accessible workspace switcher control to the app shell so users c
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — UI and UX Changes (App Shell)
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — UI and UX Changes (App Shell)
+- `src/views/AppShellView.tsx`
 
 ---
 
@@ -586,6 +613,7 @@ Extend the profile or settings screen with full workspace management: create, re
 #### Tasks
 
 - [ ] Add a "Manage Workspaces" section to the profile or settings page.
+- [ ] Show the active workspace name in profile/settings surfaces that edit workspace-scoped data.
 - [ ] List all workspaces (active and archived, clearly differentiated).
 - [ ] Per-workspace actions: rename, archive, duplicate (copy preferences and saved views, not jobs — per design doc recommendation).
 - [ ] Archived workspaces are hidden from the switcher but visible and recoverable from the management screen.
@@ -598,11 +626,14 @@ Extend the profile or settings screen with full workspace management: create, re
 - Users can rename any workspace.
 - Users can archive a workspace (it disappears from switcher, reachable from management screen).
 - Duplication produces a new workspace with copied preferences, no jobs.
+- Active workspace context is visible anywhere the user edits workspace-scoped profile or AI settings.
 - All actions require explicit user confirmation for destructive operations.
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — UI and UX Changes (Profile View)
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — UI and UX Changes (Profile View)
+- `src/views/ProfileView.tsx`
+- `src/views/SettingsView.tsx`
 
 ---
 
@@ -633,7 +664,11 @@ Update the import, export, and backup/restore screens to clearly show the active
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — UI (Messaging Requirements, Safety Rules), Storage Design §6–7
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — UI (Messaging Requirements, Safety Rules), Storage Design §6–7
+- `src/hooks/useImportExport.ts`
+- `src/views/SettingsView.tsx`
+- `src/views/settings/BackupScheduleSection.tsx`
+- `src/views/settings/RestoreSettingsSection.tsx`
 
 ---
 
@@ -662,6 +697,10 @@ Add comprehensive unit and integration tests covering workspace registry operati
   - saved views isolation
   - fallback jobs isolation
   - backup key isolation
+- [ ] Backend repository and route tests:
+  - AI config repository isolation by workspace
+  - user profile repository isolation by workspace
+  - `/api/config` and `/api/profile` reject missing `workspaceId`
 - [ ] Integration tests:
   - switching active workspace causes service calls to resolve different data
   - import/export reflects active workspace
@@ -674,7 +713,7 @@ Add comprehensive unit and integration tests covering workspace registry operati
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Testing Strategy
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Testing Strategy
 
 ---
 
@@ -705,8 +744,8 @@ Add end-to-end test flows that verify workspace creation, switching, and job/sav
 
 #### References
 
-- `docs/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Testing Strategy (E2E)
-- `docs/V2_8_0_RELEASE_PLAN.md` — Track P5, Gate 2
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md` — Testing Strategy (E2E)
+- `docs/planning/V2_8_0_RELEASE_PLAN.md` — Track P5, Gate 2
 
 ---
 
@@ -723,6 +762,8 @@ Add end-to-end test flows that verify workspace creation, switching, and job/sav
 
 Improve the filtering experience for users who manage large job lists. Focus on reducing click-count for common filter configurations and making filter state more transparent.
 
+Current repo status: partially complete. The current filter toolbar already includes search match counts, clear-search, clear-overdue, and clear-advanced controls, so this issue is now about additional workflow polish rather than first-time implementation.
+
 #### Tasks
 
 - [ ] Audit the current filter controls for friction points (review user feedback or self-test daily workflows).
@@ -738,7 +779,7 @@ Improve the filtering experience for users who manage large job lists. Focus on 
 
 #### References
 
-- `docs/V2_8_0_RELEASE_PLAN.md` — Track P4
+- `docs/planning/V2_8_0_RELEASE_PLAN.md` — Track P4
 
 ---
 
@@ -751,10 +792,12 @@ Improve the filtering experience for users who manage large job lists. Focus on 
 
 Make saved views faster to create and apply so users can treat them as lightweight named workspaces within a workspace (e.g. "Today's Follow-Ups", "Screen Calls Due").
 
+Current repo status: partially complete. Saved views can already be applied from the filter toolbar and renamed/deleted; this issue is now about reducing friction further and making the flow workspace-aware once P3 lands.
+
 #### Tasks
 
 - [ ] Identify pain points in the current save-view and load-view flow.
-- [ ] Add quick-apply access to saved views (e.g. a compact view-switcher control).
+- [x] Add quick-apply access to saved views (e.g. a compact view-switcher control).
 - [ ] Improve naming/editing UX for saved views if needed.
 - [ ] Ensure the P3-6 workspace-scoping of saved views is compatible with these improvements.
 
@@ -766,7 +809,7 @@ Make saved views faster to create and apply so users can treat them as lightweig
 
 #### References
 
-- `docs/V2_8_0_RELEASE_PLAN.md` — Track P4
+- `docs/planning/V2_8_0_RELEASE_PLAN.md` — Track P4
 
 ---
 
@@ -783,6 +826,8 @@ Make saved views faster to create and apply so users can treat them as lightweig
 
 Expand E2E coverage for destructive and high-stakes operations: importing a file (replace behavior), restoring a backup, and bulk-editing jobs. These paths are high-risk and currently under-covered.
 
+Current repo status: partially complete. Playwright already covers CRUD, filter/sort, navigation, analytics drill-down, stuck-job modal flows, and profile/settings persistence, but the destructive flows listed here are still missing.
+
 #### Tasks
 
 - [ ] E2E flow: import a jobs file and confirm replace behavior shows correct count and prompts.
@@ -798,7 +843,7 @@ Expand E2E coverage for destructive and high-stakes operations: importing a file
 
 #### References
 
-- `docs/V2_8_0_RELEASE_PLAN.md` — Track P5
+- `docs/planning/V2_8_0_RELEASE_PLAN.md` — Track P5
 
 ---
 
@@ -813,7 +858,7 @@ Update the release validation process to incorporate workspace-separation smoke 
 
 #### Tasks
 
-- [ ] Update `docs/V2_8_0_RELEASE_PLAN.md` Gate 3 checklist to include:
+- [ ] Update `docs/planning/V2_8_0_RELEASE_PLAN.md` Gate 3 checklist to include:
   - Workspace E2E flows (from P3-16 and P5-1)
   - Migration smoke test against a simulated legacy localStorage state
 - [ ] Write or update `docs/RELEASE_SMOKE_CHECKLIST.md` (or equivalent) with step-by-step manual verification steps for a release candidate.
@@ -827,7 +872,7 @@ Update the release validation process to incorporate workspace-separation smoke 
 
 #### References
 
-- `docs/V2_8_0_RELEASE_PLAN.md` — Gate 3, Track P5
+- `docs/planning/V2_8_0_RELEASE_PLAN.md` — Gate 3, Track P5
 
 ---
 

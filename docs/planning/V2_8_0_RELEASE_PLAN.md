@@ -1,191 +1,265 @@
 # Job Tracker v2.8.0 Release Plan
 
-**Release Window:** Q3 2026  
-**Release Theme:** Performance, Accessibility, Workspace Separation, and Advanced Workflow Intelligence  
-**Status:** Planning
+**Updated:** March 25, 2026  
+**Target Window:** Q3 2026  
+**Release Theme:** Performance, Accessibility, Workspace Separation, and Reliability  
+**Status:** Planning, resynced to current codebase
 
----
+## Current Baseline
 
-## Overview
+This plan now uses the current post-v2.7.4 codebase as its starting point, not the older v2.7.0 release snapshot.
 
-v2.8.0 builds on the stabilized v2.7.0 architecture. The release prioritizes measurable runtime performance gains, a formal accessibility pass, workspace separation for distinct job-search tracks, and advanced decision-support capabilities that improve daily execution quality for users.
+- Current validated baseline: 79 test files, 684 passing tests, 10 passing Playwright tests
+- Current release baseline: `v2.7.4`
+- Current branch shape: architecture cleanup landed after `v2.7.4`, including:
+  - `App.tsx` reduced to a thin composition shell
+  - table rendering split into context-driven subcomponents under `src/views/table/`
+  - settings split into focused sections under `src/views/settings/`
+  - SQLite responsibilities split into focused modules under `backend/sqlite/`
+  - `pnpm` standardized across local scripts, CI, and E2E startup
 
-## Baseline (from v2.7.0 release)
+Current live status is documented in:
 
-- 681 passing tests across 78 test files
-- Production build green
-- Service-layer boundaries finalized
-- App decomposition completed
+- `docs/planning/NEXT_STEPS.md`
+- `docs/ARCHITECTURE.md`
 
-**Technical Design:** [V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md](./V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md)
+Related design references for this release:
 
-## Release Goals
+- `docs/PERFORMANCE_BASELINE.md`
+- `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md`
+- `docs/planning/V2_8_0_FORGEJO_ISSUES.md`
 
-### Must Have
+## Release Intent
 
-1. Performance optimization pass for table-heavy and analytics-heavy workflows.
-2. Accessibility pass targeting WCAG 2.1 AA for core user journeys.
-3. Workspace separation for distinct job classes, resumes, and search strategies.
-4. Advanced filtering and workflow refinements for faster daily triage.
-5. Expanded E2E coverage for critical and destructive paths.
+v2.8.0 should focus on the areas that are still clearly missing from the current product:
 
-### Should Have
+1. measurable performance work on known hot paths
+2. a real accessibility audit and remediation pass
+3. local workspace separation for multiple job-search tracks
+4. E2E coverage for destructive and workspace-sensitive workflows
 
-1. Workspace UX improvements (switcher, duplication, workspace-specific defaults).
-2. Improved import/export and backup ergonomics (preview clarity and safety prompts).
-3. Additional documentation for performance and accessibility standards.
+Earlier ideas about “advanced workflow intelligence” are no longer the primary differentiator for this release because many of those user-facing capabilities already shipped in `v2.7.x`.
 
-### Could Have
+## Track Status Against Current Repo
 
-1. AI-assisted interview preparation guidance.
-2. Timeline visualization for pipeline momentum.
+### P1: Performance Hardening
 
----
+**Status:** prepared, not executed
 
-## Detailed Scope
+What already exists:
 
-### Track P1: Performance Hardening
+- `docs/PERFORMANCE_BASELINE.md` defines target interactions, measurement steps, and budgets
+- the current codebase has identified hot paths worth optimizing
 
-- Optimize expensive filter/sort/render paths for large datasets.
-- Introduce focused memoization and render-boundary checks in high-frequency components.
-- Define and track performance budgets for key views.
+What is still missing:
 
-**Success Criteria:**
-- Table interactions remain responsive for large job sets.
-- No regressions in correctness or sorting/filtering behavior.
-- Build size remains stable or improved.
+- actual recorded baseline numbers
+- any merged optimization work tied to those measurements
+- any enforced performance budget in CI or release validation
 
-### Track P2: Accessibility Audit and Remediation
+Known current hot spots:
 
-- Audit keyboard navigation, focus order, and screen-reader labeling in core flows.
-- Address semantic issues in table and modal interactions.
-- Add missing accessibility tests where practical.
+- `src/views/AnalyticsView.tsx` performs several synchronous analytics calculations on render
+- `src/hooks/useTablePipeline.ts` performs a redundant pre-sort before the user-selected sort
+- score-based sorting still has potentially expensive per-comparison work
 
-**Success Criteria:**
-- Core CRUD/filter/import workflows keyboard-operable.
-- No high-severity a11y issues in internal audit.
+### P2: Accessibility Audit and Remediation
 
-### Track P3: Workspace Separation Foundations
+**Status:** groundwork present, release-track work not started
 
-**Primary Product Outcome:**
-- One user can maintain multiple workspaces for different job classes.
-- Each workspace can have different jobs, a different resume/profile, different AI preferences, and different saved views.
-- Workspace switching should create clear separation between these job-search tracks.
+What already exists:
 
-**Recommended Simple Implementation Approach:**
-- Avoid authentication, shared collaboration, and permissions in v2.8.0.
-- Support multiple local workspaces on the same installation, with one active workspace at a time.
-- Scope user-specific data by `workspaceId`, so each workspace gets isolated jobs, saved views, AI settings, backups, and resume/profile preferences.
+- shared keyboard/a11y utilities in `src/utils/a11yUtils.ts`
+- many components already use `aria-*` attributes and keyboard affordances
+- recent test cleanup removed the known `StatusCell` table-semantic warning in tests
 
-**Implementation Shape:**
-- Introduce a lightweight workspace model:
-  - `id`
-  - `displayName`
-  - `createdAt`
-  - `updatedAt`
-  - optional UI metadata such as color/avatar initial
-- Add `currentWorkspaceId` persistence and a workspace switcher in the shell/profile area.
-- Replace the single global storage model with workspace-scoped records.
-- Add `workspaceId` ownership to user-scoped entities:
-  - jobs
-  - saved views
-  - AI config and user profile
-  - backups and restore metadata
-- Default all reads and writes to the active workspace context.
+What is still missing:
 
-**Why this is the simplest path:**
-- No login, password reset, or session management.
-- No server-side auth or cross-user permissions model.
-- Preserves the current local-first product direction.
-- Solves the immediate problem: users can keep job classes clearly separated, and more than one person can safely use the same app instance without mixing data.
+- a formal keyboard-navigation and screen-reader audit
+- a prioritized remediation checklist
+- accessibility-specific regression tests for the issues fixed
+- a documented “done” standard for core CRUD/filter/import/settings flows
 
-**Concrete Workspace Improvements:**
-- Add workspace switcher UI in header/profile screen.
-- Support create, rename, archive, and duplicate workspace.
-- Add workspace-specific defaults for AI scoring preferences and saved views.
-- Show active workspace clearly in the shell and import/export flows.
+### P3: Workspace Separation Foundations
 
-**Success Criteria:**
-- One user can switch between workspaces for different job classes without seeing mixed jobs, resumes, or saved views.
-- AI scoring uses the active workspace profile only.
-- Import/export and backup actions are clearly scoped to the current workspace.
-- Existing single-user installs migrate automatically into a default workspace.
+**Status:** design complete, implementation not started
 
-### Track P4: Workflow and Filtering Enhancements
+What already exists:
 
-- Add advanced filtering quality-of-life controls.
-- Improve saved-view workflows for rapid context switching.
-- Expand task triage and due-date workflow usability.
+- a detailed design doc in `docs/planning/V2_8_0_PROFILE_WORKSPACES_TECHNICAL_DESIGN.md`
+- a decomposed issue breakdown in `docs/planning/V2_8_0_FORGEJO_ISSUES.md`
 
-**Success Criteria:**
-- Reduced clicks for common daily workflows.
-- No behavior regressions in existing saved view/task flows.
+What is still missing in live code:
 
-### Track P5: E2E and Reliability Expansion
+- workspace domain types
+- workspace registry/service/provider
+- active workspace switcher UI
+- workspace-scoped localStorage keys
+- workspace-aware API requests
+- workspace-aware SQLite persistence
+- migration from the current single-workspace model
 
-- Add E2E tests for workspace creation, workspace switching, and scoped data isolation.
-- Add E2E tests for import/replace safety, backup/restore, and bulk operations.
-- Strengthen release validation checklist and smoke coverage.
+Current code still reflects a single-workspace model:
 
-**Success Criteria:**
-- Critical end-user workflows covered by deterministic E2E tests.
-- Release candidate validation is repeatable and documented.
+- AI config and user profile use single global keys in `src/storage/aiStorage.ts`
+- `/api/jobs` does not accept a `workspaceId`
+- SQLite job persistence has no workspace column or workspace-scoped query path
 
-### Migration Notes
+### P4: Workflow and Filtering Enhancements
 
-- On first run after upgrade, convert the current single stored profile/workspace into a default workspace record.
-- Attach existing jobs and saved views to that default `workspaceId`.
-- Preserve backward compatibility for users who never create a second profile.
+**Status:** needs rescoping
 
----
+Much of the original intent for this track has already landed in `v2.7.x`:
 
-## Gates
+- saved views
+- full-text search
+- task views
+- backup and restore workflows
+- analytics drill-down and stuck-job workflows
 
-### Gate 1: Mid-Release Architecture and Performance
+For `v2.8.0`, this track should be treated as targeted quality-of-life work only, for example:
 
-- [ ] Performance baseline captured
-- [ ] Initial optimization changes merged
-- [ ] No regression in unit/integration suite
+- improving saved-view ergonomics
+- reducing clicks in common task triage flows
+- clearer import/export and backup messaging
 
-### Gate 2: Feature Complete
+This track should not expand into another broad feature bucket unless the workspace and reliability tracks are already on track.
 
-- [ ] Workspace-scoped data separation implemented
-- [ ] Single-workspace to default-workspace migration implemented
-- [ ] Accessibility remediation complete for primary workflows
-- [ ] Advanced filtering/workflow enhancements complete
-- [ ] E2E scenarios for destructive operations implemented
+### P5: E2E and Reliability Expansion
+
+**Status:** partially started
+
+What already exists:
+
+- Playwright is configured and stable
+- the suite covers smoke, CRUD, filter/sort, navigation, analytics drill-down, stuck-job modal flows, and profile/settings persistence
+
+What is still missing:
+
+- bulk operations coverage
+- import/export coverage
+- drag-drop coverage
+- backup/restore destructive-flow coverage
+- workspace creation/switch/isolation coverage
+
+This is the clearest near-term gap even if workspace work has not started yet.
+
+## Must Have Scope
+
+### 1. Record and act on the performance baseline
+
+- populate `docs/PERFORMANCE_BASELINE.md` with real measurements
+- fix the highest-value confirmed bottlenecks
+- verify no correctness regressions in filtering, sorting, pagination, or analytics output
+
+### 2. Complete an accessibility pass for primary workflows
+
+- audit keyboard navigation and focus order
+- remediate table, modal, and status-message issues
+- add tests for the highest-risk interaction fixes
+
+### 3. Implement local workspace separation
+
+- add a workspace registry plus active workspace resolution
+- make jobs, saved views, AI config, user profile, and backup state workspace-aware
+- add migration from current single-workspace installs
+- add shell/profile UI for switching and managing workspaces
+
+### 4. Expand destructive-path E2E coverage
+
+- bulk operations
+- import/export
+- backup/restore
+- workspace isolation
+
+## Should Have Scope
+
+- workspace duplication and archive flows polished
+- improved import/export and backup UX copy naming the active workspace
+- release checklist updates that explicitly include workspace and destructive-flow validation
+- performance and accessibility standards documented in live docs
+
+## Could Have Scope
+
+- AI-assisted interview preparation guidance
+- timeline-style visualization for pipeline momentum
+
+These should stay out of scope unless the Must Have tracks are already complete.
+
+## Success Criteria
+
+### Performance
+
+- baseline measurements are recorded and committed to docs
+- at least one or two confirmed bottlenecks are improved with measurable gains
+- no regressions in existing filter/sort/analytics behavior
+
+### Accessibility
+
+- core CRUD, filtering, settings, and import-related flows are keyboard-operable
+- no known high-severity internal a11y audit issues remain open
+
+### Workspace Separation
+
+- users can switch between local workspaces without seeing mixed jobs, saved views, AI settings, or profile data
+- active workspace context is visible in shell and destructive flows
+- existing users migrate into a safe default workspace with no visible data loss
+
+### Reliability
+
+- destructive flows are covered by deterministic Playwright tests
+- release validation is repeatable and documented
+
+## Release Gates
+
+### Gate 1: Baseline Captured
+
+- [ ] performance baseline measurements recorded
+- [ ] current E2E gaps confirmed and prioritized
+- [ ] workspace implementation sequence agreed
+
+### Gate 2: Core Feature Complete
+
+- [ ] workspace-scoped data model implemented
+- [ ] single-workspace migration implemented
+- [ ] accessibility remediation complete for primary flows
+- [ ] initial performance fixes merged
+- [ ] destructive-path E2E tests implemented
 
 ### Gate 3: Release Candidate
 
-- [ ] Full test suite passing
-- [ ] Production build passing
-- [ ] Final code review complete
-- [ ] Release notes prepared
-
----
+- [ ] full unit/integration suite passing
+- [ ] full E2E release suite passing
+- [ ] production build passing
+- [ ] docs updated
+- [ ] release notes prepared
 
 ## Risks and Mitigations
 
-- Risk: Performance changes introduce subtle behavior regressions.
-  - Mitigation: Add targeted regression tests for filter/sort/pagination edge cases.
-- Risk: Accessibility fixes alter UI behavior unexpectedly.
-  - Mitigation: Pair semantic updates with interaction-level tests.
-- Risk: Workspace scoping leaks data between job-search tracks.
-  - Mitigation: Make `workspaceId` mandatory in workspace-scoped storage paths and add isolation tests at service and E2E layers.
-- Risk: Scope creep from new feature ideas.
-  - Mitigation: Keep Must Have scope strict and defer non-critical items.
+- Risk: performance changes introduce subtle behavioral regressions
+  - Mitigation: pair every optimization with regression tests and measured before/after numbers
 
----
+- Risk: accessibility fixes change interaction behavior unexpectedly
+  - Mitigation: validate fixes at the behavior-test level, not only visually
 
-## Validation Checklist (Release Day)
+- Risk: workspace scoping causes silent data bleed
+  - Mitigation: make workspace context explicit at every storage boundary and add isolation tests at service, backend, and E2E levels
 
-- [ ] Full unit/integration suite passes
-- [ ] E2E release smoke suite passes
-- [ ] Production build succeeds
-- [ ] Documentation updated (README, NEXT_STEPS, roadmap)
-- [ ] Release notes and tag message approved
+- Risk: scope creep dilutes the release
+  - Mitigation: keep workspace, performance, accessibility, and destructive-flow reliability as the only Must Have tracks
 
----
+## What This Plan Is Not
+
+This plan is not a restatement of work already shipped in `v2.7.x`.
+
+The following are already part of the current product baseline and should not be treated as `v2.8.0` headline deliverables:
+
+- analytics dashboard and drill-down
+- task views and priority/snooze flows
+- saved views
+- full-text search
+- backup scheduling and restore diff preview
+- AI/profile persistence
 
 ## Revision History
 
@@ -195,3 +269,4 @@ v2.8.0 builds on the stabilized v2.7.0 architecture. The release prioritizes mea
 | 2026-03-11 | 1.1 | John | Addition of profile switching |
 | 2026-03-11 | 1.2 | Copilot | Linked profile workspaces technical design |
 | 2026-03-11 | 1.3 | Copilot | Shifted plan to workspace-first framing for job-class separation |
+| 2026-03-25 | 2.0 | Codex | Rebased plan on current post-v2.7.4 codebase and marked per-track implementation status |
