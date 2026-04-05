@@ -1,0 +1,48 @@
+FROM cgr.dev/chainguard/node:22-dev AS build
+
+ARG PNPM_VERSION=10.30.3
+
+WORKDIR /workspace
+
+USER root
+
+RUN apk add --no-cache python3 make g++
+RUN npm install -g pnpm@${PNPM_VERSION}
+
+COPY package.json pnpm-lock.yaml ./
+COPY scripts ./scripts
+
+RUN pnpm install --frozen-lockfile
+
+COPY . .
+
+# CI container build runs lint, tests, and production build.
+RUN pnpm rebuild && pnpm lint && pnpm test:run && pnpm build
+
+RUN mkdir -p /opt/job-tracker/.next /opt/job-tracker/macos /opt/job-tracker/docs /opt/job-tracker/data
+RUN cp -R /workspace/.next/standalone/. /opt/job-tracker/
+RUN cp -R /workspace/.next/static /opt/job-tracker/.next/
+RUN cp -R /workspace/public /opt/job-tracker/
+RUN cp /workspace/docs/DAEMON_SETUP.md /opt/job-tracker/docs/
+RUN cp /workspace/scripts/launchd/com.local.job-tracker.plist.template /opt/job-tracker/macos/
+RUN cp /workspace/scripts/launchd/start-job-tracker.sh /opt/job-tracker/macos/
+RUN cp /workspace/scripts/launchd/install-launch-agent.sh /opt/job-tracker/macos/
+RUN cp /workspace/scripts/launchd/uninstall-launch-agent.sh /opt/job-tracker/macos/
+RUN chmod +x /opt/job-tracker/macos/start-job-tracker.sh /opt/job-tracker/macos/install-launch-agent.sh /opt/job-tracker/macos/uninstall-launch-agent.sh
+RUN chown -R 65532:65532 /opt/job-tracker
+
+FROM cgr.dev/chainguard/node:22 AS runtime
+
+WORKDIR /opt/job-tracker
+
+ENV NODE_ENV=production
+ENV PORT=3100
+ENV JOB_TRACKER_DB_PATH=/opt/job-tracker/data/job-tracker.sqlite
+
+COPY --from=build /opt/job-tracker ./
+
+USER nonroot
+
+EXPOSE 3100
+
+CMD ["server.js"]

@@ -1,0 +1,6 @@
+services:
+  release:
+    build:
+      context: ..
+      dockerfile: Containerfile.release
+    image: ${JOB_TRACKER_IMAGE_TAG:-job-tracker:local}
