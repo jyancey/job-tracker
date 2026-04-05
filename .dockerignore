@@ -1,0 +1,16 @@
+.git
+.gitea
+.github
+.next
+coverage
+deploy
+dist
+node_modules
+release
+test-results
+backend/data
+data
+*.log
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

@@ -9,9 +9,9 @@ on:
 jobs:
   build-release:
     name: Build & Package Release
-    runs-on: macos-arm64
+    runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     env:
       npm_config_script_shell: /bin/bash
       PATH: ${{ vars.RUNNER_PATH }}
@@ -21,32 +21,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.30.3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Rebuild native modules
-        run: pnpm rebuild
-
-      - name: Run tests
-        run: pnpm test:run
-
-      - name: Build application
-        run: pnpm build
-
-      - name: Get version from tag
+      - name: Resolve release version
         id: tag_version
-        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: |
+          if [[ "${GITHUB_REF:-}" == refs/tags/* ]]; then
+            echo "version=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=v0.0.0-dev.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Ensure Podman is installed
+        run: |
+          if ! command -v podman >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y podman
+          fi
+          if ! command -v podman-compose >/dev/null 2>&1; then
+            sudo apt-get install -y podman-compose
+          fi
+
+      - name: Ensure release scripts are executable
+        run: |
+          chmod +x ./scripts/podman-release.sh ./scripts/podman-deploy.sh
 
       - name: Create source tarball
         run: |
@@ -55,13 +51,11 @@ jobs:
             -czf release/${{ steps.tag_version.outputs.version }}/job-tracker-${{ steps.tag_version.outputs.version }}-source.tar.gz .
         shell: bash
 
-      - name: Create distribution zip
+      - name: Build frontend Podman release artifacts
         run: |
-          ./scripts/package-standalone.sh release/${{ steps.tag_version.outputs.version }}/deploy
-          cd release/${{ steps.tag_version.outputs.version }}/deploy
-          /usr/bin/zip -r ../job-tracker-${{ steps.tag_version.outputs.version }}-standalone.zip .
-          cd ..
-          /bin/rm -rf deploy
+          ./scripts/podman-release.sh \
+            "${{ steps.tag_version.outputs.version }}" \
+            "release/${{ steps.tag_version.outputs.version }}"
         shell: bash
 
       - name: Create release notes
@@ -76,6 +70,8 @@ jobs:
 
           ## Downloads
           - `job-tracker-${{ steps.tag_version.outputs.version }}-standalone.zip` - Standalone Next.js server bundle
+          - `job-tracker-${{ steps.tag_version.outputs.version }}-standalone.tar.gz` - Standalone bundle as tarball
+          - `job-tracker-${{ steps.tag_version.outputs.version }}-oci-image.tar.gz` - OCI image archive built with Podman
           - `job-tracker-${{ steps.tag_version.outputs.version }}-source.tar.gz` - Source code
 
           ## Installation

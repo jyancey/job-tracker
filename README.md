@@ -155,9 +155,9 @@ Triggers on: `push` to main/develop, `pull_request` against main/develop
 
 **Steps:**
 
-- Lint code (ESLint)
-- Run full test suite
-- Build application
+- Build frontend CI images with Podman Compose
+- Run lint, tests, and build inside each container build pipeline
+- Package standalone and OCI artifacts from generated images
 - Upload build artifacts (7-day retention)
 
 ### 2. **Release** (`release.yml`)
@@ -166,10 +166,10 @@ Triggers on: `git tag` (e.g., `git tag v1.0.0 && git push origin v1.0.0`)
 
 **Steps:**
 
-- Run full test suite
-- Build application
+- Build and test frontend service inside Podman using Podman Compose
 - Package source tarball (`.tar.gz`)
-- Package distribution zip (ready-to-deploy)
+- Package frontend standalone distribution archives (`.zip` and `.tar.gz`)
+- Export frontend OCI image archives (`.tar.gz`)
 - Generate release notes
 - Upload packaged artifacts for download from workflow run
 
@@ -177,6 +177,14 @@ Triggers on: `git tag` (e.g., `git tag v1.0.0 && git push origin v1.0.0`)
 
 - `job-tracker-vX.Y.Z-source.tar.gz` — Source code archive
 - `job-tracker-vX.Y.Z-standalone.zip` — Standalone Next.js deployment bundle with `server.js`, `.next/static`, `public/`, and `macos/` startup helpers
+- `job-tracker-vX.Y.Z-standalone.tar.gz` — Tarball version of the standalone deployment bundle
+- `job-tracker-vX.Y.Z-oci-image.tar.gz` — Podman-built OCI image archive for frontend runtime deployment
+
+Manual local release packaging with Podman:
+
+```bash
+pnpm run release:podman -- vX.Y.Z
+```
 
 ### 3. **Deploy** (`deploy.yml`)
 
@@ -184,11 +192,17 @@ Triggers on: Successful `Build & Test` workflow on main, or manual `workflow_dis
 
 **Steps:**
 
-- Build application
-- Create deployment artifact with metadata
+- Build deployment image with Podman Compose
+- Extract deployment bundle from the image with metadata
 - Upload to artifacts (30-day retention)
 
 **Status:** Produces a standalone Next.js deployment artifact for a Node-capable target or the included macOS launchd helper scripts
+
+Manual local deployment bundle packaging with Podman:
+
+```bash
+pnpm run deploy:podman -- vX.Y.Z deploy
+```
 
 ## Usage Tips
 

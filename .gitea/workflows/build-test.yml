@@ -11,76 +11,33 @@ on:
       - develop
 
 jobs:
-  test:
-    name: Test
-    runs-on: macos-arm64
-    env:
-      npm_config_script_shell: /bin/bash
-      PATH: ${{ vars.RUNNER_PATH }}
+  build-test:
+    name: Build & Test (Podman)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         shell: bash
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.30.3
+      - name: Ensure Podman and Podman Compose are installed
+        run: |
+          if ! command -v podman >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y podman
+          fi
+          if ! command -v podman-compose >/dev/null 2>&1; then
+            sudo apt-get install -y podman-compose
+          fi
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Rebuild native modules
-        run: pnpm rebuild
-
-      - name: Run linter
-        run: pnpm lint
-
-      - name: Run tests
-        run: pnpm test:run
-
-  build:
-    name: Build
-    runs-on: macos-arm64
-    needs: test
-    env:
-      npm_config_script_shell: /bin/bash
-      PATH: ${{ vars.RUNNER_PATH }}
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.30.3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Rebuild native modules
-        run: pnpm rebuild
-
-      - name: Build application
-        run: pnpm build
-
-      - name: Package standalone bundle
-        run: ./scripts/package-standalone.sh build-artifact
+      - name: Build, lint, test, and package frontend with Podman Compose
+        run: |
+          chmod +x ./scripts/podman-release.sh
+          ./scripts/podman-release.sh \
+            "v0.0.0-ci.${{ github.run_number }}" \
+            build-artifact
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
